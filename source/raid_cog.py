@@ -13,7 +13,7 @@ import re
 import time
 from typing import Optional
 
-from database import create_table, count, delete, read_config_key, select, select_le, select_one, select_order, upsert
+from database import add_column_if_missing, create_table, count, delete, read_config_key, select, select_le, select_one, select_order, upsert
 from time_cog import Time
 from utils import get_match
 
@@ -32,6 +32,13 @@ Classes = Enum("Classes", role_names)
 
 sign_up_delay = 3
 assign_delay = 10
+
+ROLE_EMOJIS = {
+    "tank": "🛡️",
+    "healer": "💚",
+    "cc": "⚡",
+    "dps": "⚔️",
+}
 
 class RaidCog(commands.Cog):
 
@@ -56,6 +63,7 @@ class RaidCog(commands.Cog):
         create_table(self.conn, 'raid')
         create_table(self.conn, 'player')
         create_table(self.conn, 'assign')
+        add_column_if_missing(self.conn, 'Assignment', 'role', 'text')
         create_table(self.conn, 'specs')
 
         raids = select(self.conn, 'Raids', ['raid_id'])
@@ -427,7 +435,7 @@ class RaidCog(commands.Cog):
 
         embed = discord.Embed(title=embed_title, colour=discord.Colour(0x3498db), description=embed_description)
         if roster:
-            result = select(self.conn, 'Assignment', ['byname, class_name'], ['raid_id'], [raid_id])
+            result = select(self.conn, 'Assignment', ['byname', 'class_name', 'role'], ['raid_id'], [raid_id])
             number_of_slots = len(result)
             # Add first half
             embed_name = _("Selected line up:")
@@ -437,19 +445,21 @@ class RaidCog(commands.Cog):
             else:
                 left_size = min(number_of_slots, 6)
             for row in result[:left_size]:
+                embed_text += ROLE_EMOJIS.get(row[2], "")
                 class_names = row[1].split(',')
                 for class_name in class_names:
-                    embed_text = embed_text + self.emojis_dict[class_name]
-                embed_text = embed_text + ": " + row[0] + "\n"
+                    embed_text += self.emojis_dict[class_name]
+                embed_text += ": " + row[0] + "\n"
             embed.add_field(name=embed_name, value=embed_text)
             # Add second half
             embed_name = "\u200B"
             embed_text = ""
             for row in result[left_size:]:
+                embed_text += ROLE_EMOJIS.get(row[2], "")
                 class_names = row[1].split(',')
                 for class_name in class_names:
-                    embed_text = embed_text + self.emojis_dict[class_name]
-                embed_text = embed_text + ": " + row[0] + "\n"
+                    embed_text += self.emojis_dict[class_name]
+                embed_text += ": " + row[0] + "\n"
             embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
         # Add a field for each embed text
@@ -835,6 +845,7 @@ class SelectView(discord.ui.View):
         self.add_item(SlotSelect(raid_size))
         self.add_item(PlayerSelect(raid_cog.conn, raid_id))
         self.add_item(ClassSelect(raid_cog.class_emojis))
+        self.add_item(RoleSelect())
 
     async def on_timeout(self):
         self.conn.commit()
@@ -955,6 +966,32 @@ class ClassSelect(discord.ui.Select):
             assignment_values = [None, _("<Open>"), class_names]
             upsert(self.view.conn, 'Assignment', assignment_columns, assignment_values, ['raid_id', 'slot_id'],
                    [self.view.raid_id, slot[0]])
+
+
+class RoleSelect(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label=_("None"), value="none"),
+            discord.SelectOption(label=_("Tank"), value="tank", emoji="🛡️"),
+            discord.SelectOption(label=_("Healer"), value="healer", emoji="💚"),
+            discord.SelectOption(label=_("CC"), value="cc", emoji="⚡"),
+            discord.SelectOption(label=_("DPS"), value="dps", emoji="⚔️"),
+        ]
+        super().__init__(placeholder=_("Role"), options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.view.slot == -1:
+            msg = _("Please select a slot first.")
+            await interaction.response.send_message(msg, ephemeral=True)
+            return
+        role = None if self.values[0] == "none" else self.values[0]
+        upsert(self.view.conn, 'Assignment', ['role'], [role],
+               ['raid_id', 'slot_id'], [self.view.raid_id, self.view.slot])
+        self.view.conn.commit()
+        label = self.values[0].capitalize()
+        msg = _("Set slot {0} role to {1}.").format(self.view.slot + 1, label)
+        await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
+        await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
 
 
 class ConfigureModal(discord.ui.Modal):

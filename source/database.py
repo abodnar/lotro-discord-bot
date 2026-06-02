@@ -57,6 +57,14 @@ def create_table(conn, table):
         logger.exception(e)
 
 
+def add_column_if_missing(conn, table, column, column_type):
+    try:
+        c = conn.cursor()
+        c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type};")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+
+
 def table_sqls(table):
     sql_dict = {
             'raid': "create table if not exists Raids ("
@@ -91,6 +99,7 @@ def table_sqls(table):
                       "player_id integer, "
                       "byname text, "
                       "class_name text, "
+                      "role text, "
                       "primary key (raid_id, slot_id), "
                       "foreign key (raid_id) references Raids(raid_id)"
                       ");",
