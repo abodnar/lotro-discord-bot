@@ -24,8 +24,7 @@ class Bot(commands.Bot):
             version = re.search(regex, f.read(), re.MULTILINE).group(1)
         self.version = version
 
-        logfile = 'raid_bot.log'
-        logging.basicConfig(filename=logfile, level=logging.WARNING, format='%(asctime)s %(levelname)s: %(message)s',
+        logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
@@ -143,6 +142,11 @@ class Bot(commands.Bot):
             await self.load_extension('custom_cog')
         except commands.ExtensionAlreadyLoaded:
             pass
+        else:
+            for guild in self.guilds:
+                self.tree.copy_global_to(guild=guild)
+                await self.tree.sync(guild=guild)
+            self.logger.info("Synced slash commands.")
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):

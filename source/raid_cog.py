@@ -463,14 +463,15 @@ class RaidCog(commands.Cog):
             embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
         # Add a field for each embed text
-        for i in range(len(embed_texts_av)):
-            if i == 0:
-                embed_name = _("The following {0} players are available:").format(number_of_players)
-            else:
-                embed_name = "\u200B"
-            embed.add_field(name=embed_name, value=embed_texts_av[i])
-        if len(embed_texts_av) == 1:
-            embed.add_field(name="\u200B", value="\u200B")
+        if number_of_players > 0:
+            for i in range(len(embed_texts_av)):
+                if i == 0:
+                    embed_name = _("The following {0} players are available:").format(number_of_players)
+                else:
+                    embed_name = "\u200B"
+                embed.add_field(name=embed_name, value=embed_texts_av[i])
+            if len(embed_texts_av) == 1:
+                embed.add_field(name="\u200B", value="\u200B")
         if embed_texts_unav:
             number_of_unav_players = count(self.conn, 'Players', 'player_id', ['raid_id', 'unavailable'],
                                            [raid_id, True])
