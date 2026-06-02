@@ -450,7 +450,7 @@ class RaidCog(commands.Cog):
                 for class_name in class_names:
                     embed_text = embed_text + self.emojis_dict[class_name]
                 embed_text = embed_text + ": " + row[0] + "\n"
-            embed.add_field(name=embed_name, value=embed_text)
+            embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
         # Add a field for each embed text
         for i in range(len(embed_texts_av)):
