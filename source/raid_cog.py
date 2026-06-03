@@ -52,16 +52,16 @@ SPEC_BITMASK = {
 }
 SPEC_TO_BITMASK = {v: k for k, v in SPEC_BITMASK.items()}
 
-# (value, label, icon_name) for autocomplete; icon_name=None for Clear
+# (value, display label) for autocomplete — Unicode emoji only, custom emoji don't render here
 _SPEC_CHOICES = [
-    ('clear',       'Clear',         None),
-    ('spec_red',    'Red',           'spec_red'),
-    ('spec_blue',   'Blue',          'spec_blue'),
-    ('spec_yellow', 'Yellow',        'spec_yellow'),
-    ('spec_rb',     'Red / Blue',    'spec_rb'),
-    ('spec_by',     'Blue / Yellow', 'spec_by'),
-    ('spec_ry',     'Red / Yellow',  'spec_ry'),
-    ('spec_all',    'All three',     'spec_all'),
+    ('clear',       '❌ Clear'),
+    ('spec_red',    '🔴 Red'),
+    ('spec_blue',   '🔵 Blue'),
+    ('spec_yellow', '🟡 Yellow'),
+    ('spec_rb',     '🔴🔵 Red / Blue'),
+    ('spec_by',     '🔵🟡 Blue / Yellow'),
+    ('spec_ry',     '🔴🟡 Red / Yellow'),
+    ('spec_all',    '🔴🔵🟡 All three'),
 ]
 
 class RaidCog(commands.Cog):
@@ -246,13 +246,11 @@ class RaidCog(commands.Cog):
         classes_val = getattr(interaction.namespace, 'classes', None)
         is_duo = bool(duo_spec and classes_val and classes_val in duo_spec)
         choices = []
-        for value, label, icon in _SPEC_CHOICES:
+        for value, label in _SPEC_CHOICES:
             bitmask = SPEC_TO_BITMASK.get(value, 0)
             if is_duo and (bitmask & 0b100):
                 continue
-            emoji_str = self.emojis_dict.get(icon, '') if icon else ''
-            name = f'{emoji_str} {label}' if emoji_str else label
-            choices.append(app_commands.Choice(name=name, value=value))
+            choices.append(app_commands.Choice(name=label, value=value))
         return choices
 
     @app_commands.command(name=_("list_players"), description=_("List the signed up players for a raid in order of sign up time."))
