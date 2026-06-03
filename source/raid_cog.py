@@ -1058,36 +1058,37 @@ class PlayerSpecView(discord.ui.View):
         self.conn = conn
         self.player_id = player_id
         self.class_name = class_name
-        self.add_item(PlayerSpecSelect(emojis_dict, is_duo))
-
-    async def on_timeout(self):
-        self.conn.commit()
-
-
-class PlayerSpecSelect(discord.ui.Select):
-    def __init__(self, emojis_dict, is_duo=False):
-        options = []
-        for value, label, emoji_key in _SPEC_CHOICES:
+        # Row 0: solid colours + clear
+        # Row 1: combinations
+        rows = [0, 0, 0, 0, 1, 1, 1, 1]
+        for (value, label, emoji_key), row in zip(_SPEC_CHOICES, rows):
             bitmask = SPEC_TO_BITMASK.get(value, 0)
             if is_duo and (bitmask & 0b100):
                 continue
-            # Parse '<:name:id>' into a PartialEmoji so the icon renders in the Select
             emoji = None
             if emoji_key:
                 emoji_str = emojis_dict.get(emoji_key, '')
                 if emoji_str:
                     emoji = discord.PartialEmoji.from_str(emoji_str)
-            options.append(discord.SelectOption(label=label, value=value, emoji=emoji))
-        super().__init__(placeholder=_("Specialization"), options=options)
+            self.add_item(SpecButton(value=value, label=label, emoji=emoji, row=row))
+
+    async def on_timeout(self):
+        self.conn.commit()
+
+
+class SpecButton(discord.ui.Button):
+    def __init__(self, *, value, label, emoji, row):
+        super().__init__(label=label, emoji=emoji,
+                         style=discord.ButtonStyle.secondary, row=row)
+        self.spec_value = value
 
     async def callback(self, interaction: discord.Interaction):
-        value = self.values[0]
-        bitmask = SPEC_TO_BITMASK.get(value, 0)
+        bitmask = SPEC_TO_BITMASK.get(self.spec_value, 0)
         upsert(self.view.conn, 'Specs', [self.view.class_name], [bitmask],
                ['player_id'], [self.view.player_id])
         self.view.conn.commit()
-        label = next(l for v, l, _ in _SPEC_CHOICES if v == value)
-        msg = _("Updated your {0} specialization to {1}.").format(self.view.class_name, label)
+        msg = _("Updated your {0} specialization to {1}.").format(
+            self.view.class_name, self.label)
         await interaction.response.send_message(msg, ephemeral=True)
 
 
