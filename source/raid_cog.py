@@ -716,16 +716,6 @@ class RaidView(discord.ui.View):
         await self.sign_up_all(interaction)
 
     async def sign_up_class(self, i, class_name):
-        try:
-            role = discord.utils.get(i.guild.roles, name=class_name)
-            if role is None:
-                role = await i.guild.create_role(mentionable=True, name=class_name)
-            if role not in i.user.roles:
-                await i.user.add_roles(role)
-        except discord.Forbidden:
-            msg = _("Error: Missing 'Manage roles' permission to assign the class role.")
-        else:
-            msg = _("Your sign up has been received and the raid post will be updated momentarily.")
         raid_id = i.message.id
         timestamp = int(time.time())
         byname = self.raid_cog.process_name(i.guild.id, i.user)
@@ -736,6 +726,19 @@ class RaidView(discord.ui.View):
             if signed_up_classes == 1:
                 await self.sign_up_cancel(i)
                 return
+        if sign_up:
+            try:
+                role = discord.utils.get(i.guild.roles, name=class_name)
+                if role is None:
+                    role = await i.guild.create_role(mentionable=True, name=class_name)
+                if role not in i.user.roles:
+                    await i.user.add_roles(role)
+            except discord.Forbidden:
+                msg = _("Error: Missing 'Manage roles' permission to assign the class role.")
+            else:
+                msg = _("Signed up as {0}.").format(class_name)
+        else:
+            msg = _("Removed {0} from your sign up.").format(class_name)
         upsert(self.conn, 'Players', ['byname', 'timestamp', 'unavailable', class_name],
                [byname, timestamp, False, sign_up], ['player_id', 'raid_id'], [i.user.id, raid_id])
         self.conn.commit()
