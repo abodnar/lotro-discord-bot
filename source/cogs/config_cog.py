@@ -1,6 +1,7 @@
 import datetime
 import discord
 import logging
+import __init__ as _meta
 
 from discord import app_commands
 from discord.ext import commands
@@ -38,9 +39,12 @@ class ConfigCog(commands.Cog):
 
         return ", ".join(strings)
 
+    _DEV = _meta.__author__
+    _REPO = _meta.__repo__
+
     async def about_embed(self):
-        dev = "dramacus"
-        repo = "https://github.com/abodnar/lotro"
+        dev = self._DEV
+        repo = self._REPO
         code = "dGcBzPN"
         server = "https://discord.gg/"+code
         app_info = await self.bot.application_info()
@@ -202,7 +206,7 @@ class ConfigCog(commands.Cog):
                     "along with your discord id such that it can parse times provided in your commands in your "
                     "preferred time zone.\n"
                     "**Please find the full privacy policy here:**\n"
-                    "https://github.com/"+dev+"/lotro#privacy-policy")
+                    f"{self._REPO}#privacy-policy")
         await interaction.response.send_message(privacy)
 
 

@@ -192,11 +192,14 @@ class Bot(commands.Bot):
         self._error_last_notified[key] = now
         try:
             owner = (await self.application_info()).owner
+            if owner is None:
+                self.logger.warning("Could not notify owner: application_info().owner is None (team app?)")
+                return
             await owner.send(
                 f"⚠️ **Error in `{context}`** (`{type(error).__name__}`)\n```{error}```"
             )
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.warning(f"Failed to DM owner about error: {e}")
 
     async def on_app_command_completion(self, interaction, command):
         timestamp = int(datetime.now().timestamp())
