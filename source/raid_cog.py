@@ -525,7 +525,7 @@ class RaidCog(commands.Cog):
             columns.extend(self.role_names)
             columns.extend(self.creep_names)
         unavailable = not available
-        result = select(self.conn, 'Players', columns, ['raid_id', 'unavailable'], [raid_id, unavailable])
+        result = select_order(self.conn, 'Players', columns, 'timestamp', ['raid_id', 'unavailable'], [raid_id, unavailable])
         player_strings = []
         if result:
             number_of_players = len(result)
@@ -551,8 +551,6 @@ class RaidCog(commands.Cog):
                     player_string = "\u274C " + row[i]
                 player_string = player_string + "\n"
                 player_strings.append(player_string)
-            # Sort the strings by length
-            player_strings.sort(key=len, reverse=True)
         else:
             if not available:
                 return None
@@ -853,6 +851,7 @@ class CreepView(discord.ui.View):
                    ['player_id', 'raid_id'], [i.user.id, raid_id])
         self.conn.commit()
         await self.raid_cog.update_raid_post(raid_id, i.channel, delay=0)
+        await i.followup.send(_("Your sign up has been removed."), ephemeral=True)
 
     @discord.ui.button(emoji="\U0001F6E0\uFE0F", style=discord.ButtonStyle.blurple, custom_id='creep_view:settings')
     async def settings(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -1008,10 +1007,11 @@ class ClassSelect(discord.ui.Select):
         slot = select_one(self.view.conn, 'Assignment', ['slot_id', 'byname'], ['player_id', 'raid_id'],
                           [self.view.player, self.view.raid_id])
         if slot is not None:
-            assignment_columns = ['player_id', 'byname', 'class_name']
-            class_names = ','.join(self.view.raid_cog.slots_class_names[slot[0]])
-            assignment_values = [None, _("<Open>"), class_names]
-            upsert(self.view.conn, 'Assignment', assignment_columns, assignment_values, ['raid_id', 'slot_id'],
+            original = select_one(self.view.conn, 'Assignment', ['original_class_name'],
+                                  ['slot_id', 'raid_id'], [slot[0], self.view.raid_id])
+            reset_classes = original or ','.join(self.view.raid_cog.slots_class_names[slot[0]])
+            upsert(self.view.conn, 'Assignment', ['player_id', 'byname', 'class_name'],
+                   [None, _("<Open>"), reset_classes], ['raid_id', 'slot_id'],
                    [self.view.raid_id, slot[0]])
 
 

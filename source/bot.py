@@ -75,10 +75,6 @@ class Bot(commands.Bot):
         else:
             self.host_id = None
 
-        # Check for twitter auth
-        self.twitter_token = read_config_key(config, 'TWITTER_TOKEN', False)
-        self.twitter_id = read_config_key(config, 'TWITTER_ID', False)
-
         language = read_config_key(config, 'LANGUAGE', False)
         if language == 'fr':
             locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
@@ -144,11 +140,6 @@ class Bot(commands.Bot):
             await self.load_extension('calendar_cog')
             # Load after calendar_cog
             await self.load_extension('raid_cog')
-            # Load twitter cog
-            #if self.twitter_token:
-            #    await self.load_extension('twitter_cog')
-            #else:
-            #    self.logger.info("No twitter credentials found. Twitter cog will not be loaded.")
             # Load rss cog
             await self.load_extension('rss_cog')
             # Load treasure cog
