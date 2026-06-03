@@ -1,0 +1,102 @@
+name: Deploy to NAS
+
+env:
+  CONTAINER_NAME: lotro-bot
+  IMAGE_NAME: lotro-bot
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'source/**'
+      - 'dockerfile'
+      - 'requirements.txt'
+      - '.forgejo/workflows/deploy.yml'
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        run: git clone --depth 1 --branch ${GITHUB_REF_NAME} http://192.168.86.46:3000/${GITHUB_REPOSITORY}.git repo
+
+      - name: Lint Dockerfile
+        run: docker run --rm -i hadolint/hadolint < repo/dockerfile
+
+  deploy:
+    runs-on: self-hosted
+    needs: lint
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        run: git clone --depth 1 --branch ${GITHUB_REF_NAME} http://192.168.86.46:3000/${GITHUB_REPOSITORY}.git repo
+
+      - name: Build image
+        run: docker build -t ${IMAGE_NAME}:latest repo
+
+      - name: Redeploy container
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          SERVER_TZ: ${{ secrets.SERVER_TZ }}
+        run: |
+          mkdir -p /volume1/docker/${CONTAINER_NAME}
+          docker stop ${CONTAINER_NAME} || true
+          docker rm   ${CONTAINER_NAME} || true
+          docker run -d \
+            --name ${CONTAINER_NAME} \
+            --restart unless-stopped \
+            -e BOT_TOKEN="${BOT_TOKEN}" \
+            -e SERVER_TZ="${SERVER_TZ}" \
+            -e LANGUAGE=en \
+            -v /volume1/docker/${CONTAINER_NAME}/raid_db:/usr/src/app/raid_db \
+            ${IMAGE_NAME}:latest
+
+      - name: Verify container is running
+        run: |
+          sleep 8
+          docker ps --filter name=${CONTAINER_NAME} --format '{{.Names}} {{.Status}}'
+          docker logs --tail 15 ${CONTAINER_NAME}
+
+  cleanup-images:
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: Prune dangling images
+        run: docker image prune -f
+
+  notify-failure:
+    runs-on: self-hosted
+    needs: [lint, deploy]
+    if: failure()
+    env:
+      FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+    steps:
+      - name: Open failure issue
+        run: |
+          docker run --rm \
+            -e FORGEJO_TOKEN="${FORGEJO_TOKEN}" \
+            -e GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
+            -e GITHUB_SHA="${GITHUB_SHA}" \
+            -e GITHUB_WORKFLOW="${GITHUB_WORKFLOW}" \
+            python:3.12-slim python3 - << 'PYEOF'
+          import json, os
+          from urllib.request import Request, urlopen
+
+          token = os.environ["FORGEJO_TOKEN"]
+          repo  = os.environ["GITHUB_REPOSITORY"]
+          sha   = os.environ["GITHUB_SHA"][:7]
+          wf    = os.environ["GITHUB_WORKFLOW"]
+          base  = f"http://192.168.86.46:3000/api/v1/repos/{repo}"
+          hdrs  = {"Authorization": f"token {token}", "Content-Type": "application/json"}
+
+          body = json.dumps({
+              "title": f"Deploy failed: {sha}",
+              "body": (
+                  f"Workflow **{wf}** failed on commit `{sha}`.\n\n"
+                  f"Check the [Actions log](http://192.168.86.46:3000/{repo}/actions)."
+              ),
+          }).encode()
+          urlopen(Request(base + "/issues", data=body, headers=hdrs, method="POST"))
+          print(f"Opened failure issue for {sha}")
+          PYEOF
