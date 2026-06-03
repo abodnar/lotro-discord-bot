@@ -7,3 +7,4 @@ messages.mo
 .idea.DS_Store
 *.po~
 .idea/
+push-github.sh
