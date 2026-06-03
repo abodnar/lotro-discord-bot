@@ -815,7 +815,7 @@ class RaidView(discord.ui.View):
                    ['player_id', 'raid_id'], [i.user.id, raid_id])
         self.conn.commit()
         await self.raid_cog.update_raid_post(raid_id, i.channel, delay=0)
-        await i.followup.send(_("You have been removed from the raid."), ephemeral=True)
+        await i.followup.send(_("Your sign up has been removed."), ephemeral=True)
 
 
 class CreepView(discord.ui.View):
