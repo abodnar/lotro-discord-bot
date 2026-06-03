@@ -40,6 +40,17 @@ ROLE_EMOJIS = {
     "dps": "⚔️",
 }
 
+# Maps /specs bitmask (bit0=red, bit1=blue, bit2=yellow) to spec icon emoji name
+SPEC_BITMASK = {
+    0b001: 'spec_red',
+    0b010: 'spec_blue',
+    0b100: 'spec_yellow',
+    0b011: 'spec_rb',
+    0b110: 'spec_by',
+    0b101: 'spec_ry',
+    0b111: 'spec_all',
+}
+
 class RaidCog(commands.Cog):
 
     # Load raid (nick)names and size
@@ -509,10 +520,9 @@ class RaidCog(commands.Cog):
                             if specs and i < len(self.role_names) + 3:
                                 spec = specs[i-3]
                                 if spec:
-                                    for emoji in ["\U0001F534", "\U0001F535", "\U0001F7E1"]:
-                                        if (spec % 2):
-                                            spec_str += emoji
-                                        spec = spec >> 1
+                                    icon = SPEC_BITMASK.get(spec)
+                                    if icon:
+                                        spec_str = self.emojis_dict.get(icon, "")
                             player_string += self.emojis_dict[name] + spec_str
                 else:
                     player_string = "\u274C " + row[i]
