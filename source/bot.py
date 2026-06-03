@@ -147,13 +147,13 @@ class Bot(commands.Bot):
         except commands.ExtensionAlreadyLoaded:
             pass
         else:
-            # Clear old global commands so they don't appear alongside guild ones
-            self.tree.clear_commands(guild=None)
-            await self.tree.sync()
-            # Copy current commands to each guild for instant availability
+            # Guild sync first (instant) while global tree is still populated
             for guild in self.guilds:
                 self.tree.copy_global_to(guild=guild)
                 await self.tree.sync(guild=guild)
+            # Then clear global commands from Discord to prevent duplicates
+            self.tree.clear_commands(guild=None)
+            await self.tree.sync()
             self.logger.info("Synced slash commands.")
 
     async def on_command_error(self, ctx, error):
