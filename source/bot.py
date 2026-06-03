@@ -37,19 +37,27 @@ class Bot(commands.Bot):
             with open('config.json', 'r') as f:
                 config = json.load(f)
         except FileNotFoundError:
-            logger.warning(f"No config file found. Please create the file 'config.json', see GitHub for an example.")
+            logger.warning("No config.json found. Please create it with BOT_TOKEN and SERVER_TZ.")
+            config = {}
+
+        try:
+            with open('game_data.json', 'r') as f:
+                game_data = json.load(f)
+        except FileNotFoundError:
+            logger.warning("No game_data.json found. Using config.json for game data (legacy).")
+            game_data = config  # fall back to reading everything from config.json
 
         self.token = read_config_key(config, 'BOT_TOKEN', True)
         self.server_tz = read_config_key(config, 'SERVER_TZ', True)
-        role_names = read_config_key(config, 'CLASSES', True)
+        role_names = read_config_key(game_data, 'CLASSES', True)
         self.role_names = tuple(role_names)
-        self.creep_names = read_config_key(config, 'CREEPS', False)
+        self.creep_names = read_config_key(game_data, 'CREEPS', False)
         # Lineups — prefer human-readable LINEUPS dict, fall back to bitmask LINEUP
-        lineups_config = read_config_key(config, 'LINEUPS', False)
+        lineups_config = read_config_key(game_data, 'LINEUPS', False)
         if lineups_config:
             self.lineups = {key: slots for key, slots in lineups_config.items()}
         else:
-            lineup = read_config_key(config, 'LINEUP', True)
+            lineup = read_config_key(game_data, 'LINEUP', True)
             default_lineup = []
             for string in lineup:
                 bitmask = [int(char) for char in string]

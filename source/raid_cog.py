@@ -20,14 +20,19 @@ from utils import get_match
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Create Enumerator class
+# Load game data (classes, lineups) from game_data.json; fall back to config.json
 try:
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    with open('game_data.json', 'r') as f:
+        _game_data = json.load(f)
 except FileNotFoundError:
-    logger.warning(f"No config file found. Please create the file 'config.json', see GitHub for an example.")
-role_names = read_config_key(config, 'CLASSES', True)
-duo_spec = read_config_key(config, 'DUOSPEC', False)
+    try:
+        with open('config.json', 'r') as f:
+            _game_data = json.load(f)
+    except FileNotFoundError:
+        _game_data = {}
+        logger.warning("Neither game_data.json nor config.json found.")
+role_names = read_config_key(_game_data, 'CLASSES', True)
+duo_spec = read_config_key(_game_data, 'DUOSPEC', False)
 Classes = Enum("Classes", role_names)
 
 sign_up_delay = 3

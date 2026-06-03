@@ -22,14 +22,18 @@ def read_config_key(config, key, required):
     return value
 
 try:
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-except (FileNotFoundError):
-    logger.warning(f"No config file found. Please create the file 'config.json', see GitHub for an example.")
+    with open('game_data.json', 'r') as f:
+        _db_game_data = json.load(f)
+except FileNotFoundError:
+    try:
+        with open('config.json', 'r') as f:
+            _db_game_data = json.load(f)
+    except FileNotFoundError:
+        _db_game_data = {}
+        logger.warning("Neither game_data.json nor config.json found.")
 
-
-classes = read_config_key(config, 'CLASSES', True)
-creeps = read_config_key(config, 'CREEPS', False)
+classes = read_config_key(_db_game_data, 'CLASSES', True)
+creeps = read_config_key(_db_game_data, 'CREEPS', False)
 
 specs_str = " integer, ".join(classes) + " integer"
 if creeps:
