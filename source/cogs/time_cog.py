@@ -18,10 +18,10 @@ from utils import get_partial_matches
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-with open('common_timezones.txt', 'r') as f:
+with open('data/common_timezones.txt', 'r') as f:
     common_timezones = f.read().splitlines()
 
-with open('timezones.txt', 'r') as f:
+with open('data/timezones.txt', 'r') as f:
     timezones = f.read().splitlines()
 
 async def time_zone_autocomplete(interaction: discord.Interaction, current: str):

@@ -41,10 +41,10 @@ class Bot(commands.Bot):
             config = {}
 
         try:
-            with open('game_data.json', 'r') as f:
+            with open('data/game_data.json', 'r') as f:
                 game_data = json.load(f)
         except FileNotFoundError:
-            logger.warning("No game_data.json found. Using config.json for game data (legacy).")
+            logger.warning("No data/game_data.json found. Using config.json for game data (legacy).")
             game_data = config  # fall back to reading everything from config.json
 
         self.token = read_config_key(config, 'BOT_TOKEN', True)
@@ -129,24 +129,24 @@ class Bot(commands.Bot):
             pass
         self.http_session = aiohttp.ClientSession()
 
-        self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, '../emojis')
+        self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, 'emojis')
         self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
 
         try:
-            await self.load_extension('config_cog')
-            await self.load_extension('dev_cog')
-            await self.load_extension('time_cog')
+            await self.load_extension('cogs.config_cog')
+            await self.load_extension('cogs.dev_cog')
+            await self.load_extension('cogs.time_cog')
             # Load after time cog
-            await self.load_extension('calendar_cog')
+            await self.load_extension('cogs.calendar_cog')
             # Load after calendar_cog
-            await self.load_extension('raid_cog')
+            await self.load_extension('cogs.raid_cog')
             # Load rss cog
-            await self.load_extension('rss_cog')
-            # Load treasure cog
+            await self.load_extension('cogs.rss_cog')
+            # Load treasure cog (requires LotRO data submodule checked out)
             if os.path.exists('../data/lore/containers.xml'):
-                await self.load_extension('treasure_cog')
+                await self.load_extension('cogs.treasure_cog')
             # Load custom cog
-            await self.load_extension('custom_cog')
+            await self.load_extension('cogs.custom_cog')
         except commands.ExtensionAlreadyLoaded:
             pass
         else:

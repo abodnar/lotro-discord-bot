@@ -6,3 +6,4 @@ bot-env
 messages.mo
 .idea.DS_Store
 *.po~
+.idea/

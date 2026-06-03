@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 
 # Load game data (classes, lineups) from game_data.json; fall back to config.json
 try:
-    with open('game_data.json', 'r') as f:
+    with open('data/game_data.json', 'r') as f:
         _game_data = json.load(f)
 except FileNotFoundError:
     try:
@@ -74,7 +74,7 @@ class RaidCog(commands.Cog):
     # Load raid (nick)names and size
     raid_lookup = dict()
     raid_size = dict()
-    with open('list-of-raids.csv', 'r') as f:
+    with open('data/list-of-raids.csv', 'r') as f:
         reader = csv.reader(f)
         for row in reader:
             raid_lookup[row[0]] = row[1]

@@ -22,7 +22,7 @@ def read_config_key(config, key, required):
     return value
 
 try:
-    with open('game_data.json', 'r') as f:
+    with open('data/game_data.json', 'r') as f:
         _db_game_data = json.load(f)
 except FileNotFoundError:
     try:
