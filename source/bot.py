@@ -121,8 +121,7 @@ class Bot(commands.Bot):
             pass
         self.http_session = aiohttp.ClientSession()
 
-        all_classes = list(self.role_names) + (list(self.creep_names) if self.creep_names else [])
-        self.emojis_dict = await ensure_emojis(self, all_classes, '../emojis')
+        self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, '../emojis')
         self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
 
         try:

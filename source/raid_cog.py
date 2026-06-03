@@ -446,8 +446,9 @@ class RaidCog(commands.Cog):
                 byname, class_name, role, spec = row
                 embed_text += ROLE_EMOJIS.get(role, "")
                 for cn in class_name.split(','):
-                    variant = f'{cn}_{spec}' if spec and f'{cn}_{spec}' in self.emojis_dict else cn
-                    embed_text += self.emojis_dict.get(variant) or self.emojis_dict.get(cn, cn)
+                    embed_text += self.emojis_dict.get(cn, cn)
+                if spec:
+                    embed_text += self.emojis_dict.get(spec, "")
                 embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text)
             # Add second half
@@ -457,8 +458,9 @@ class RaidCog(commands.Cog):
                 byname, class_name, role, spec = row
                 embed_text += ROLE_EMOJIS.get(role, "")
                 for cn in class_name.split(','):
-                    variant = f'{cn}_{spec}' if spec and f'{cn}_{spec}' in self.emojis_dict else cn
-                    embed_text += self.emojis_dict.get(variant) or self.emojis_dict.get(cn, cn)
+                    embed_text += self.emojis_dict.get(cn, cn)
+                if spec:
+                    embed_text += self.emojis_dict.get(spec, "")
                 embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
@@ -850,7 +852,7 @@ class SelectView(discord.ui.View):
         self.add_item(PlayerSelect(raid_cog.conn, raid_id))
         self.add_item(ClassSelect(raid_cog))
         self.add_item(RoleSelect())
-        self.add_item(SpecSelect())
+        self.add_item(SpecSelect(raid_cog.emojis_dict))
 
     async def on_timeout(self):
         self.conn.commit()
@@ -1001,13 +1003,23 @@ class RoleSelect(discord.ui.Select):
 
 
 class SpecSelect(discord.ui.Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(label=_("None"), value="none"),
-            discord.SelectOption(label=_("Red"), value="red", emoji="🔴"),
-            discord.SelectOption(label=_("Blue"), value="blue", emoji="🔵"),
-            discord.SelectOption(label=_("Yellow"), value="yellow", emoji="🟡"),
-        ]
+    _SPECS = [
+        ("spec_red",    _("Red")),
+        ("spec_blue",   _("Blue")),
+        ("spec_yellow", _("Yellow")),
+        ("spec_rb",     _("Red / Blue")),
+        ("spec_by",     _("Blue / Yellow")),
+        ("spec_ry",     _("Red / Yellow")),
+        ("spec_all",    _("All three")),
+    ]
+
+    def __init__(self, emojis_dict):
+        options = [discord.SelectOption(label=_("None"), value="none")]
+        for value, label in self._SPECS:
+            options.append(discord.SelectOption(
+                label=label, value=value,
+                emoji=emojis_dict.get(value),
+            ))
         super().__init__(placeholder=_("Spec"), options=options)
 
     async def callback(self, interaction: discord.Interaction):
