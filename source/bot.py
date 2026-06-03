@@ -147,6 +147,10 @@ class Bot(commands.Bot):
         except commands.ExtensionAlreadyLoaded:
             pass
         else:
+            # Clear old global commands so they don't appear alongside guild ones
+            self.tree.clear_commands(guild=None)
+            await self.tree.sync()
+            # Copy current commands to each guild for instant availability
             for guild in self.guilds:
                 self.tree.copy_global_to(guild=guild)
                 await self.tree.sync(guild=guild)
@@ -163,6 +167,13 @@ class Bot(commands.Bot):
                 await ctx.send(error, delete_after=10)
             except discord.Forbidden:
                 self.logger.warning("Missing Send messages permission for channel {0}".format(ctx.channel.id))
+
+    async def on_app_command_error(self, interaction, error):
+        self.logger.error(f"App command error in /{interaction.command}: {error}", exc_info=error)
+        try:
+            await interaction.response.send_message(str(error), ephemeral=True)
+        except Exception:
+            pass
 
     async def on_app_command_completion(self, interaction, command):
         timestamp = int(datetime.now().timestamp())
