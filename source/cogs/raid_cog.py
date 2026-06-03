@@ -14,7 +14,7 @@ import time
 from typing import Optional
 
 from database import add_column_if_missing, create_table, count, delete, read_config_key, select, select_le, select_one, select_order, upsert
-from time_cog import Time
+from cogs.time_cog import Time
 from utils import get_match
 
 logger = logging.getLogger(__name__)

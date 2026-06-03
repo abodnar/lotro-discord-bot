@@ -9,15 +9,20 @@ import locale
 import logging
 import os
 import re
+import time
 
 from database import create_connection, create_table, increment, read_config_key, select, upsert
 from emoji_manager import ensure_emojis
+
+
+_ERROR_COOLDOWN = 300  # seconds between owner DMs for the same error type
 
 
 class Bot(commands.Bot):
 
     def __init__(self):
         self.launch_time = datetime.utcnow()
+        self._error_last_notified: dict[str, float] = {}
 
         version = ""
         with open('__init__.py') as f:
@@ -175,6 +180,21 @@ class Bot(commands.Bot):
         self.logger.error(f"App command error in /{interaction.command}: {error}", exc_info=error)
         try:
             await interaction.response.send_message(str(error), ephemeral=True)
+        except Exception:
+            pass
+        await self._notify_owner_of_error(f"/{interaction.command}", error)
+
+    async def _notify_owner_of_error(self, context: str, error: Exception):
+        key = f"{context}:{type(error).__name__}"
+        now = time.time()
+        if now - self._error_last_notified.get(key, 0) < _ERROR_COOLDOWN:
+            return
+        self._error_last_notified[key] = now
+        try:
+            owner = (await self.application_info()).owner
+            await owner.send(
+                f"⚠️ **Error in `{context}`** (`{type(error).__name__}`)\n```{error}```"
+            )
         except Exception:
             pass
 
