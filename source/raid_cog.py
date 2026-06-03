@@ -217,22 +217,14 @@ class RaidCog(commands.Cog):
         await interaction.edit_original_response(content=content)
 
     @app_commands.command(name=_("specs"), description=_("Set a specialization for your class."))
-    @app_commands.describe(classes=_("The class to set your specialization for."), spec=_("Your chosen specialization."))
-    @app_commands.choices(spec=[
-        app_commands.Choice(name='Red \U0001F534', value=0b001),
-        app_commands.Choice(name='Blue \U0001F535', value=0b010),
-        app_commands.Choice(name='Yellow \U0001F7E1', value=0b100),
-        app_commands.Choice(name='Red \U0001F534 and Blue \U0001F535', value=0b011),
-        app_commands.Choice(name='Blue \U0001F535 and Yellow \U0001F7E1', value=0b110),
-        app_commands.Choice(name='Red \U0001F534 and Yellow \U0001F7E1', value=0b101),
-        app_commands.Choice(name='Clear specialization', value=0b000),
-    ])
-    async def specs_respond(self, interaction: discord.Interaction, classes: Classes, spec: app_commands.Choice[int]):
-        if duo_spec and classes.name in duo_spec and (spec.value & 0b100):
-            await interaction.response.send_message(_("Invalid specialization."))
-            return
-        upsert(self.conn, 'Specs', [classes.name], [spec.value], ['player_id'], [interaction.user.id])
-        await interaction.response.send_message(_("Updated your {0} specialization.").format(classes.name), ephemeral=True)
+    @app_commands.describe(classes=_("The class to set your specialization for."))
+    async def specs_respond(self, interaction: discord.Interaction, classes: Classes):
+        is_duo = bool(duo_spec and classes.name in duo_spec)
+        view = PlayerSpecView(self.conn, self.emojis_dict, interaction.user.id, classes.name, is_duo)
+        await interaction.response.send_message(
+            _("Select your {0} specialization:").format(classes.name),
+            view=view, ephemeral=True
+        )
 
     @app_commands.command(name=_("list_players"), description=_("List the signed up players for a raid in order of sign up time."))
     @app_commands.describe(raid_number=_("Specify the raid to list, e.g. 2 for the second upcoming raid. This defaults to 1 if omitted."), cut_off=_("Specify cut-off time in hours before raid time. This defaults to 24 hours if omitted."))
@@ -1045,6 +1037,52 @@ class SpecSelect(discord.ui.Select):
         msg = _("Set slot {0} spec to {1}.").format(self.view.slot + 1, label)
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
         await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
+
+
+class PlayerSpecView(discord.ui.View):
+    def __init__(self, conn, emojis_dict, player_id, class_name, is_duo_spec):
+        super().__init__(timeout=60)
+        self.conn = conn
+        self.player_id = player_id
+        self.class_name = class_name
+        self.add_item(PlayerSpecSelect(emojis_dict, is_duo_spec))
+
+    async def on_timeout(self):
+        self.conn.commit()
+
+
+class PlayerSpecSelect(discord.ui.Select):
+    # (bitmask_str, label, icon_name) — yellow-containing entries filtered for duo_spec classes
+    _SPECS = [
+        ('0',  _("Clear"),        None),
+        ('1',  _("Red"),          'spec_red'),
+        ('2',  _("Blue"),         'spec_blue'),
+        ('4',  _("Yellow"),       'spec_yellow'),
+        ('3',  _("Red / Blue"),   'spec_rb'),
+        ('6',  _("Blue / Yellow"), 'spec_by'),
+        ('5',  _("Red / Yellow"), 'spec_ry'),
+        ('7',  _("All three"),    'spec_all'),
+    ]
+
+    def __init__(self, emojis_dict, is_duo_spec=False):
+        options = []
+        for value, label, icon in self._SPECS:
+            if is_duo_spec and (int(value) & 0b100):
+                continue
+            options.append(discord.SelectOption(
+                label=label, value=value,
+                emoji=emojis_dict.get(icon) if icon else None,
+            ))
+        super().__init__(placeholder=_("Specialization"), options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        bitmask = int(self.values[0])
+        upsert(self.view.conn, 'Specs', [self.view.class_name], [bitmask],
+               ['player_id'], [self.view.player_id])
+        self.view.conn.commit()
+        label = next(l for v, l, _ in self._SPECS if v == self.values[0])
+        msg = _("Updated your {0} specialization to {1}.").format(self.view.class_name, label)
+        await interaction.response.send_message(msg, ephemeral=True)
 
 
 class ConfigureModal(discord.ui.Modal):
