@@ -460,11 +460,11 @@ class RaidCog(commands.Cog):
             left_size = (number_of_slots + 1) // 2
             for row in result[:left_size]:
                 byname, class_name, role, spec = row
-                embed_text += ROLE_EMOJIS.get(role, "")
                 for cn in class_name.split(','):
                     embed_text += self.emojis_dict.get(cn, cn)
                 if spec:
                     embed_text += self.emojis_dict.get(spec, "")
+                embed_text += ROLE_EMOJIS.get(role, "")
                 embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text)
             # Add second half
@@ -472,11 +472,11 @@ class RaidCog(commands.Cog):
             embed_text = ""
             for row in result[left_size:]:
                 byname, class_name, role, spec = row
-                embed_text += ROLE_EMOJIS.get(role, "")
                 for cn in class_name.split(','):
                     embed_text += self.emojis_dict.get(cn, cn)
                 if spec:
                     embed_text += self.emojis_dict.get(spec, "")
+                embed_text += ROLE_EMOJIS.get(role, "")
                 embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
@@ -866,8 +866,8 @@ class SelectView(discord.ui.View):
         self.add_item(SlotSelect(raid_size))
         self.add_item(PlayerSelect(raid_cog.conn, raid_id))
         self.add_item(ClassSelect(raid_cog))
-        self.add_item(RoleSelect())
         self.add_item(SpecSelect(raid_cog.emojis_dict))
+        self.add_item(RoleSelect())
 
     async def on_timeout(self):
         self.conn.commit()
