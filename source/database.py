@@ -99,6 +99,7 @@ def table_sqls(table):
                       "player_id integer, "
                       "byname text, "
                       "class_name text, "
+                      "original_class_name text, "
                       "role text, "
                       "spec text, "
                       "primary key (raid_id, slot_id), "

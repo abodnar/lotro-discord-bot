@@ -44,17 +44,21 @@ class Bot(commands.Bot):
         role_names = read_config_key(config, 'CLASSES', True)
         self.role_names = tuple(role_names)
         self.creep_names = read_config_key(config, 'CREEPS', False)
-        # Line up
-        lineup = read_config_key(config, 'LINEUP', True)
-        default_lineup = []
-        for string in lineup:
-            bitmask = [int(char) for char in string]
-            default_lineup.append(bitmask)
-        slots_class_names = []
-        for bitmask in default_lineup:
-            class_names = list(compress(role_names, bitmask))
-            slots_class_names.append(class_names)
-        self.slots_class_names = slots_class_names
+        # Lineups — prefer human-readable LINEUPS dict, fall back to bitmask LINEUP
+        lineups_config = read_config_key(config, 'LINEUPS', False)
+        if lineups_config:
+            self.lineups = {key: slots for key, slots in lineups_config.items()}
+        else:
+            lineup = read_config_key(config, 'LINEUP', True)
+            default_lineup = []
+            for string in lineup:
+                bitmask = [int(char) for char in string]
+                default_lineup.append(bitmask)
+            slots_class_names = []
+            for bitmask in default_lineup:
+                slots_class_names.append(list(compress(role_names, bitmask)))
+            self.lineups = {'default': slots_class_names}
+        self.slots_class_names = self.lineups.get('default', [])
 
         # Get id for discord server hosting custom emoji.
         host_id = read_config_key(config, 'HOST', False)

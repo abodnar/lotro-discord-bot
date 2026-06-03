@@ -87,6 +87,7 @@ class RaidCog(commands.Cog):
         create_table(self.conn, 'raid')
         create_table(self.conn, 'player')
         create_table(self.conn, 'assign')
+        add_column_if_missing(self.conn, 'Assignment', 'original_class_name', 'text')
         add_column_if_missing(self.conn, 'Assignment', 'role', 'text')
         add_column_if_missing(self.conn, 'Assignment', 'spec', 'text')
         create_table(self.conn, 'specs')
@@ -352,7 +353,7 @@ class RaidCog(commands.Cog):
         upsert(self.conn, 'Raids', raid_columns, raid_values, ['raid_id'], [raid_id])
         await channel.guild.create_role(mentionable=True, name=tag)
         if not creep:
-            self.roster_init(raid_id, raid_size)
+            self.roster_init(raid_id, raid_size, name)
             embed = self.build_raid_message(raid_id, "\u200B", None)
             await post.edit(embed=embed, view=RaidView(self))
         else:
@@ -374,13 +375,25 @@ class RaidCog(commands.Cog):
         else:
             upsert(self.conn, 'Raids', ['event_id'], [event_id], ['raid_id'], [raid_id])
 
-    def roster_init(self, raid_id, raid_size):
+    def get_lineup(self, raid_key, raid_size):
+        lineups = self.bot.lineups
+        if raid_key in lineups:
+            return lineups[raid_key]
+        size_key = str(raid_size)
+        if size_key in lineups:
+            return lineups[size_key]
+        return lineups.get('default', self.slots_class_names)
+
+    def roster_init(self, raid_id, raid_size, raid_key='default'):
         available = _("<Open>")
-        assignment_columns = ['player_id', 'byname', 'class_name']
-        number_of_slots = min(len(self.slots_class_names), raid_size)
+        slots = self.get_lineup(raid_key, raid_size)
+        assignment_columns = ['player_id', 'byname', 'class_name', 'original_class_name']
+        number_of_slots = min(len(slots), raid_size)
         for i in range(number_of_slots):
-            assignment_values = [None, available, ','.join(self.slots_class_names[i])]
-            upsert(self.conn, 'Assignment', assignment_columns, assignment_values, ['raid_id', 'slot_id'], [raid_id, i])
+            class_str = ','.join(slots[i])
+            upsert(self.conn, 'Assignment', assignment_columns,
+                   [None, available, class_str, class_str],
+                   ['raid_id', 'slot_id'], [raid_id, i])
 
     async def has_raid_permission(self, user, guild, raid_id, channel=None):
         if user.guild_permissions.administrator:
@@ -682,6 +695,9 @@ class RaidView(discord.ui.View):
             await interaction.response.send_message(perm_msg, ephemeral=True)
             return
         modal = ConfigureModal(self.raid_cog, interaction.message.id)
+        if not modal.children:
+            await interaction.response.send_message(_("This raid no longer exists."), ephemeral=True)
+            return
         await interaction.response.send_modal(modal)
 
     @discord.ui.button(emoji="\u26CF\uFE0F", style=discord.ButtonStyle.blurple, custom_id='raid_view:select')
@@ -775,17 +791,16 @@ class RaidView(discord.ui.View):
             error_msg = _("Dearest raid leader, {0} has cancelled their availability. "
                           "Please note they were assigned to {1} in the raid.").format(i.user.mention, class_name)
             await i.channel.send(error_msg)
-
             tag = select_one(self.conn, 'Raids', ['tag'], ['raid_id'], [raid_id])
             role = discord.utils.get(i.guild.roles, name=tag)
             if role:
                 await i.user.remove_roles(role)
-
-            class_names = ','.join(self.raid_cog.slots_class_names[assigned_slot])
-            assign_columns = ['player_id', 'byname', 'class_name']
-            assign_values = [None, _("<Open>"), class_names]
-            upsert(self.conn, 'Assignment', assign_columns, assign_values, ['raid_id', 'slot_id'],
-                   [raid_id, assigned_slot])
+            # Restore slot using stored original eligible classes
+            original = select_one(self.conn, 'Assignment', ['original_class_name'], ['slot_id', 'raid_id'],
+                                  [assigned_slot, raid_id])
+            reset_classes = original or ','.join(self.raid_cog.slots_class_names[assigned_slot])
+            upsert(self.conn, 'Assignment', ['player_id', 'byname', 'class_name'],
+                   [None, _("<Open>"), reset_classes], ['raid_id', 'slot_id'], [raid_id, assigned_slot])
         r = select_one(self.conn, 'Players', ['byname'], ['player_id', 'raid_id'], [i.user.id, raid_id])
         if r:
             delete(self.conn, 'Players', ['player_id', 'raid_id'], [i.user.id, raid_id])
@@ -795,6 +810,7 @@ class RaidView(discord.ui.View):
                    ['player_id', 'raid_id'], [i.user.id, raid_id])
         self.conn.commit()
         await self.raid_cog.update_raid_post(raid_id, i.channel, delay=0)
+        await i.followup.send(_("You have been removed from the raid."), ephemeral=True)
 
 
 class CreepView(discord.ui.View):
