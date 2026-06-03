@@ -39,8 +39,8 @@ class ConfigCog(commands.Cog):
         return ", ".join(strings)
 
     async def about_embed(self):
-        dev = "Baviaan#4862"
-        repo = "https://github.com/Baviaan/lotro"
+        dev = "dramacus"
+        repo = "https://github.com/abodnar/lotro"
         code = "dGcBzPN"
         server = "https://discord.gg/"+code
         app_info = await self.bot.application_info()
@@ -53,7 +53,6 @@ class ConfigCog(commands.Cog):
 
         invite_link = "https://discord.com/api/oauth2/authorize?client_id={0}&permissions=268462080&scope=bot" \
                       "%20applications.commands".format(self.bot.user.id)
-        #donate_link = "https://www.paypal.com/donate?hosted_button_id=WWPCUJVJPMT7W"
         releases = repo + "/releases/latest"
         async with  self.bot.http_session.get(releases, allow_redirects=False) as r:
             if r.ok:
@@ -73,7 +72,6 @@ class ConfigCog(commands.Cog):
             _("**[Source code]({0})**").format(repo),
             _("**[Support server]({0})**").format(server),
             _("**[Invite me!]({0})**").format(invite_link),
-            #_("**[Donate]({0})**").format(donate_link),
             "",
             _("**Hosted by:** {0}").format(host),
             _("**Uptime:** {0}.").format(uptime),
@@ -143,7 +141,7 @@ class ConfigCog(commands.Cog):
                     "along with your discord id such that it can parse times provided in your commands in your "
                     "preferred time zone.\n"
                     "**Please find the full privacy policy here:**\n"
-                    "https://github.com/Baviaan/lotro#privacy-policy")
+                    "https://github.com/"+dev+"/lotro#privacy-policy")
         await interaction.response.send_message(privacy)
 
 

@@ -19,8 +19,8 @@ with open('README.md') as f:
 setup(
     name="Saruman",
     version=version,
-    author="Baviaan",
-    url="https://github.com/Baviaan/lotro",
+    author="Dramacus",
+    url="https://github.com/abodnar/lotro",
     license="GPLv3",
     description="A discord bot for scheduling raids."
     long_description=readme,
