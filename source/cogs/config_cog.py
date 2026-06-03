@@ -118,49 +118,65 @@ class ConfigCog(commands.Cog):
             msg = self.welcome_msg(guild.name)
             await channel.send(msg)
 
-    @app_commands.command(name=_("commands"), description=_("Show all available commands."))
+    # Sections: maps section title → list of command names to include.
+    # Names starting with * are shown as plain text (no slash command registered).
+    _HELP_SECTIONS = [
+        ("📅 Scheduling", [
+            "*[raid name]",   # dynamic raid commands like /rem, /ad, /palace
+            "custom", "creep",
+        ]),
+        ("✅ Sign-up", [
+            "*class buttons",  # not a slash command
+            "remove_roles", "specs",
+        ]),
+        ("📆 Calendar", [
+            "calendar", "list_raids", "list_players",
+        ]),
+        ("ℹ️ Info", [
+            "about", "events", "server_time", "loot",
+        ]),
+        ("⚙️ Server settings", [
+            "leader", "kin", "time_zones", "rss",
+        ]),
+        ("👤 Personal settings", [
+            "privacy",
+        ]),
+    ]
+
+    # Descriptions for entries that aren't real slash commands
+    _EXTRA_DESCRIPTIONS = {
+        "*[raid name]": _("Schedule a specific raid — e.g. `/rem t3 friday 8pm`"),
+        "*class buttons": _("Click a class icon on the raid post to sign up"),
+    }
+
+    async def _build_help_embed(self, guild: discord.Guild) -> discord.Embed:
+        synced = await self.bot.tree.fetch_commands(guild=guild)
+        cmd_map = {cmd.name: cmd for cmd in synced}
+
+        embed = discord.Embed(title=_("LotRO Raid Bot — Commands"),
+                              colour=discord.Colour(0x3498db))
+        for section, names in self._HELP_SECTIONS:
+            lines = []
+            for name in names:
+                if name.startswith("*"):
+                    lines.append(self._EXTRA_DESCRIPTIONS[name])
+                elif name in cmd_map:
+                    cmd = cmd_map[name]
+                    lines.append(f"</{cmd.name}:{cmd.id}> — {cmd.description}")
+            if lines:
+                embed.add_field(name=section, value="\n".join(lines), inline=False)
+        return embed
+
+    @app_commands.command(name=_("raid_commands"), description=_("Show all available raid bot commands."))
     @app_commands.guild_only()
-    async def commands_respond(self, interaction: discord.Interaction):
-        sections = {
-            _("📅 Scheduling"): [
-                "`/[raid]` — Schedule a specific raid (e.g. `/rem`, `/ad`, `/palace`)",
-                "`/custom` — Schedule a custom event",
-                "`/creep` — Schedule a Ettenmoors event",
-            ],
-            _("✅ Sign-up"): [
-                "_Click a class button on the raid post to sign up_",
-                "`/remove_roles` — Clear your class roles",
-                "`/specs` — Set your specialization for a class",
-            ],
-            _("📆 Calendar"): [
-                "`/calendar channel` — Create a self-updating raid calendar",
-                "`/calendar discord` — Add raids to Discord's event calendar",
-                "`/list_raids` — List upcoming raids",
-                "`/list_players` — List sign-ups in order (raid leaders only)",
-            ],
-            _("ℹ️ Info"): [
-                "`/about` — Bot information and invite link",
-                "`/events` — Upcoming official LotRO events",
-                "`/server_time` — Current server time",
-                "`/loot` — Loot table for any chest",
-            ],
-            _("⚙️ Server settings"): [
-                "`/leader` — Set the raid leader role",
-                "`/kin` — Set the kin role",
-                "`/time_zones server` — Set the server time zone",
-                "`/rss on/off` — Toggle LotRO news in this channel",
-            ],
-            _("👤 Personal settings"): [
-                "`/time_zones personal` — Set your personal time zone",
-                "`/privacy` — View data collection policy",
-            ],
-        }
-        embed = discord.Embed(
-            title=_("Available commands"),
-            colour=discord.Colour(0x3498db),
-        )
-        for section, lines in sections.items():
-            embed.add_field(name=section, value="\n".join(lines), inline=False)
+    async def raid_commands_respond(self, interaction: discord.Interaction):
+        embed = await self._build_help_embed(interaction.guild)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(name=_("raid_help"), description=_("Show all available raid bot commands."))
+    @app_commands.guild_only()
+    async def raid_help_respond(self, interaction: discord.Interaction):
+        embed = await self._build_help_embed(interaction.guild)
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name=_("about"), description=_("Show information about this bot."))
