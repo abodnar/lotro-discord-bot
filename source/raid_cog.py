@@ -64,6 +64,7 @@ class RaidCog(commands.Cog):
         create_table(self.conn, 'player')
         create_table(self.conn, 'assign')
         add_column_if_missing(self.conn, 'Assignment', 'role', 'text')
+        add_column_if_missing(self.conn, 'Assignment', 'spec', 'text')
         create_table(self.conn, 'specs')
 
         raids = select(self.conn, 'Raids', ['raid_id'])
@@ -72,15 +73,15 @@ class RaidCog(commands.Cog):
 
         self.update_call = {}
 
-        # Emojis
-        host_guild = bot.get_guild(bot.host_id)
-        if not host_guild:
-            # Use first guild as host
-            host_guild = bot.guilds[0]
-        logger.info("Using emoji from {0}.".format(host_guild))
-        self.class_emojis = [emoji for emoji in host_guild.emojis if emoji.name in self.role_names]
-        self.creep_emojis = [emoji for emoji in host_guild.emojis if emoji.name in self.creep_names]
-        self.emojis_dict = {emoji.name: str(emoji) for emoji in self.class_emojis + self.creep_emojis}
+        # Emojis — prefer application emojis set up in bot.on_ready
+        if hasattr(bot, 'emojis_dict') and bot.emojis_dict:
+            self.emojis_dict = bot.emojis_dict
+        else:
+            host_guild = bot.get_guild(bot.host_id) or bot.guilds[0]
+            logger.info("Falling back to guild emojis from {0}.".format(host_guild))
+            all_emojis = [e for e in host_guild.emojis
+                          if e.name in self.role_names or e.name in (self.creep_names or [])]
+            self.emojis_dict = {e.name: str(e) for e in all_emojis}
 
         # Add raid views
         self.bot.add_view(RaidView(self))
@@ -435,31 +436,30 @@ class RaidCog(commands.Cog):
 
         embed = discord.Embed(title=embed_title, colour=discord.Colour(0x3498db), description=embed_description)
         if roster:
-            result = select(self.conn, 'Assignment', ['byname', 'class_name', 'role'], ['raid_id'], [raid_id])
+            result = select(self.conn, 'Assignment', ['byname', 'class_name', 'role', 'spec'], ['raid_id'], [raid_id])
             number_of_slots = len(result)
             # Add first half
             embed_name = _("Selected line up:")
             embed_text = ""
-            if number_of_slots > 12:
-                left_size = number_of_slots // 2
-            else:
-                left_size = min(number_of_slots, 6)
+            left_size = (number_of_slots + 1) // 2
             for row in result[:left_size]:
-                embed_text += ROLE_EMOJIS.get(row[2], "")
-                class_names = row[1].split(',')
-                for class_name in class_names:
-                    embed_text += self.emojis_dict[class_name]
-                embed_text += ": " + row[0] + "\n"
+                byname, class_name, role, spec = row
+                embed_text += ROLE_EMOJIS.get(role, "")
+                for cn in class_name.split(','):
+                    variant = f'{cn}_{spec}' if spec and f'{cn}_{spec}' in self.emojis_dict else cn
+                    embed_text += self.emojis_dict.get(variant) or self.emojis_dict.get(cn, cn)
+                embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text)
             # Add second half
             embed_name = "\u200B"
             embed_text = ""
             for row in result[left_size:]:
-                embed_text += ROLE_EMOJIS.get(row[2], "")
-                class_names = row[1].split(',')
-                for class_name in class_names:
-                    embed_text += self.emojis_dict[class_name]
-                embed_text += ": " + row[0] + "\n"
+                byname, class_name, role, spec = row
+                embed_text += ROLE_EMOJIS.get(role, "")
+                for cn in class_name.split(','):
+                    variant = f'{cn}_{spec}' if spec and f'{cn}_{spec}' in self.emojis_dict else cn
+                    embed_text += self.emojis_dict.get(variant) or self.emojis_dict.get(cn, cn)
+                embed_text += ": " + byname + "\n"
             embed.add_field(name=embed_name, value=embed_text or "\u200B")
             embed.add_field(name="\u200B", value="\u200B")
         # Add a field for each embed text
@@ -653,8 +653,10 @@ class RaidView(discord.ui.View):
         super().__init__(timeout=None)
         self.raid_cog = raid_cog
         self.conn = raid_cog.conn
-        for emoji in raid_cog.class_emojis:
-            self.add_item(EmojiButton(emoji))
+        for class_name in raid_cog.role_names:
+            emoji = raid_cog.emojis_dict.get(class_name)
+            if emoji:
+                self.add_item(EmojiButton(class_name, emoji))
 
     @discord.ui.button(emoji="\U0001F6E0\uFE0F", style=discord.ButtonStyle.blurple, custom_id='raid_view:settings')
     async def settings(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -781,8 +783,10 @@ class CreepView(discord.ui.View):
         self.raid_cog = raid_cog
         self.conn = raid_cog.conn
         # For better visual appearance divide creep classes equally over three rows
-        for index, emoji in enumerate(raid_cog.creep_emojis):
-            self.add_item(EmojiButton(emoji, (index+2)//3))
+        for index, creep_name in enumerate(raid_cog.creep_names or []):
+            emoji = raid_cog.emojis_dict.get(creep_name)
+            if emoji:
+                self.add_item(EmojiButton(creep_name, emoji, (index+2)//3))
 
     async def sign_up_class(self, i, creep_name):
         raid_id = i.message.id
@@ -824,12 +828,11 @@ class CreepView(discord.ui.View):
 
 
 class EmojiButton(discord.ui.Button):
-    def __init__(self, emoji, row=None):
-        super().__init__(emoji=emoji, custom_id=emoji.name, row=row)
+    def __init__(self, class_name, emoji, row=None):
+        super().__init__(emoji=emoji, custom_id=class_name, row=row)
 
     async def callback(self, interaction: discord.Interaction):
-        class_name = self.custom_id
-        await self.view.sign_up_class(interaction, class_name)
+        await self.view.sign_up_class(interaction, self.custom_id)
 
 
 class SelectView(discord.ui.View):
@@ -845,8 +848,9 @@ class SelectView(discord.ui.View):
 
         self.add_item(SlotSelect(raid_size))
         self.add_item(PlayerSelect(raid_cog.conn, raid_id))
-        self.add_item(ClassSelect(raid_cog.class_emojis))
+        self.add_item(ClassSelect(raid_cog))
         self.add_item(RoleSelect())
+        self.add_item(SpecSelect())
 
     async def on_timeout(self):
         self.conn.commit()
@@ -882,10 +886,11 @@ class PlayerSelect(discord.ui.Select):
 
 
 class ClassSelect(discord.ui.Select):
-    def __init__(self, class_emojis):
+    def __init__(self, raid_cog):
         options = []
-        for emoji in class_emojis:
-            options.append(discord.SelectOption(label=emoji.name, emoji=emoji))
+        for class_name in raid_cog.role_names:
+            emoji = raid_cog.emojis_dict.get(class_name)
+            options.append(discord.SelectOption(label=class_name, value=class_name, emoji=emoji))
         options.append(discord.SelectOption(label=_("Remove"), value='remove', emoji="\u274C"))
         super().__init__(placeholder=_("Class"), options=options)
 
@@ -991,6 +996,31 @@ class RoleSelect(discord.ui.Select):
         self.view.conn.commit()
         label = self.values[0].capitalize()
         msg = _("Set slot {0} role to {1}.").format(self.view.slot + 1, label)
+        await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
+        await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
+
+
+class SpecSelect(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label=_("None"), value="none"),
+            discord.SelectOption(label=_("Red"), value="red", emoji="🔴"),
+            discord.SelectOption(label=_("Blue"), value="blue", emoji="🔵"),
+            discord.SelectOption(label=_("Yellow"), value="yellow", emoji="🟡"),
+        ]
+        super().__init__(placeholder=_("Spec"), options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.view.slot == -1:
+            msg = _("Please select a slot first.")
+            await interaction.response.send_message(msg, ephemeral=True)
+            return
+        spec = None if self.values[0] == "none" else self.values[0]
+        upsert(self.view.conn, 'Assignment', ['spec'], [spec],
+               ['raid_id', 'slot_id'], [self.view.raid_id, self.view.slot])
+        self.view.conn.commit()
+        label = self.values[0].capitalize()
+        msg = _("Set slot {0} spec to {1}.").format(self.view.slot + 1, label)
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
         await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
 

@@ -11,6 +11,7 @@ import os
 import re
 
 from database import create_connection, create_table, increment, read_config_key, select, upsert
+from emoji_manager import ensure_emojis
 
 
 class Bot(commands.Bot):
@@ -119,6 +120,10 @@ class Bot(commands.Bot):
         except AttributeError:
             pass
         self.http_session = aiohttp.ClientSession()
+
+        all_classes = list(self.role_names) + (list(self.creep_names) if self.creep_names else [])
+        self.emojis_dict = await ensure_emojis(self, all_classes, '../emojis')
+        self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
 
         try:
             await self.load_extension('config_cog')

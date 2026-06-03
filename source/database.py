@@ -100,6 +100,7 @@ def table_sqls(table):
                       "byname text, "
                       "class_name text, "
                       "role text, "
+                      "spec text, "
                       "primary key (raid_id, slot_id), "
                       "foreign key (raid_id) references Raids(raid_id)"
                       ");",
