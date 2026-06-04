@@ -45,8 +45,6 @@ class ConfigCog(commands.Cog):
     async def about_embed(self):
         dev = self._DEV
         repo = self._REPO
-        code = "dGcBzPN"
-        server = "https://discord.gg/"+code
         app_info = await self.bot.application_info()
         try:
             host = app_info.team.name
@@ -74,7 +72,6 @@ class ConfigCog(commands.Cog):
             _("A bot for scheduling raids!"),
             _("**Developer:** {0}").format(dev),
             _("**[Source code]({0})**").format(repo),
-            _("**[Support server]({0})**").format(server),
             _("**[Invite me!]({0})**").format(invite_link),
             "",
             _("**Hosted by:** {0}").format(host),
