@@ -41,6 +41,7 @@ jobs:
           SERVER_TZ: ${{ secrets.SERVER_TZ }}
         run: |
           mkdir -p /volume1/docker/${CONTAINER_NAME}
+          touch /volume1/docker/${CONTAINER_NAME}/raid_db
           docker stop ${CONTAINER_NAME} || true
           docker rm   ${CONTAINER_NAME} || true
           docker run -d \
