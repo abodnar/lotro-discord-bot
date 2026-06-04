@@ -224,5 +224,6 @@ class Bot(commands.Bot):
             self.conn.commit()
 
     async def close(self):
-        await self.http_session.close()
+        if hasattr(self, 'http_session'):
+            await self.http_session.close()
         await super().close()
