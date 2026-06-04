@@ -1017,16 +1017,19 @@ class RoleSelect(discord.ui.Select):
         super().__init__(placeholder=_("Role"), options=options)
 
     async def callback(self, interaction: discord.Interaction):
-        if self.view.slot == -1:
-            msg = _("Please select a slot first.")
-            await interaction.response.send_message(msg, ephemeral=True)
-            return
+        slot = self.view.slot
+        if slot == -1:
+            slot = select_one(self.view.conn, 'Assignment', ['slot_id'],
+                              ['raid_id'], [self.view.raid_id], ['player_id'])
+            if slot is None:
+                await interaction.response.send_message(_("No open slots available."), ephemeral=True)
+                return
         role = None if self.values[0] == "none" else self.values[0]
         upsert(self.view.conn, 'Assignment', ['role'], [role],
-               ['raid_id', 'slot_id'], [self.view.raid_id, self.view.slot])
+               ['raid_id', 'slot_id'], [self.view.raid_id, slot])
         self.view.conn.commit()
         label = self.values[0].capitalize()
-        msg = _("Set slot {0} role to {1}.").format(self.view.slot + 1, label)
+        msg = _("Set slot {0} role to {1}.").format(slot + 1, label)
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
         await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
 
@@ -1052,17 +1055,20 @@ class SpecSelect(discord.ui.Select):
         super().__init__(placeholder=_("Spec"), options=options)
 
     async def callback(self, interaction: discord.Interaction):
-        if self.view.slot == -1:
-            msg = _("Please select a slot first.")
-            await interaction.response.send_message(msg, ephemeral=True)
-            return
+        slot = self.view.slot
+        if slot == -1:
+            slot = select_one(self.view.conn, 'Assignment', ['slot_id'],
+                              ['raid_id'], [self.view.raid_id], ['player_id'])
+            if slot is None:
+                await interaction.response.send_message(_("No open slots available."), ephemeral=True)
+                return
         spec = None if self.values[0] == "none" else self.values[0]
         upsert(self.view.conn, 'Assignment', ['spec'], [spec],
-               ['raid_id', 'slot_id'], [self.view.raid_id, self.view.slot])
+               ['raid_id', 'slot_id'], [self.view.raid_id, slot])
         self.view.conn.commit()
         label = next((l for v, l in self._SPECS if v == self.values[0]), self.values[0])
         emoji = self.view.raid_cog.emojis_dict.get(self.values[0], "")
-        msg = _("Set slot {0} spec to {1}.").format(self.view.slot + 1, f"{emoji} {label}".strip())
+        msg = _("Set slot {0} spec to {1}.").format(slot + 1, f"{emoji} {label}".strip())
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
         await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
 
