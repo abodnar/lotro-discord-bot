@@ -105,6 +105,10 @@ class ConfigCog(commands.Cog):
         timestamp = int(datetime.datetime.now().timestamp())
         upsert(self.conn, 'Settings', ['last_command'], [timestamp], ['guild_id'], [guild.id])
         self.conn.commit()
+        # Sync commands to the new guild immediately
+        self.bot.tree.copy_global_to(guild=guild)
+        await self.bot.tree.sync(guild=guild)
+        logger.info("Synced commands to {0}.".format(guild))
         channels = guild.text_channels
         channel = find(lambda x: x.name == 'welcome', channels)
         if not channel or not channel.permissions_for(guild.me).send_messages:
