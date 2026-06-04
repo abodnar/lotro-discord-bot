@@ -42,7 +42,7 @@ class Bot(commands.Bot):
             with open('config.json', 'r') as f:
                 config = json.load(f)
         except FileNotFoundError:
-            logger.warning("No config.json found. Please create it with BOT_TOKEN and SERVER_TZ.")
+            logger.info("No config.json found, using environment variables.")
             config = {}
 
         try:
@@ -73,12 +73,9 @@ class Bot(commands.Bot):
             self.lineups = {'default': slots_class_names}
         self.slots_class_names = self.lineups.get('default', [])
 
-        # Get id for discord server hosting custom emoji.
+        # Guild to use as emoji fallback (only needed if application emojis unavailable).
         host_id = read_config_key(config, 'HOST', False)
-        if host_id:
-            self.host_id = int(host_id)
-        else:
-            self.host_id = None
+        self.host_id = int(host_id) if host_id else None
 
         language = read_config_key(config, 'LANGUAGE', False)
         if language == 'fr':
