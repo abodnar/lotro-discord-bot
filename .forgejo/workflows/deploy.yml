@@ -24,12 +24,67 @@ jobs:
       - name: Lint Dockerfile
         run: docker run --rm -i hadolint/hadolint < repo/dockerfile
 
-  deploy:
+  bump-version:
     runs-on: self-hosted
     needs: lint
+    timeout-minutes: 5
+    env:
+      API_TOKEN: ${{ secrets.API_TOKEN }}
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - name: Checkout with history
+        run: git clone --depth 50 --branch ${GITHUB_REF_NAME} http://192.168.86.46:3000/${GITHUB_REPOSITORY}.git repo
+
+      - name: Bump version
+        id: bump
+        run: |
+          cd repo
+
+          # Read current version
+          CURRENT=$(grep -oP '(?<=__version__ = ")[^"]+' source/__init__.py)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          # Find commits since last version bump (or last 50 if no bump commit found)
+          LAST_BUMP=$(git log --format="%H %s" | grep -m1 "chore: bump version" | awk '{print $1}' || true)
+          if [ -n "$LAST_BUMP" ]; then
+            COMMITS=$(git log --format="%s" "${LAST_BUMP}..HEAD")
+          else
+            COMMITS=$(git log --format="%s" -50)
+          fi
+
+          # Determine bump level from conventional commit prefixes
+          BUMP="patch"
+          if echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?!:|BREAKING CHANGE"; then
+            BUMP="major"
+          elif echo "$COMMITS" | grep -qE "^(feat|feature)(\(.+\))?:"; then
+            BUMP="minor"
+          fi
+
+          case $BUMP in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
+          esac
+          NEW="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "Bumping ${CURRENT} → ${NEW} (${BUMP})"
+          sed -i "s/__version__ = \"${CURRENT}\"/__version__ = \"${NEW}\"/" source/__init__.py
+
+          git config user.email "ci@forgejo-nas"
+          git config user.name "Forgejo CI"
+          git add source/__init__.py
+          git commit -m "chore: bump version to ${NEW} [skip ci]"
+          git push http://ci:${API_TOKEN}@192.168.86.46:3000/${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
+
+          echo "version=${NEW}" >> ${GITHUB_OUTPUT}
+
+  deploy:
+    runs-on: self-hosted
+    needs: bump-version
     timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout (with bumped version)
         run: git clone --depth 1 --branch ${GITHUB_REF_NAME} http://192.168.86.46:3000/${GITHUB_REPOSITORY}.git repo
 
       - name: Build image
@@ -68,7 +123,7 @@ jobs:
 
   notify-failure:
     runs-on: self-hosted
-    needs: [lint, deploy]
+    needs: [lint, bump-version, deploy]
     if: failure()
     env:
       FORGEJO_TOKEN: ${{ secrets.API_TOKEN }}
