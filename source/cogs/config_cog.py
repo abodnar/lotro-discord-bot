@@ -53,7 +53,7 @@ class ConfigCog(commands.Cog):
         uptime = datetime.datetime.utcnow() - self.bot.launch_time
         uptime = self.td_format(uptime)
 
-        invite_link = "https://discord.com/api/oauth2/authorize?client_id={0}&permissions=268462080&scope=bot" \
+        invite_link = "https://discord.com/api/oauth2/authorize?client_id={0}&permissions=8858388480&scope=bot" \
                       "%20applications.commands".format(self.bot.user.id)
         releases = repo + "/releases/latest"
         async with  self.bot.http_session.get(releases, allow_redirects=False) as r:
