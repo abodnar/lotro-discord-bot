@@ -139,6 +139,11 @@ class Bot(commands.Bot):
         self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, 'emojis')
         self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
 
+        # Clear stale global commands from Discord while the tree is still empty.
+        # Must happen before cogs are loaded so the local tree stays intact for dispatch.
+        self.tree.clear_commands(guild=None)
+        await self.tree.sync()
+
         try:
             await self.load_extension('cogs.config_cog')
             await self.load_extension('cogs.dev_cog')
@@ -157,13 +162,11 @@ class Bot(commands.Bot):
         except commands.ExtensionAlreadyLoaded:
             pass
         else:
-            # Guild sync first (instant) while global tree is still populated
+            # Guild sync — copies freshly loaded commands to guild for instant availability.
+            # The local tree keeps commands intact so dispatch works after sync.
             for guild in self.guilds:
                 self.tree.copy_global_to(guild=guild)
                 await self.tree.sync(guild=guild)
-            # Then clear global commands from Discord to prevent duplicates
-            self.tree.clear_commands(guild=None)
-            await self.tree.sync()
             self.logger.info("Synced slash commands.")
 
     async def on_command_error(self, ctx, error):
