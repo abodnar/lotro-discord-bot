@@ -1,0 +1,44 @@
+{
+  "CLASSES": [
+    "Beorning", "Brawler", "Burglar", "Captain", "Champion",
+    "Guardian", "Hunter", "Loremaster", "Mariner", "Minstrel",
+    "Runekeeper", "Warden"
+  ],
+  "DUOSPEC": ["Brawler", "Guardian", "Minstrel", "Warden"],
+  "CREEPS": [
+    "Blackarrow", "Defiler", "Reaver", "Sorceress",
+    "Stalker", "Warleader", "Weaver"
+  ],
+  "LINEUPS": {
+    "default": [
+      ["Minstrel", "Runekeeper"],
+      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+      ["Loremaster"],
+      ["Burglar"],
+      ["Brawler", "Captain", "Guardian"],
+      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"],
+      ["Captain", "Loremaster", "Mariner"],
+      ["Hunter", "Minstrel", "Runekeeper"],
+      ["Beorning", "Champion", "Warden"],
+      ["Champion", "Hunter", "Minstrel", "Runekeeper", "Warden"],
+      ["Beorning", "Brawler", "Burglar", "Champion", "Mariner", "Warden"],
+      ["Beorning", "Brawler", "Burglar", "Champion", "Guardian", "Loremaster", "Minstrel", "Runekeeper", "Warden"]
+    ],
+    "palace": [
+      ["Minstrel", "Runekeeper"],
+      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+      ["Loremaster"],
+      ["Burglar"],
+      ["Brawler", "Captain", "Guardian"],
+      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
+    ],
+    "wailing": [
+      ["Minstrel", "Runekeeper"],
+      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+      ["Loremaster"],
+      ["Burglar"],
+      ["Brawler", "Captain", "Guardian"],
+      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
+    ]
+  }
+}

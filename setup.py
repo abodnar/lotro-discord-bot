@@ -5,9 +5,12 @@ requirements = []
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-version = ""
+version = author = repo = ""
 with open('source/__init__.py') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    src = f.read()
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', src, re.MULTILINE).group(1)
+    author  = re.search(r'^__author__\s*=\s*[\'"]([^\'"]*)[\'"]',  src, re.MULTILINE).group(1)
+    repo    = re.search(r'^__repo__\s*=\s*[\'"]([^\'"]*)[\'"]',    src, re.MULTILINE).group(1)
 
 if not version:
     raise RuntimeError("Version is not set.")
@@ -19,8 +22,8 @@ with open('README.md') as f:
 setup(
     name="Saruman",
     version=version,
-    author="Baviaan",
-    url="https://github.com/Baviaan/lotro",
+    author=author,
+    url=repo,
     license="GPLv3",
     description="A discord bot for scheduling raids."
     long_description=readme,

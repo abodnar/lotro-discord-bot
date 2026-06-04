@@ -1,0 +1,12 @@
+.git
+.gitignore
+.dockerignore
+.idea
+.DS_Store
+assets
+CLAUDE.md
+LICENSE.md
+README.md
+setup.py
+source/raid_db
+source/locale/*.po~

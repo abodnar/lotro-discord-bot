@@ -4,3 +4,7 @@ raid_bot.log
 __pycache__
 bot-env
 messages.mo
+.idea.DS_Store
+*.po~
+.idea/
+push-github.sh

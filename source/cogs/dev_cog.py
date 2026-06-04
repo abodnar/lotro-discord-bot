@@ -1,11 +1,10 @@
-from subprocess import Popen, PIPE
 from discord.ext import commands
 import datetime
 import discord
 import logging
 import psutil
 
-from database import delete, select
+from database import count, delete, select
 from utils import chunks
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class DevCog(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def load(self, ctx, ext):
-        ext = ext + "_cog"
+        ext = 'cogs.' + ext + '_cog'
         try:
             await self.bot.load_extension(ext)
             await ctx.send(_('Extension loaded.'))
@@ -38,21 +37,9 @@ class DevCog(commands.Cog):
         self.bot.version = version
         await self.bot.change_presence(activity=discord.Game(name=version))
 
-    @commands.group(hidden=True)
-    @commands.is_owner()
-    async def git(self, ctx):
-        ctx.git_cmd = ['git']
-
-    @git.command()
-    async def pull(self, ctx):
-        ctx.git_cmd.append('pull')
-        p = Popen(ctx.git_cmd, stdout=PIPE)
-        await ctx.send(p.stdout.read().decode("utf-8"))
-
     @commands.command(hidden=True)
     @commands.is_owner()
     async def stats(self, ctx):
-        """Shows stats about the bot"""
         guild_count = len(self.bot.guilds)
         member_count = sum([guild.member_count for guild in self.bot.guilds])
 
@@ -60,33 +47,34 @@ class DevCog(commands.Cog):
         bot_process = psutil.Process()
         process_memory = bot_process.memory_info().vms
         cpu = bot_process.cpu_times()
-        cpu_time = cpu.system + cpu.user
-        cpu_time = str(datetime.timedelta(seconds=cpu_time))
+        cpu_time = str(datetime.timedelta(seconds=cpu.system + cpu.user))
 
-        data_sizes = {
-            'B': 1,
-            'KB': 1024,
-            'MB': 1048576,
-            'GB': 1073741824
-        }
-        for size, value in data_sizes.items():
-            if (process_memory / value) > 1 < 1024:
-                process_memory_str = "{} {}".format(
-                    round(process_memory / value, 2), size)
-            if (available_memory / value) > 1 < 1024:
-                available_memory_str = "{} {}".format(
-                    round(available_memory / value, 2), size)
+        def fmt_bytes(b):
+            for unit in ('B', 'KB', 'MB', 'GB'):
+                if b < 1024:
+                    return f'{b:.1f} {unit}'
+                b /= 1024
+            return f'{b:.1f} GB'
 
-        title = "Bot stats"
+        raid_count = count(self.conn, 'Raids', 'raid_id')
+        player_count = count(self.conn, 'Players', 'player_id')
+        slash_total = sum(
+            (r[0] or 0)
+            for r in select(self.conn, 'Settings', ['slash_count'])
+        )
+
         about = [
-            _("Resource usage:"),
-            _("**CPU time:** {0}").format(cpu_time),
-            _("**Memory:** {0}/{1}\n").format(process_memory_str, available_memory_str),
-            _("**Servers:** {0}").format(guild_count),
-            _("**Members:** {0}").format(member_count)
+            "**Resource usage:**",
+            f"**CPU time:** {cpu_time}",
+            f"**Memory:** {fmt_bytes(process_memory)} used / {fmt_bytes(available_memory)} free\n",
+            f"**Servers:** {guild_count}",
+            f"**Members:** {member_count}\n",
+            f"**Active raids:** {raid_count}",
+            f"**Players signed up:** {player_count}",
+            f"**Slash commands used:** {slash_total}",
         ]
-        content = "\n".join(about)
-        embed = discord.Embed(title=title, colour=discord.Colour(0x3498db), description=content)
+        embed = discord.Embed(title="Bot stats", colour=discord.Colour(0x3498db),
+                              description="\n".join(about))
         await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
@@ -102,14 +90,10 @@ class DevCog(commands.Cog):
     async def cleanup(self, ctx):
         res = select(self.conn, 'Settings', ['guild_id', 'last_command'])
         current_time = datetime.datetime.now().timestamp()
-        cutoff = 3600 * 24 * 90
-        cutoff_time = current_time - cutoff
-        active = 0
-        inactive = 0
-        deleted = 0
+        cutoff_time = current_time - 3600 * 24 * 90
+        active = inactive = deleted = 0
         for row in res:
-            guild_id = row[0]
-            last_command = row[1]
+            guild_id, last_command = row
             guild = self.bot.get_guild(guild_id)
             if guild:
                 if last_command and last_command > cutoff_time:
@@ -118,18 +102,12 @@ class DevCog(commands.Cog):
                     inactive += 1
                     logger.info("Leaving guild {0}...".format(guild.name))
                     await guild.leave()
-                    ## Don't immediately delete settings in case they rejoin.
             else:
                 logger.info("We are no longer in {0}".format(guild_id))
                 delete(self.conn, 'Settings', ['guild_id'], [guild_id])
                 deleted += 1
         self.conn.commit()
-        logger.info("Active guild count: {0}".format(active))
-        logger.info("Inactive guild count: {0}".format(inactive))
-        logger.info("Deleted guild count: {0}".format(deleted))
-        await ctx.send("Active guild count: {0}".format(active))
-        await ctx.send("Inactive guild count: {0}".format(inactive))
-        await ctx.send("Deleted guild count: {0}".format(deleted))
+        await ctx.send(f"Active: {active}  Inactive: {inactive}  Deleted: {deleted}")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -137,6 +115,7 @@ class DevCog(commands.Cog):
         await self.bot.tree.sync()
         logger.info("Synced bot commands.")
         await ctx.send("Synced bot commands.")
+
 
 async def setup(bot):
     await bot.add_cog(DevCog(bot))
