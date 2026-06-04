@@ -42,7 +42,7 @@ jobs:
           cd repo
 
           # Read current version
-          CURRENT=$(grep -oP '(?<=__version__ = ")[^"]+' source/__init__.py)
+          CURRENT=$(sed -n 's/__version__ = "\(.*\)"/\1/p' source/__init__.py)
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
           # Find commits since last version bump (or last 50 if no bump commit found)
