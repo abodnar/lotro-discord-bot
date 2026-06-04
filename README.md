@@ -9,7 +9,11 @@ A Discord bot for scheduling raids in Lord of the Rings Online. Players sign up 
 - **Raid scheduling** — post a raid with `/rem`, `/ad`, `/palace`, etc. with tier, time, and optional aim
 - **Class sign-up** — click class buttons to sign up; the embed updates in real time
 - **Roster management** — raid leaders assign players to slots via the ⛏️ picker
-- **Spec & role per slot** — mark each slot with a spec (🔴🔵🟡 or combinations) and role (🛡️ Tank, 💚 Healer, ⚡ CC, ⚔️ DPS)
+- **Spec & role per slot** — mark each slot with a spec and role (🛡️ Tank, 💚 Healer, ⚡ CC, ⚔️ DPS)
+
+  | Solid | Half | All three |
+  |:-----:|:----:|:---------:|
+  | <img src="assets/icons/spec_red.png" width="28"> <img src="assets/icons/spec_blue.png" width="28"> <img src="assets/icons/spec_yellow.png" width="28"> | <img src="assets/icons/spec_rb.png" width="28"> <img src="assets/icons/spec_by.png" width="28"> <img src="assets/icons/spec_ry.png" width="28"> | <img src="assets/icons/spec_all.png" width="28"> |
 - **Per-instance lineups** — configure different slot compositions for different raids in `game_data.json`
 - **Application emoji** — class and spec icons work in any server without uploading custom emoji
 - **Calendar** — auto-updating channel overview and Discord guild event integration
