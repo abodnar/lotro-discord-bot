@@ -12,7 +12,7 @@ import re
 import time
 from typing import Optional
 
-from database import add_column_if_missing, create_table, count, delete, read_config_key, select, select_le, select_one, select_order, upsert
+from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, upsert
 from cogs.time_cog import Time
 from utils import get_match
 
@@ -155,7 +155,7 @@ class RaidCog(commands.Cog):
             await interaction.response.send_message(content, ephemeral=True)
             if new_raid:
                 if tier and int(tier[1]) > 2:
-                    roster = True
+                    roster = get_server_setting(self.conn, guild.id, 'show_lineup', True)
                 else:
                     roster = False
                 await self.post_raid(name, tier, aim, timestamp, roster, guild.id, channel, interaction.user.id, creep)
