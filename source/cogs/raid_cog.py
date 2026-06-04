@@ -461,13 +461,16 @@ class RaidCog(commands.Cog):
             embed_description += _("Aim: {0}").format(boss)
 
         embed = discord.Embed(title=embed_title, colour=discord.Colour(0x3498db), description=embed_description)
+        # Suppress lineup if tier is T1/T2, or server has lineup display off
+        if roster:
+            if tier and len(tier) >= 2 and tier[1:2].isdigit() and int(tier[1]) <= 2:
+                roster = False
+            else:
+                guild_id = select_one(self.conn, 'Raids', ['guild_id'], ['raid_id'], [raid_id])
+                if not get_server_setting(self.conn, guild_id, 'show_lineup', True):
+                    roster = False
         if roster:
             result = select(self.conn, 'Assignment', ['byname', 'class_name', 'role', 'spec'], ['raid_id'], [raid_id])
-            # Hide <Open> slots if the server has lineup display turned off
-            guild_id = select_one(self.conn, 'Raids', ['guild_id'], ['raid_id'], [raid_id])
-            if not get_server_setting(self.conn, guild_id, 'show_lineup', True):
-                open_label = _("<Open>")
-                result = [row for row in result if row[0] != open_label]
             number_of_slots = len(result)
             if number_of_slots == 0:
                 roster = False  # nothing to display
