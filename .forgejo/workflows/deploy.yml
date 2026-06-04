@@ -34,7 +34,7 @@ jobs:
 
       - name: Build image
         run: |
-          VERSION=$(date -u +%Y.%m.%d)
+          VERSION="$(date -u +%Y.%m.%d)-${GITHUB_SHA:0:7}"
           docker build --build-arg VERSION="${VERSION}" -t ${IMAGE_NAME}:latest repo
 
       - name: Redeploy container
