@@ -70,7 +70,7 @@ jobs:
     needs: [lint, deploy]
     if: failure()
     env:
-      FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+      FORGEJO_TOKEN: ${{ secrets.API_TOKEN }}
     steps:
       - name: Open failure issue
         run: |
