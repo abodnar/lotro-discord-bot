@@ -7,16 +7,23 @@ from discord import app_commands
 from discord.ext import commands
 from discord.utils import find
 
-from database import upsert
+from database import add_column_if_missing, get_server_setting, set_server_setting, upsert
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+@app_commands.guild_only()
+class LineupGroup(app_commands.Group):
+    def __init__(self):
+        super().__init__(name=_("lineup"), description=_("Control whether raid posts show slot lineup suggestions."))
 
 
 class ConfigCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.conn = self.bot.conn
+        add_column_if_missing(self.conn, 'Settings', 'settings_json', 'text')
 
     @staticmethod
     def td_format(td_object):
@@ -122,6 +129,28 @@ class ConfigCog(commands.Cog):
         if channel and channel.permissions_for(guild.me).send_messages:
             msg = self.welcome_msg(guild.name)
             await channel.send(msg)
+
+    lineup = LineupGroup()
+
+    @lineup.command(name=_("on"), description=_("Show class lineup slots on raid posts (default)."))
+    @app_commands.checks.has_permissions(administrator=True)
+    async def lineup_on(self, interaction: discord.Interaction):
+        set_server_setting(self.conn, interaction.guild_id, 'show_lineup', True)
+        self.conn.commit()
+        await interaction.response.send_message(_("Lineup display enabled for this server."), ephemeral=True)
+
+    @lineup.command(name=_("off"), description=_("Hide class lineup slots from raid posts."))
+    @app_commands.checks.has_permissions(administrator=True)
+    async def lineup_off(self, interaction: discord.Interaction):
+        set_server_setting(self.conn, interaction.guild_id, 'show_lineup', False)
+        self.conn.commit()
+        await interaction.response.send_message(_("Lineup display disabled for this server."), ephemeral=True)
+
+    @lineup_on.error
+    @lineup_off.error
+    async def lineup_error(self, interaction: discord.Interaction, error):
+        if isinstance(error, app_commands.MissingPermissions):
+            await interaction.response.send_message(_("You must be an admin to change this setting."), ephemeral=True)
 
     # Sections: maps section title → list of command names to include.
     # Names starting with * are shown as plain text (no slash command registered).

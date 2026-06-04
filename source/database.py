@@ -69,6 +69,28 @@ def add_column_if_missing(conn, table, column, column_type):
         pass  # Column already exists
 
 
+def get_server_setting(conn, guild_id, key, default=None):
+    """Read a value from the per-guild JSON settings blob."""
+    result = select_one(conn, 'Settings', ['settings_json'], ['guild_id'], [guild_id])
+    if result:
+        try:
+            return json.loads(result).get(key, default)
+        except (ValueError, TypeError):
+            pass
+    return default
+
+
+def set_server_setting(conn, guild_id, key, value):
+    """Write a value into the per-guild JSON settings blob."""
+    result = select_one(conn, 'Settings', ['settings_json'], ['guild_id'], [guild_id])
+    try:
+        settings = json.loads(result) if result else {}
+    except (ValueError, TypeError):
+        settings = {}
+    settings[key] = value
+    upsert(conn, 'Settings', ['settings_json'], [json.dumps(settings)], ['guild_id'], [guild_id])
+
+
 def table_sqls(table):
     sql_dict = {
             'raid': "create table if not exists Raids ("
@@ -122,15 +144,10 @@ def table_sqls(table):
                         "priority integer, "
                         "calendar text, "
                         "guild_events integer, "
-                        "twitter integer, "
                         "rss integer, "
                         "last_command integer, "
-                        "slash_count integer"
-                        ");",
-
-            'twitter':  "create table if not exists Twitter ("
-                        "user_id integer primary key,"
-                        "tweet_id integer"
+                        "slash_count integer, "
+                        "settings_json text"
                         ");",
 
             'rss':  "create table if not exists RSS ("
