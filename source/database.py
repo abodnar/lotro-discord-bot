@@ -17,7 +17,7 @@ def read_config_key(config, key, required):
                 logger.critical(f"Please supply a config value for {key}.")
                 raise SystemExit
             else:
-                logger.warning(f"Please supply a config value for {key}.")
+                logger.debug(f"Optional config key {key} not set.")
                 value = None
     return value
 
