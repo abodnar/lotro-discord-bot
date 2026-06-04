@@ -1061,7 +1061,8 @@ class SpecSelect(discord.ui.Select):
                ['raid_id', 'slot_id'], [self.view.raid_id, self.view.slot])
         self.view.conn.commit()
         label = next((l for v, l in self._SPECS if v == self.values[0]), self.values[0])
-        msg = _("Set slot {0} spec to {1}.").format(self.view.slot + 1, label)
+        emoji = self.view.raid_cog.emojis_dict.get(self.values[0], "")
+        msg = _("Set slot {0} spec to {1}.").format(self.view.slot + 1, f"{emoji} {label}".strip())
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
         await self.view.raid_cog.update_raid_post(self.view.raid_id, interaction.channel)
 
