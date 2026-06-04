@@ -28,8 +28,6 @@ jobs:
     runs-on: self-hosted
     needs: lint
     timeout-minutes: 5
-    env:
-      API_TOKEN: ${{ secrets.API_TOKEN }}
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
@@ -38,6 +36,8 @@ jobs:
 
       - name: Bump version
         id: bump
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd repo
 
@@ -75,7 +75,7 @@ jobs:
           git config user.name "Forgejo CI"
           git add source/__init__.py
           git commit -m "chore: bump version to ${NEW} [skip ci]"
-          git push http://${GITHUB_ACTOR}:${API_TOKEN}@192.168.86.46:3000/${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
+          git push http://x-token-auth:${GITHUB_TOKEN}@192.168.86.46:3000/${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
 
           echo "version=${NEW}" >> ${GITHUB_OUTPUT}
 
