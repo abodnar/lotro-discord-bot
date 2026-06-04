@@ -10,7 +10,8 @@
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create a new application
 2. Under **Bot**, click **Reset Token** and copy it — this is your `BOT_TOKEN`
 3. Under **Privileged Gateway Intents**, enable **Message Content Intent**
-4. Under **OAuth2 → URL Generator**, select scopes `bot` and `applications.commands`, permissions **Manage Roles**, **Send Messages**, **Embed Links**, **Manage Events**
+4. Under **OAuth2 → URL Generator**, select scopes `bot` and `applications.commands`, permissions: **Manage Roles**, **Send Messages**, **Embed Links**, **Manage Events**
+   - Or use this permission integer: `8858388480`
 5. Open the generated URL to invite the bot to your server
 
 ## 2. Configure
