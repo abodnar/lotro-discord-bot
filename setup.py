@@ -12,8 +12,8 @@ with open('source/__init__.py') as f:
     author  = re.search(r'^__author__\s*=\s*[\'"]([^\'"]*)[\'"]',  src, re.MULTILINE).group(1)
     repo    = re.search(r'^__repo__\s*=\s*[\'"]([^\'"]*)[\'"]',    src, re.MULTILINE).group(1)
 
-if not version:
-    raise RuntimeError("Version is not set.")
+if not version or version == "dev":
+    version = "0.0.0"
 
 readme = ""
 with open('README.md') as f:
