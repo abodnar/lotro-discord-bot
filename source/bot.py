@@ -42,7 +42,10 @@ class Bot(commands.Bot):
             with open('config.json', 'r') as f:
                 config = json.load(f)
         except FileNotFoundError:
-            logger.info("No config.json found, using environment variables.")
+            if os.environ.get('BOT_TOKEN'):
+                logger.info("No config.json found, using environment variables.")
+            else:
+                logger.warning("No config.json found and BOT_TOKEN env var is not set.")
             config = {}
 
         try:
