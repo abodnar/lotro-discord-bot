@@ -1,12 +1,16 @@
 .git
 .gitignore
 .dockerignore
+.forgejo
 .idea
 .DS_Store
 assets
+docs
 CLAUDE.md
 LICENSE.md
 README.md
 setup.py
 source/raid_db
+source/config.json
+source/config.example.json
 source/locale/*.po~
