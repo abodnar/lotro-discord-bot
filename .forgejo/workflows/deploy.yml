@@ -75,7 +75,7 @@ jobs:
           git config user.name "Forgejo CI"
           git add source/__init__.py
           git commit -m "chore: bump version to ${NEW} [skip ci]"
-          git push http://ci:${API_TOKEN}@192.168.86.46:3000/${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
+          git push http://${GITHUB_ACTOR}:${API_TOKEN}@192.168.86.46:3000/${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
 
           echo "version=${NEW}" >> ${GITHUB_OUTPUT}
 
