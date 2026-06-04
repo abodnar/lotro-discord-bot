@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 from typing import Optional
 
-from raid_cog import Classes
+from cogs.raid_cog import Classes
 from utils import get_partial_matches
 
 logger = logging.getLogger(__name__)

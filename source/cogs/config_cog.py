@@ -1,6 +1,7 @@
 import datetime
 import discord
 import logging
+import __init__ as _meta
 
 from discord import app_commands
 from discord.ext import commands
@@ -38,9 +39,12 @@ class ConfigCog(commands.Cog):
 
         return ", ".join(strings)
 
+    _DEV = _meta.__author__
+    _REPO = _meta.__repo__
+
     async def about_embed(self):
-        dev = "Baviaan#4862"
-        repo = "https://github.com/Baviaan/lotro"
+        dev = self._DEV
+        repo = self._REPO
         code = "dGcBzPN"
         server = "https://discord.gg/"+code
         app_info = await self.bot.application_info()
@@ -53,7 +57,6 @@ class ConfigCog(commands.Cog):
 
         invite_link = "https://discord.com/api/oauth2/authorize?client_id={0}&permissions=268462080&scope=bot" \
                       "%20applications.commands".format(self.bot.user.id)
-        #donate_link = "https://www.paypal.com/donate?hosted_button_id=WWPCUJVJPMT7W"
         releases = repo + "/releases/latest"
         async with  self.bot.http_session.get(releases, allow_redirects=False) as r:
             if r.ok:
@@ -73,7 +76,6 @@ class ConfigCog(commands.Cog):
             _("**[Source code]({0})**").format(repo),
             _("**[Support server]({0})**").format(server),
             _("**[Invite me!]({0})**").format(invite_link),
-            #_("**[Donate]({0})**").format(donate_link),
             "",
             _("**Hosted by:** {0}").format(host),
             _("**Uptime:** {0}.").format(uptime),
@@ -120,6 +122,67 @@ class ConfigCog(commands.Cog):
             msg = self.welcome_msg(guild.name)
             await channel.send(msg)
 
+    # Sections: maps section title → list of command names to include.
+    # Names starting with * are shown as plain text (no slash command registered).
+    _HELP_SECTIONS = [
+        ("📅 Scheduling", [
+            "*[raid name]",   # dynamic raid commands like /rem, /ad, /palace
+            "custom", "creep",
+        ]),
+        ("✅ Sign-up", [
+            "*class buttons",  # not a slash command
+            "remove_roles", "specs",
+        ]),
+        ("📆 Calendar", [
+            "calendar", "list_raids", "list_players",
+        ]),
+        ("ℹ️ Info", [
+            "about", "events", "server_time", "loot",
+        ]),
+        ("⚙️ Server settings", [
+            "leader", "kin", "time_zones", "rss",
+        ]),
+        ("👤 Personal settings", [
+            "privacy",
+        ]),
+    ]
+
+    # Descriptions for entries that aren't real slash commands
+    _EXTRA_DESCRIPTIONS = {
+        "*[raid name]": _("Schedule a specific raid — e.g. `/rem t3 friday 8pm`"),
+        "*class buttons": _("Click a class icon on the raid post to sign up"),
+    }
+
+    async def _build_help_embed(self, guild: discord.Guild) -> discord.Embed:
+        synced = await self.bot.tree.fetch_commands(guild=guild)
+        cmd_map = {cmd.name: cmd for cmd in synced}
+
+        embed = discord.Embed(title=_("LotRO Raid Bot — Commands"),
+                              colour=discord.Colour(0x3498db))
+        for section, names in self._HELP_SECTIONS:
+            lines = []
+            for name in names:
+                if name.startswith("*"):
+                    lines.append(self._EXTRA_DESCRIPTIONS[name])
+                elif name in cmd_map:
+                    cmd = cmd_map[name]
+                    lines.append(f"</{cmd.name}:{cmd.id}> — {cmd.description}")
+            if lines:
+                embed.add_field(name=section, value="\n".join(lines), inline=False)
+        return embed
+
+    @app_commands.command(name=_("raid_commands"), description=_("Show all available raid bot commands."))
+    @app_commands.guild_only()
+    async def raid_commands_respond(self, interaction: discord.Interaction):
+        embed = await self._build_help_embed(interaction.guild)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(name=_("raid_help"), description=_("Show all available raid bot commands."))
+    @app_commands.guild_only()
+    async def raid_help_respond(self, interaction: discord.Interaction):
+        embed = await self._build_help_embed(interaction.guild)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
     @app_commands.command(name=_("about"), description=_("Show information about this bot."))
     @app_commands.guild_only()
     async def about_respond(self, interaction: discord.Interaction):
@@ -143,7 +206,7 @@ class ConfigCog(commands.Cog):
                     "along with your discord id such that it can parse times provided in your commands in your "
                     "preferred time zone.\n"
                     "**Please find the full privacy policy here:**\n"
-                    "https://github.com/Baviaan/lotro#privacy-policy")
+                    f"{self._REPO}#privacy-policy")
         await interaction.response.send_message(privacy)
 
 

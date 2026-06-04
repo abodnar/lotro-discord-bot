@@ -9,14 +9,20 @@ import locale
 import logging
 import os
 import re
+import time
 
 from database import create_connection, create_table, increment, read_config_key, select, upsert
+from emoji_manager import ensure_emojis
+
+
+_ERROR_COOLDOWN = 300  # seconds between owner DMs for the same error type
 
 
 class Bot(commands.Bot):
 
     def __init__(self):
         self.launch_time = datetime.utcnow()
+        self._error_last_notified: dict[str, float] = {}
 
         version = ""
         with open('__init__.py') as f:
@@ -24,8 +30,7 @@ class Bot(commands.Bot):
             version = re.search(regex, f.read(), re.MULTILINE).group(1)
         self.version = version
 
-        logfile = 'raid_bot.log'
-        logging.basicConfig(filename=logfile, level=logging.WARNING, format='%(asctime)s %(levelname)s: %(message)s',
+        logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
@@ -37,24 +42,36 @@ class Bot(commands.Bot):
             with open('config.json', 'r') as f:
                 config = json.load(f)
         except FileNotFoundError:
-            logger.warning(f"No config file found. Please create the file 'config.json', see GitHub for an example.")
+            logger.warning("No config.json found. Please create it with BOT_TOKEN and SERVER_TZ.")
+            config = {}
+
+        try:
+            with open('data/game_data.json', 'r') as f:
+                game_data = json.load(f)
+        except FileNotFoundError:
+            logger.warning("No data/game_data.json found. Using config.json for game data (legacy).")
+            game_data = config  # fall back to reading everything from config.json
 
         self.token = read_config_key(config, 'BOT_TOKEN', True)
         self.server_tz = read_config_key(config, 'SERVER_TZ', True)
-        role_names = read_config_key(config, 'CLASSES', True)
+        role_names = read_config_key(game_data, 'CLASSES', True)
         self.role_names = tuple(role_names)
-        self.creep_names = read_config_key(config, 'CREEPS', False)
-        # Line up
-        lineup = read_config_key(config, 'LINEUP', True)
-        default_lineup = []
-        for string in lineup:
-            bitmask = [int(char) for char in string]
-            default_lineup.append(bitmask)
-        slots_class_names = []
-        for bitmask in default_lineup:
-            class_names = list(compress(role_names, bitmask))
-            slots_class_names.append(class_names)
-        self.slots_class_names = slots_class_names
+        self.creep_names = read_config_key(game_data, 'CREEPS', False)
+        # Lineups — prefer human-readable LINEUPS dict, fall back to bitmask LINEUP
+        lineups_config = read_config_key(game_data, 'LINEUPS', False)
+        if lineups_config:
+            self.lineups = {key: slots for key, slots in lineups_config.items()}
+        else:
+            lineup = read_config_key(game_data, 'LINEUP', True)
+            default_lineup = []
+            for string in lineup:
+                bitmask = [int(char) for char in string]
+                default_lineup.append(bitmask)
+            slots_class_names = []
+            for bitmask in default_lineup:
+                slots_class_names.append(list(compress(role_names, bitmask)))
+            self.lineups = {'default': slots_class_names}
+        self.slots_class_names = self.lineups.get('default', [])
 
         # Get id for discord server hosting custom emoji.
         host_id = read_config_key(config, 'HOST', False)
@@ -62,10 +79,6 @@ class Bot(commands.Bot):
             self.host_id = int(host_id)
         else:
             self.host_id = None
-
-        # Check for twitter auth
-        self.twitter_token = read_config_key(config, 'TWITTER_TOKEN', False)
-        self.twitter_id = read_config_key(config, 'TWITTER_ID', False)
 
         language = read_config_key(config, 'LANGUAGE', False)
         if language == 'fr':
@@ -89,6 +102,7 @@ class Bot(commands.Bot):
         intents.guilds = True
         intents.emojis = True
         intents.dm_messages = True
+        intents.message_content = True
 
         super().__init__(command_prefix=self.prefix_manager, case_insensitive=True, intents=intents,
                          activity=discord.Game(name=self.version))
@@ -121,28 +135,35 @@ class Bot(commands.Bot):
             pass
         self.http_session = aiohttp.ClientSession()
 
+        self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, 'emojis')
+        self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
+
         try:
-            await self.load_extension('config_cog')
-            await self.load_extension('dev_cog')
-            await self.load_extension('time_cog')
+            await self.load_extension('cogs.config_cog')
+            await self.load_extension('cogs.dev_cog')
+            await self.load_extension('cogs.time_cog')
             # Load after time cog
-            await self.load_extension('calendar_cog')
+            await self.load_extension('cogs.calendar_cog')
             # Load after calendar_cog
-            await self.load_extension('raid_cog')
-            # Load twitter cog
-            #if self.twitter_token:
-            #    await self.load_extension('twitter_cog')
-            #else:
-            #    self.logger.info("No twitter credentials found. Twitter cog will not be loaded.")
+            await self.load_extension('cogs.raid_cog')
             # Load rss cog
-            await self.load_extension('rss_cog')
-            # Load treasure cog
+            await self.load_extension('cogs.rss_cog')
+            # Load treasure cog (requires LotRO data submodule checked out)
             if os.path.exists('../data/lore/containers.xml'):
-                await self.load_extension('treasure_cog')
+                await self.load_extension('cogs.treasure_cog')
             # Load custom cog
-            await self.load_extension('custom_cog')
+            await self.load_extension('cogs.custom_cog')
         except commands.ExtensionAlreadyLoaded:
             pass
+        else:
+            # Guild sync first (instant) while global tree is still populated
+            for guild in self.guilds:
+                self.tree.copy_global_to(guild=guild)
+                await self.tree.sync(guild=guild)
+            # Then clear global commands from Discord to prevent duplicates
+            self.tree.clear_commands(guild=None)
+            await self.tree.sync()
+            self.logger.info("Synced slash commands.")
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
@@ -155,6 +176,31 @@ class Bot(commands.Bot):
                 await ctx.send(error, delete_after=10)
             except discord.Forbidden:
                 self.logger.warning("Missing Send messages permission for channel {0}".format(ctx.channel.id))
+
+    async def on_app_command_error(self, interaction, error):
+        self.logger.error(f"App command error in /{interaction.command}: {error}", exc_info=error)
+        try:
+            await interaction.response.send_message(str(error), ephemeral=True)
+        except Exception:
+            pass
+        await self._notify_owner_of_error(f"/{interaction.command}", error)
+
+    async def _notify_owner_of_error(self, context: str, error: Exception):
+        key = f"{context}:{type(error).__name__}"
+        now = time.time()
+        if now - self._error_last_notified.get(key, 0) < _ERROR_COOLDOWN:
+            return
+        self._error_last_notified[key] = now
+        try:
+            owner = (await self.application_info()).owner
+            if owner is None:
+                self.logger.warning("Could not notify owner: application_info().owner is None (team app?)")
+                return
+            await owner.send(
+                f"⚠️ **Error in `{context}`** (`{type(error).__name__}`)\n```{error}```"
+            )
+        except Exception as e:
+            self.logger.warning(f"Failed to DM owner about error: {e}")
 
     async def on_app_command_completion(self, interaction, command):
         timestamp = int(datetime.now().timestamp())

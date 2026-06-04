@@ -22,14 +22,18 @@ def read_config_key(config, key, required):
     return value
 
 try:
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-except (FileNotFoundError):
-    logger.warning(f"No config file found. Please create the file 'config.json', see GitHub for an example.")
+    with open('data/game_data.json', 'r') as f:
+        _db_game_data = json.load(f)
+except FileNotFoundError:
+    try:
+        with open('config.json', 'r') as f:
+            _db_game_data = json.load(f)
+    except FileNotFoundError:
+        _db_game_data = {}
+        logger.warning("Neither game_data.json nor config.json found.")
 
-
-classes = read_config_key(config, 'CLASSES', True)
-creeps = read_config_key(config, 'CREEPS', False)
+classes = read_config_key(_db_game_data, 'CLASSES', True)
+creeps = read_config_key(_db_game_data, 'CREEPS', False)
 
 specs_str = " integer, ".join(classes) + " integer"
 if creeps:
@@ -55,6 +59,14 @@ def create_table(conn, table):
         c.execute(sql)
     except sqlite3.Error as e:
         logger.exception(e)
+
+
+def add_column_if_missing(conn, table, column, column_type):
+    try:
+        c = conn.cursor()
+        c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type};")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
 
 
 def table_sqls(table):
@@ -91,6 +103,9 @@ def table_sqls(table):
                       "player_id integer, "
                       "byname text, "
                       "class_name text, "
+                      "original_class_name text, "
+                      "role text, "
+                      "spec text, "
                       "primary key (raid_id, slot_id), "
                       "foreign key (raid_id) references Raids(raid_id)"
                       ");",

@@ -3,6 +3,10 @@ import datetime
 import discord
 import logging
 import pytz
+import re
+
+# Match bare HHMM military time (e.g. 2100, 0900) but not date parts like 2026 in 2026-06-05
+_HHMM_RE = re.compile(r'(?<!\d)([01]\d|2[0-3])([0-5]\d)(?!\d)(?![-/])')
 
 from discord import app_commands
 from discord.ext import commands
@@ -14,10 +18,10 @@ from utils import get_partial_matches
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-with open('common_timezones.txt', 'r') as f:
+with open('data/common_timezones.txt', 'r') as f:
     common_timezones = f.read().splitlines()
 
-with open('timezones.txt', 'r') as f:
+with open('data/timezones.txt', 'r') as f:
     timezones = f.read().splitlines()
 
 async def time_zone_autocomplete(interaction: discord.Interaction, current: str):
@@ -46,6 +50,7 @@ class Time(commands.Converter):
     def converter(bot, guild_id, author_id, argument):
         time_cog = bot.get_cog('TimeCog')
         parse_settings = {'PREFER_DATES_FROM': 'future'}
+        argument = _HHMM_RE.sub(r'\1:\2', argument)
         argument_lower = argument.lower()
         server = _("server")
         if server in argument_lower:
