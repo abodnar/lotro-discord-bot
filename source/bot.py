@@ -60,27 +60,27 @@ class Bot(commands.Bot):
         role_names = read_config_key(game_data, 'CLASSES', True)
         self.role_names = tuple(role_names)
         self.creep_names = read_config_key(game_data, 'CREEPS', False)
-        # Lineups — prefer human-readable LINEUPS dict, fall back to bitmask LINEUP
-        lineups_config = read_config_key(game_data, 'LINEUPS', False)
-        if lineups_config:
-            self.lineups = {key: slots for key, slots in lineups_config.items()}
-        else:
-            lineup = read_config_key(game_data, 'LINEUP', True)
+
+        # Raids config — all raid definitions live here
+        self.raids_config = read_config_key(game_data, 'RAIDS', False) or {}
+
+        # Default lineup — fallback for raids without a specific lineup
+        default_lineup = read_config_key(game_data, 'DEFAULT_LINEUP', False)
+        if not default_lineup:
+            # Legacy: bitmask LINEUP string
+            lineup_bitmasks = read_config_key(game_data, 'LINEUP', False) or []
             default_lineup = []
-            for string in lineup:
-                bitmask = [int(char) for char in string]
-                default_lineup.append(bitmask)
-            slots_class_names = []
-            for bitmask in default_lineup:
-                slots_class_names.append(list(compress(role_names, bitmask)))
-            self.lineups = {'default': slots_class_names}
-        self.slots_class_names = self.lineups.get('default', [])
+            for string in lineup_bitmasks:
+                bitmask = [int(c) for c in string]
+                default_lineup.append(list(compress(role_names, bitmask)))
+        self.default_lineup = default_lineup
+        self.slots_class_names = default_lineup  # kept for legacy references
 
         # Guild to use as emoji fallback (only needed if application emojis unavailable).
         host_id = read_config_key(config, 'HOST', False)
         self.host_id = int(host_id) if host_id else None
 
-        language = read_config_key(config, 'LANGUAGE', False)
+        language = read_config_key(config, 'LANGUAGE', False) or 'en'
         if language == 'fr':
             locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
         localization = gettext.translation('messages', localedir='locale', languages=[language], fallback=True)

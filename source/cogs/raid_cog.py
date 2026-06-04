@@ -1,5 +1,4 @@
 import asyncio
-import csv
 import datetime
 import discord
 from discord import app_commands
@@ -71,15 +70,6 @@ _SPEC_CHOICES = [
 
 class RaidCog(commands.Cog):
 
-    # Load raid (nick)names and size
-    raid_lookup = dict()
-    raid_size = dict()
-    with open('data/list-of-raids.csv', 'r') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            raid_lookup[row[0]] = row[1]
-            raid_size[row[1]] = int(row[2])
-
     def __init__(self, bot):
         self.bot = bot
         self.conn = bot.conn
@@ -88,6 +78,11 @@ class RaidCog(commands.Cog):
         self.slots_class_names = bot.slots_class_names
         self.time_cog = bot.get_cog('TimeCog')
         self.calendar_cog = bot.get_cog('CalendarCog')
+
+        # Build lookups from raids_config
+        raids_cfg = bot.raids_config
+        self.raid_lookup = {key: cfg['name'] for key, cfg in raids_cfg.items()}
+        self.raid_size   = {cfg['name']: cfg['size'] for cfg in raids_cfg.values()}
 
         create_table(self.conn, 'raid')
         create_table(self.conn, 'player')
@@ -381,13 +376,10 @@ class RaidCog(commands.Cog):
             upsert(self.conn, 'Raids', ['event_id'], [event_id], ['raid_id'], [raid_id])
 
     def get_lineup(self, raid_key, raid_size):
-        lineups = self.bot.lineups
-        if raid_key in lineups:
-            return lineups[raid_key]
-        size_key = str(raid_size)
-        if size_key in lineups:
-            return lineups[size_key]
-        return lineups.get('default', self.slots_class_names)
+        raid_cfg = self.bot.raids_config.get(raid_key, {})
+        if 'lineup' in raid_cfg:
+            return raid_cfg['lineup']
+        return self.bot.default_lineup or self.slots_class_names
 
     def roster_init(self, raid_id, raid_size, raid_key='default'):
         available = _("<Open>")
