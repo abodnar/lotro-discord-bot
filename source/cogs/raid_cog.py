@@ -155,7 +155,7 @@ class RaidCog(commands.Cog):
             await interaction.response.send_message(content, ephemeral=True)
             if new_raid:
                 if tier and int(tier[1]) > 2:
-                    roster = get_server_setting(self.conn, guild.id, 'show_lineup', True)
+                    roster = True
                 else:
                     roster = False
                 await self.post_raid(name, tier, aim, timestamp, roster, guild.id, channel, interaction.user.id, creep)
@@ -463,7 +463,14 @@ class RaidCog(commands.Cog):
         embed = discord.Embed(title=embed_title, colour=discord.Colour(0x3498db), description=embed_description)
         if roster:
             result = select(self.conn, 'Assignment', ['byname', 'class_name', 'role', 'spec'], ['raid_id'], [raid_id])
+            # Hide <Open> slots if the server has lineup display turned off
+            guild_id = select_one(self.conn, 'Raids', ['guild_id'], ['raid_id'], [raid_id])
+            if not get_server_setting(self.conn, guild_id, 'show_lineup', True):
+                open_label = _("<Open>")
+                result = [row for row in result if row[0] != open_label]
             number_of_slots = len(result)
+            if number_of_slots == 0:
+                roster = False  # nothing to display
             # Add first half
             embed_name = _("Selected line up:")
             embed_text = ""
