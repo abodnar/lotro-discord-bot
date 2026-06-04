@@ -968,6 +968,9 @@ class ClassSelect(discord.ui.Select):
             await interaction.response.send_message(msg, ephemeral=True)
             return
 
+        # Remember the resolved slot so spec/role dropdowns use the same one
+        self.view.slot = slot_id
+
         player_id = select_one(self.view.conn, 'Assignment', ['player_id'], ['slot_id', 'raid_id'], [slot_id, raid_id])
         if player_id:
             old_member = await interaction.guild.fetch_member(player_id)
