@@ -59,42 +59,47 @@ Creep class names for Ettenmoors events (`/creep`).
            "Stalker", "Warleader", "Weaver"]
 ```
 
-### LINEUPS
+### DEFAULT_LINEUP
 
-Defines which classes are eligible for each roster slot, keyed by raid short name (the slash command name), raid size as a string, or `"default"`.
+The fallback slot configuration used for any raid without its own `lineup`. Each entry is the list of classes eligible for that slot.
 
 ```json
-"LINEUPS": {
-  "default": [
-    ["Minstrel", "Runekeeper"],
-    ["Beorning", "Captain", "Minstrel", "Runekeeper"],
-    ["Loremaster"],
-    ["Burglar"],
-    ["Brawler", "Captain", "Guardian"],
-    ["Beorning", "Brawler", "Captain", "Guardian", "Warden"],
-    ...
-  ],
-  "palace": [
-    ["Minstrel", "Runekeeper"],
-    ["Beorning", "Captain", "Minstrel", "Runekeeper"],
-    ["Loremaster"],
-    ["Burglar"],
-    ["Brawler", "Captain", "Guardian"],
-    ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
-  ]
+"DEFAULT_LINEUP": [
+  ["Minstrel", "Runekeeper"],
+  ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+  ["Loremaster"],
+  ...
+]
+```
+
+### RAIDS
+
+All raid definitions in one place. Each key is the slash command name; `name` and `size` are required, `lineup` is optional and falls back to `DEFAULT_LINEUP` when absent.
+
+```json
+"RAIDS": {
+  "rem":    { "name": "Remmorchant, the Net of Darkness", "size": 12 },
+  "palace": {
+    "name": "Ekal-nêbi, the Fallen Palace",
+    "size": 6,
+    "lineup": [
+      ["Minstrel", "Runekeeper"],
+      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+      ["Loremaster"],
+      ["Burglar"],
+      ["Brawler", "Captain", "Guardian"],
+      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
+    ]
+  }
 }
 ```
 
-**Lookup order:** raid short name → raid size (e.g. `"6"`) → `"default"`.
-
-Each sub-array is the list of classes that can fill that slot. The number of sub-arrays must be ≥ the raid's size in `list-of-raids.csv`; extra entries are ignored for smaller raids.
-
 ### Adding a new raid
 
-Add a row to `source/data/list-of-raids.csv`:
+Add an entry to `RAIDS` in `game_data.json`:
 
-```
-shortname,Full Raid Name,size
+```json
+"newraid": { "name": "Full Raid Name", "size": 12 }
 ```
 
-Then optionally add a lineup entry keyed by `shortname` in `game_data.json`.
+Include a `lineup` array to override `DEFAULT_LINEUP` for that raid.

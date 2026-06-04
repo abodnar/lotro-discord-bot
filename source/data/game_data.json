@@ -9,36 +9,73 @@
     "Blackarrow", "Defiler", "Reaver", "Sorceress",
     "Stalker", "Warleader", "Weaver"
   ],
-  "LINEUPS": {
-    "default": [
-      ["Minstrel", "Runekeeper"],
-      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
-      ["Loremaster"],
-      ["Burglar"],
-      ["Brawler", "Captain", "Guardian"],
-      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"],
-      ["Captain", "Loremaster", "Mariner"],
-      ["Hunter", "Minstrel", "Runekeeper"],
-      ["Beorning", "Champion", "Warden"],
-      ["Champion", "Hunter", "Minstrel", "Runekeeper", "Warden"],
-      ["Beorning", "Brawler", "Burglar", "Champion", "Mariner", "Warden"],
-      ["Beorning", "Brawler", "Burglar", "Champion", "Guardian", "Loremaster", "Minstrel", "Runekeeper", "Warden"]
-    ],
-    "palace": [
-      ["Minstrel", "Runekeeper"],
-      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
-      ["Loremaster"],
-      ["Burglar"],
-      ["Brawler", "Captain", "Guardian"],
-      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
-    ],
-    "wailing": [
-      ["Minstrel", "Runekeeper"],
-      ["Beorning", "Captain", "Minstrel", "Runekeeper"],
-      ["Loremaster"],
-      ["Burglar"],
-      ["Brawler", "Captain", "Guardian"],
-      ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
-    ]
+  "DEFAULT_LINEUP": [
+    ["Minstrel", "Runekeeper"],
+    ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+    ["Loremaster"],
+    ["Burglar"],
+    ["Brawler", "Captain", "Guardian"],
+    ["Beorning", "Brawler", "Captain", "Guardian", "Warden"],
+    ["Captain", "Loremaster", "Mariner"],
+    ["Hunter", "Minstrel", "Runekeeper"],
+    ["Beorning", "Champion", "Warden"],
+    ["Champion", "Hunter", "Minstrel", "Runekeeper", "Warden"],
+    ["Beorning", "Brawler", "Burglar", "Champion", "Mariner", "Warden"],
+    ["Beorning", "Brawler", "Burglar", "Champion", "Guardian", "Loremaster", "Minstrel", "Runekeeper", "Warden"]
+  ],
+  "RAIDS": {
+    "skraid":     { "name": "Skirmish Raid",                              "size": 12 },
+    "drake_wing": { "name": "Helegrod: Drake Wing",                       "size": 12 },
+    "spider_wing":{ "name": "Helegrod: Spider Wing",                      "size": 12 },
+    "giant_wing": { "name": "Helegrod: Giant Wing",                       "size": 12 },
+    "thorog":     { "name": "Helegrod: Dragon Wing",                      "size": 24 },
+    "rift":       { "name": "The Rift of Nûrz Ghâshu",                   "size": 12 },
+    "watcher":    { "name": "The Vile Maw",                               "size": 12 },
+    "turtle":     { "name": "Filikul",                                    "size": 12 },
+    "dn":         { "name": "Dâr Narbugud",                              "size": 12 },
+    "bg":         { "name": "Barad Guldur",                               "size": 12 },
+    "od":         { "name": "Ost Dunhoth",                                "size": 12 },
+    "draigoch":   { "name": "Draigoch's Lair",                            "size": 12 },
+    "too":        { "name": "Tower of Orthanc",                           "size": 12 },
+    "flight":     { "name": "Flight to the Lonely Mountain",              "size": 12 },
+    "smaug":      { "name": "The Fires of Smaug",                         "size": 12 },
+    "bfe":        { "name": "The Battle for Erebor",                      "size": 12 },
+    "dw":         { "name": "Deeping Wall",                               "size": 12 },
+    "throne":     { "name": "Throne of the Dread Terror",                 "size": 12 },
+    "abyss":      { "name": "The Abyss of Mordath",                       "size": 12 },
+    "anvil":      { "name": "The Anvil of Winterstith",                   "size": 12 },
+    "rem":        { "name": "Remmorchant, the Net of Darkness",           "size": 12 },
+    "ad":         { "name": "Amdân Dammul, the Bloody Threshold",        "size": 12 },
+    "fall":       { "name": "The Fall of Khazad-dûm",                    "size": 12 },
+    "hiddenhoard":{ "name": "The Hiddenhoard of Abnankâra",               "size": 12 },
+    "gwath":      { "name": "Gwathrenost, The Witch-king's Citadel",      "size": 12 },
+    "depths":     { "name": "Depths of Mâkhda Khorbo",                   "size": 12 },
+    "temple":     { "name": "Temple of Utug-bûr",                         "size": 12 },
+    "folly":      { "name": "The Folly of Nagakhêdi",                     "size": 12 },
+    "caves":      { "name": "The Treasure Caves of Hurum Kâna",           "size": 3  },
+    "palace": {
+      "name": "Ekal-nêbi, the Fallen Palace",
+      "size": 6,
+      "lineup": [
+        ["Minstrel", "Runekeeper"],
+        ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+        ["Loremaster"],
+        ["Burglar"],
+        ["Brawler", "Captain", "Guardian"],
+        ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
+      ]
+    },
+    "wailing": {
+      "name": "Kôth Rau, the Wailing Hold",
+      "size": 6,
+      "lineup": [
+        ["Minstrel", "Runekeeper"],
+        ["Beorning", "Captain", "Minstrel", "Runekeeper"],
+        ["Loremaster"],
+        ["Burglar"],
+        ["Brawler", "Captain", "Guardian"],
+        ["Beorning", "Brawler", "Captain", "Guardian", "Warden"]
+      ]
+    }
   }
 }
