@@ -178,6 +178,15 @@ class Bot(commands.Bot):
             except discord.Forbidden:
                 self.logger.warning("Missing Send messages permission for channel {0}".format(ctx.channel.id))
 
+    async def setup_hook(self):
+        @self.tree.error
+        async def on_tree_error(interaction, error):
+            if isinstance(error, discord.app_commands.CommandNotFound):
+                # Stale Discord cache — user needs to refresh their client
+                self.logger.debug(f"CommandNotFound: {error} (stale Discord cache)")
+                return
+            await self.on_app_command_error(interaction, error)
+
     async def on_app_command_error(self, interaction, error):
         self.logger.error(f"App command error in /{interaction.command}: {error}", exc_info=error)
         try:
