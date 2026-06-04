@@ -881,8 +881,8 @@ class SelectView(discord.ui.View):
         self.add_item(SlotSelect(raid_size))
         self.add_item(PlayerSelect(raid_cog.conn, raid_id))
         self.add_item(ClassSelect(raid_cog))
-        self.add_item(SpecSelect(raid_cog.emojis_dict))
-        self.add_item(RoleSelect())
+        self.add_item(SpecSelect(raid_cog.emojis_dict, disabled=True))
+        self.add_item(RoleSelect(disabled=True))
 
     async def on_timeout(self):
         self.conn.commit()
@@ -897,7 +897,11 @@ class SlotSelect(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         self.view.slot = int(self.values[0])
-        await interaction.response.defer()
+        slot_chosen = self.view.slot >= 0
+        for item in self.view.children:
+            if isinstance(item, (SpecSelect, RoleSelect)):
+                item.disabled = not slot_chosen
+        await interaction.response.edit_message(view=self.view)
 
 
 class PlayerSelect(discord.ui.Select):
@@ -1006,7 +1010,7 @@ class ClassSelect(discord.ui.Select):
 
 
 class RoleSelect(discord.ui.Select):
-    def __init__(self):
+    def __init__(self, disabled=False):
         options = [
             discord.SelectOption(label=_("None"), value="none"),
             discord.SelectOption(label=_("Tank"), value="tank", emoji="🛡️"),
@@ -1014,7 +1018,7 @@ class RoleSelect(discord.ui.Select):
             discord.SelectOption(label=_("CC"), value="cc", emoji="⚡"),
             discord.SelectOption(label=_("DPS"), value="dps", emoji="⚔️"),
         ]
-        super().__init__(placeholder=_("Role"), options=options)
+        super().__init__(placeholder=_("Role"), options=options, disabled=disabled)
 
     async def callback(self, interaction: discord.Interaction):
         if self.view.slot == -1:
@@ -1042,14 +1046,14 @@ class SpecSelect(discord.ui.Select):
         ("spec_all",    _("All three")),
     ]
 
-    def __init__(self, emojis_dict):
+    def __init__(self, emojis_dict, disabled=False):
         options = [discord.SelectOption(label=_("None"), value="none")]
         for value, label in self._SPECS:
             options.append(discord.SelectOption(
                 label=label, value=value,
                 emoji=emojis_dict.get(value),
             ))
-        super().__init__(placeholder=_("Spec"), options=options)
+        super().__init__(placeholder=_("Spec"), options=options, disabled=disabled)
 
     async def callback(self, interaction: discord.Interaction):
         if self.view.slot == -1:
