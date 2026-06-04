@@ -890,11 +890,9 @@ class SelectView(discord.ui.View):
 
 class SlotSelect(discord.ui.Select):
     def __init__(self, number_of_slots):
-        options = [
-                discord.SelectOption(label=_("Automatic"), value=-1)
-        ]
+        options = [discord.SelectOption(label=_("Automatic"), value="-1")]
         for i in range(number_of_slots):
-            options.append(discord.SelectOption(label=i+1, value=i))
+            options.append(discord.SelectOption(label=str(i + 1), value=str(i)))
         super().__init__(placeholder=_("Slot (automatic)"), options=options)
 
     async def callback(self, interaction: discord.Interaction):
