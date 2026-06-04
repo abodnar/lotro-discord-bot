@@ -41,7 +41,6 @@ jobs:
           SERVER_TZ: ${{ secrets.SERVER_TZ }}
         run: |
           mkdir -p /volume1/docker/${CONTAINER_NAME}
-          touch /volume1/docker/${CONTAINER_NAME}/raid_db
           docker stop ${CONTAINER_NAME} || true
           docker rm   ${CONTAINER_NAME} || true
           docker run -d \
@@ -50,7 +49,8 @@ jobs:
             -e BOT_TOKEN="${BOT_TOKEN}" \
             -e SERVER_TZ="${SERVER_TZ}" \
             -e LANGUAGE=en \
-            -v /volume1/docker/${CONTAINER_NAME}/raid_db:/usr/src/app/raid_db \
+            -e DB_PATH=/data/raid_db \
+            -v /volume1/docker/${CONTAINER_NAME}:/data \
             ${IMAGE_NAME}:latest
 
       - name: Verify container is running
