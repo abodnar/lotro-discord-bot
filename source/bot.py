@@ -90,7 +90,8 @@ class Bot(commands.Bot):
             logger.warning("Language file '{0}' not found. Defaulting to English.".format(language))
         localization.install()
 
-        conn = create_connection('raid_db')
+        db_path = os.environ.get('DB_PATH', 'raid_db')
+        conn = create_connection(db_path)
         if conn:
             self.logger.info("Bot connected to raid database.")
             create_table(conn, 'settings')
