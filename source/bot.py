@@ -182,8 +182,8 @@ class Bot(commands.Bot):
         @self.tree.error
         async def on_tree_error(interaction, error):
             if isinstance(error, discord.app_commands.CommandNotFound):
-                # Stale Discord cache — user needs to refresh their client
-                self.logger.debug(f"CommandNotFound: {error} (stale Discord cache)")
+                full = " ".join(error.parents + [error.name])
+                self.logger.info(f"CommandNotFound: /{full} — stale Discord cache for {interaction.user}")
                 return
             await self.on_app_command_error(interaction, error)
 
