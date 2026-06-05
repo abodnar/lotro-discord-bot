@@ -152,7 +152,11 @@ class RaidCog(commands.Cog):
                 else:
                     content = _("Posting a new raid!")
                     new_raid = True
-            await interaction.response.send_message(content, ephemeral=True)
+            try:
+                await interaction.response.send_message(content, ephemeral=True)
+            except discord.NotFound:
+                logger.warning("Interaction expired before raid command could respond.")
+                return
             if new_raid:
                 if tier and int(tier[1]) > 2:
                     roster = True
@@ -793,7 +797,10 @@ class RaidView(discord.ui.View):
                                     [i.user.id, raid_id])
             error_msg = _("Dearest raid leader, {0} has cancelled their availability. "
                           "Please note they were assigned to {1} in the raid.").format(i.user.mention, class_name)
-            await i.channel.send(error_msg)
+            try:
+                await i.channel.send(error_msg)
+            except discord.Forbidden:
+                logger.warning(f"Missing Send Messages permission to notify raid leader in channel {i.channel.id}")
             tag = select_one(self.conn, 'Raids', ['tag'], ['raid_id'], [raid_id])
             role = discord.utils.get(i.guild.roles, name=tag)
             if role:
