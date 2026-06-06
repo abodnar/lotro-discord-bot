@@ -194,6 +194,10 @@ class Bot(commands.Bot):
             await self.on_app_command_error(interaction, error)
 
     async def on_app_command_error(self, interaction, error):
+        original = getattr(error, 'original', error)
+        if isinstance(original, discord.NotFound) and original.code == 10062:
+            self.logger.warning(f"Interaction expired before /{interaction.command} could respond.")
+            return
         self.logger.error(f"App command error in /{interaction.command}: {error}", exc_info=error)
         try:
             await interaction.response.send_message(str(error), ephemeral=True)
