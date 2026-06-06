@@ -879,7 +879,10 @@ class EmojiButton(discord.ui.Button):
         super().__init__(emoji=emoji, custom_id=class_name, row=row)
 
     async def callback(self, interaction: discord.Interaction):
-        await self.view.sign_up_class(interaction, self.custom_id)
+        try:
+            await self.view.sign_up_class(interaction, self.custom_id)
+        except discord.NotFound:
+            logger.warning("Interaction expired before sign_up_class could respond.")
 
 
 class SelectView(discord.ui.View):
