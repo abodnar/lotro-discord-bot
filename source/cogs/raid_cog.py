@@ -1128,7 +1128,10 @@ class SpecButton(discord.ui.Button):
         self.view.conn.commit()
         msg = _("Updated your {0} specialization to {1}.").format(
             self.view.class_name, self.label)
-        await interaction.response.send_message(msg, ephemeral=True)
+        try:
+            await interaction.response.send_message(msg, ephemeral=True)
+        except discord.NotFound:
+            logger.warning("Interaction expired before spec button could respond.")
 
 
 class ConfigureModal(discord.ui.Modal):
