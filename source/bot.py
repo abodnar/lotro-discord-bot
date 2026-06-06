@@ -99,6 +99,9 @@ class Bot(commands.Bot):
             self.logger.error("main could not create database connection!")
         self.conn = conn
 
+        discord.VoiceClient.warn_nacl = False
+        discord.VoiceClient.warn_dave = False
+
         intents = discord.Intents.none()
         intents.guilds = True
         intents.emojis = True
