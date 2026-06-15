@@ -1,3 +1,4 @@
+import asyncio
 import dateparser
 import datetime
 import discord
@@ -44,7 +45,9 @@ class TimeGroup(app_commands.Group):
 
 class Time(commands.Converter):
     async def convert(self, ctx, argument):
-        return self.converter(ctx.bot, ctx.guild.id, ctx.author.id, argument)
+        # dateparser can take seconds to compile its locale regexes; keep it off the event loop
+        # so a slow call doesn't block the gateway heartbeat and trigger a reconnect.
+        return await asyncio.to_thread(self.converter, ctx.bot, ctx.guild.id, ctx.author.id, argument)
 
     @staticmethod
     def converter(bot, guild_id, author_id, argument):

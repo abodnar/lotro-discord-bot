@@ -1,3 +1,4 @@
+import asyncio
 import dateparser
 import discord
 import logging
@@ -183,7 +184,11 @@ class CalendarCog(commands.Cog):
         result = prog.search(stripped)
         events_data = result.group(2).strip().splitlines() + ['']
         events = [chunk for chunk in chunks(events_data, 5)]
-        parsed_events = [(event[0], self.parse_event_time(event[1]), self.parse_event_time(event[2])) for event in events]
+        # dateparser can take seconds to compile its locale regexes; keep it off the event loop
+        # so a slow call doesn't block the gateway heartbeat and trigger a reconnect.
+        parsed_events = await asyncio.to_thread(
+            lambda: [(event[0], self.parse_event_time(event[1]), self.parse_event_time(event[2])) for event in events]
+        )
 
         cutoff_unlock = current_time - 30 * 86400
         cutoff_past = current_time - 86400
