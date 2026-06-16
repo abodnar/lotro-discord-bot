@@ -1,5 +1,8 @@
 config.json
 raid_db
+raid_db-journal
+raid_db-wal
+raid_db-shm
 raid_bot.log
 __pycache__
 bot-env
