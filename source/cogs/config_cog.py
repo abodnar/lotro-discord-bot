@@ -85,8 +85,9 @@ class ConfigCog(commands.Cog):
             _("**Uptime:** {0}.").format(uptime),
             "",
             _("**Using version:** {0}").format(self.bot.version),
-            _("**Latest version:** {0}").format(latest_version)
         ]
+        if latest_version != "N/A":
+            about.append(_("**Latest version:** {0}").format(latest_version))
 
         content = "\n".join(about)
         embed = discord.Embed(title=title, colour=discord.Colour(0x3498db), description=content)

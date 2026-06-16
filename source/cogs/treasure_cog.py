@@ -16,12 +16,41 @@ logger.setLevel(logging.DEBUG)
 
 containerRoot = None
 containers = {}
+containers_unique = {}
 itemsTables = []
 filteredTrophyTables = []
 weightedTreasureTables = []
 trophyLists = []
 treasureLists = []
 footer_text = _("Lore data not loaded yet.")
+
+
+def _build_unique_containers(root, all_containers):
+    """Return a subset of all_containers with duplicate loot tables removed.
+
+    Two containers are considered duplicates if they share the same name and
+    the same set of loot table reference IDs, meaning they drop identical loot.
+    Only the first container ID encountered for each unique combination is kept.
+    """
+    seen = set()
+    result = {}
+    for child in root:
+        cid = child.attrib['id']
+        if cid not in all_containers:
+            continue
+        sig = (
+            child.attrib.get('name', ''),
+            child.attrib.get('filteredTrophyTableId', ''),
+            child.attrib.get('filteredTrophyTableId2', ''),
+            child.attrib.get('filteredTrophyTableId3', ''),
+            child.attrib.get('trophyListId', ''),
+            child.attrib.get('barterTrophyListId', ''),
+            child.attrib.get('treasureListId', ''),
+        )
+        if sig not in seen:
+            seen.add(sig)
+            result[cid] = all_containers[cid]
+    return result
 
 
 def load_lore_data():
@@ -32,7 +61,7 @@ def load_lore_data():
     False if the files are missing or invalid (existing data, if any, is
     left untouched).
     """
-    global containerRoot, containers, itemsTables, filteredTrophyTables
+    global containerRoot, containers, containers_unique, itemsTables, filteredTrophyTables
     global weightedTreasureTables, trophyLists, treasureLists, footer_text
 
     try:
@@ -58,6 +87,7 @@ def load_lore_data():
         new_footer_text = _("Powered by LotroCompanion.")
 
     containerRoot, containers = new_containerRoot, new_containers
+    containers_unique = _build_unique_containers(new_containerRoot, new_containers)
     itemsTables, filteredTrophyTables = new_itemsTables, new_filteredTrophyTables
     weightedTreasureTables, trophyLists, treasureLists = new_weightedTreasureTables, new_trophyLists, new_treasureLists
     footer_text = new_footer_text
@@ -252,6 +282,17 @@ def appendTreasureDrops(treasureListIDs, loot):
                 break
     return loot
 
+def _dedup_loot(loot):
+    seen = set()
+    result = []
+    for freq, items in loot:
+        key = (freq, tuple(items))
+        if key not in seen:
+            seen.add(key)
+            result.append([freq, items])
+    return result
+
+
 def generateLootEmbed(loot, container, level, classes):
     title = _("Drop table for {0}").format(container)
     desc = _("Level {0} {1}").format(level, classes)
@@ -280,9 +321,9 @@ def generateLootEmbed(loot, container, level, classes):
 async def container_autocomplete(interaction: discord.Interaction, current: str):
     if not current or containerRoot is None:
         return []
-    suggestions = get_partial_matches(current, containers, keys=True)
+    suggestions = get_partial_matches(current, containers_unique, keys=True)
     return [
-        app_commands.Choice(name=containers[containerID], value=containerID)
+        app_commands.Choice(name=containers_unique[containerID], value=containerID)
         for containerID in suggestions
     ]
 
@@ -333,6 +374,7 @@ class TreasureCog(commands.Cog):
             else:
                 loot.append((100, [_("{0} traceries (pass tracery=True to expand this list)").format(len(traceryID))]))
         loot = appendTreasureDrops(treasureListIDs, loot)
+        loot = _dedup_loot(loot)
         embed = generateLootEmbed(loot, containers[chest], level, _class)
         if len(embed) > 6000:
             # Check for send messages permission
