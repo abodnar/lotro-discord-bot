@@ -52,7 +52,7 @@ python3 ../../msgfmt.py messages.po
 4. `calendar_cog` — calendar channel management; must load before raid_cog
 5. `raid_cog` — core raid scheduling; loads raid commands dynamically from `list-of-raids.csv`
 6. `rss_cog` — LotRO RSS feed posting
-7. `treasure_cog` — loot lookup; only loads if `../data/lore/containers.xml` exists
+7. `treasure_cog` — loot lookup; always loads, graceful no-data state until !refreshlore is run
 8. `custom_cog` — empty stub for local customization without merge conflicts
 
 ### Data Flow
@@ -71,8 +71,8 @@ The `LINEUP` config controls which class slots appear in which positions for the
 ### Key Files
 
 - `source/list-of-raids.csv` — raid shortnames, full names, and sizes
-- `source/__init__.py` — bot version (`__version__`) and LotRO data version (`__lotro__`)
-- `data/lore/containers.xml`, `data/lore/loots.xml` — loot data for `/loot` command (not in repo by default)
+- `source/__init__.py` — bot version (`__version__`)
+- `data/lore/containers.xml`, `data/lore/loots.xml` — loot data for `/loot` command; auto-fetched from GitHub at startup if absent (see `source/lore_data.py`)
 - `source/locale/` — i18n files; `messages.po` is source, `messages.mo` is compiled binary
 
 ### Internationalization

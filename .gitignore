@@ -9,3 +9,4 @@ messages.mo
 .idea/
 push-github.sh
 *.log
+data/lore/
