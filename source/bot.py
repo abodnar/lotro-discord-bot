@@ -13,6 +13,7 @@ import time
 
 from database import create_connection, create_table, increment, read_config_key, select, upsert
 from emoji_manager import ensure_emojis
+import lore_data
 
 
 _ERROR_COOLDOWN = 300  # seconds between owner DMs for the same error type
@@ -139,6 +140,12 @@ class Bot(commands.Bot):
             pass
         self.http_session = aiohttp.ClientSession()
 
+        if not os.path.exists('../data/lore/containers.xml'):
+            try:
+                await lore_data.fetch_lore_data(self.http_session)
+            except Exception as e:
+                self.logger.warning(f"Initial lore data fetch failed: {e}")
+
         self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, 'emojis')
         self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
 
@@ -157,9 +164,8 @@ class Bot(commands.Bot):
             await self.load_extension('cogs.raid_cog')
             # Load rss cog
             await self.load_extension('cogs.rss_cog')
-            # Load treasure cog (requires LotRO data submodule checked out)
-            if os.path.exists('../data/lore/containers.xml'):
-                await self.load_extension('cogs.treasure_cog')
+            # Load treasure cog
+            await self.load_extension('cogs.treasure_cog')
             # Load custom cog
             await self.load_extension('cogs.custom_cog')
         except commands.ExtensionAlreadyLoaded:
