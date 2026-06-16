@@ -20,9 +20,9 @@ def fp_ratio(s1, s2, force_ascii=True, full_process=True):
         p1 = s1
         p2 = s2
 
-    if not utils.validate_string(p1):
+    if not p1:
         return 0
-    if not utils.validate_string(p2):
+    if not p2:
         return 0
 
     # should we look at partials?
@@ -38,9 +38,9 @@ def fp_ratio(s1, s2, force_ascii=True, full_process=True):
 
     if try_partial:
         partial = fuzz.partial_ratio(p1, p2) * partial_scale
-        return utils.intr(max(base, partial))
+        return int(round(max(base, partial)))
     else:
-        return utils.intr(base)
+        return int(round(base))
 
 
 def get_match(word: str, word_list: list, score_cutoff: int = 80):
