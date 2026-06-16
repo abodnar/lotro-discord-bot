@@ -361,10 +361,10 @@ class TreasureCog(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def refreshlore(self, ctx):
-        if not self._refresh_lock.acquire_nowait():
+        if self._refresh_lock.locked():
             await ctx.send(_("A lore data refresh is already in progress."))
             return
-        try:
+        async with self._refresh_lock:
             await ctx.send(_("Fetching latest lore data..."))
             try:
                 await lore_data.fetch_lore_data(self.bot.http_session)
@@ -377,8 +377,6 @@ class TreasureCog(commands.Cog):
                 await ctx.send(footer_text)
             else:
                 await ctx.send(_("Downloaded data failed to parse; keeping previous data."))
-        finally:
-            self._refresh_lock.release()
 
 async def setup(bot):
     await bot.add_cog(TreasureCog(bot))
