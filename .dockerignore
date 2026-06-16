@@ -8,9 +8,6 @@ assets/icons
 assets/screenshots
 docs
 CLAUDE.md
-pytest.ini
-requirements-dev.txt
-tests/
 .pytest_cache/
 LICENSE.md
 README.md
