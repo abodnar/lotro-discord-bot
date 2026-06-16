@@ -1,34 +1,71 @@
+import asyncio
 import discord
 import logging
-import re
 import xml.etree.ElementTree as ET
 
 from discord import app_commands
 from discord.ext import commands
 from typing import Optional
 
+import lore_data
 from cogs.raid_cog import Classes
 from utils import get_partial_matches
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-data_version = ""
-with open('__init__.py') as f:
-    regex = r'^__lotro__\s*=\s*[\'"]([^\'"]*)[\'"]'
-    data_version = re.search(regex, f.read(), re.MULTILINE).group(1)
+containerRoot = None
+containers = {}
+itemsTables = []
+filteredTrophyTables = []
+weightedTreasureTables = []
+trophyLists = []
+treasureLists = []
+footer_text = _("Lore data not loaded yet.")
 
-#Parse XML file
-tree = ET.parse('../data/lore/containers.xml')
-containerRoot = tree.getroot()
-containers = {child.attrib['id']: child.attrib['name'] for child in containerRoot}
-tree = ET.parse('../data/lore/loots.xml')
-root = tree.getroot()
-itemsTables = root.findall("itemsTable")
-filteredTrophyTables = root.findall("filteredTrophyTable")
-weightedTreasureTables = root.findall("weightedTreasureTable")
-trophyLists = root.findall("trophyList")
-treasureLists = root.findall("treasureList")
+
+def load_lore_data():
+    """Load and parse the lore XML files into module-level data structures.
+
+    Parses into local variables first; the module globals below are only
+    reassigned if both files parse successfully. Returns True on success,
+    False if the files are missing or invalid (existing data, if any, is
+    left untouched).
+    """
+    global containerRoot, containers, itemsTables, filteredTrophyTables
+    global weightedTreasureTables, trophyLists, treasureLists, footer_text
+
+    try:
+        tree = ET.parse('../data/lore/containers.xml')
+        new_containerRoot = tree.getroot()
+        new_containers = {child.attrib['id']: child.attrib['name'] for child in new_containerRoot}
+        tree = ET.parse('../data/lore/loots.xml')
+        root = tree.getroot()
+        new_itemsTables = root.findall("itemsTable")
+        new_filteredTrophyTables = root.findall("filteredTrophyTable")
+        new_weightedTreasureTables = root.findall("weightedTreasureTable")
+        new_trophyLists = root.findall("trophyList")
+        new_treasureLists = root.findall("treasureList")
+    except (FileNotFoundError, ET.ParseError):
+        return False
+
+    info = lore_data.load_version_info()
+    if 'version' in info:
+        new_footer_text = _("Powered by LotroCompanion. Data as of U{0}").format(info['version'])
+    elif 'fetched_date' in info:
+        new_footer_text = _("Powered by LotroCompanion. Data fetched {0}").format(info['fetched_date'])
+    else:
+        new_footer_text = _("Powered by LotroCompanion.")
+
+    containerRoot, containers = new_containerRoot, new_containers
+    itemsTables, filteredTrophyTables = new_itemsTables, new_filteredTrophyTables
+    weightedTreasureTables, trophyLists, treasureLists = new_weightedTreasureTables, new_trophyLists, new_treasureLists
+    footer_text = new_footer_text
+    return True
+
+
+if not load_lore_data():
+    logger.warning("Lore data files not found at import; /loot unavailable until !refreshlore is run.")
 
 traceryIDs = ['1879428517', '1879428521', '1879428563', '1879428567']
 
@@ -237,11 +274,11 @@ def generateLootEmbed(loot, container, level, classes):
             else:
                 field_name = "\u200b"
             embed.add_field(name=field_name, value=msg, inline=False)
-    embed.set_footer(text=_("Powered by LotroCompanion. Data as of U{0}").format(data_version))
+    embed.set_footer(text=footer_text)
     return embed
 
 async def container_autocomplete(interaction: discord.Interaction, current: str):
-    if not current:
+    if not current or containerRoot is None:
         return []
     suggestions = get_partial_matches(current, containers, keys=True)
     return [
@@ -263,12 +300,16 @@ def override_player_class(_class):
 class TreasureCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self._refresh_lock = asyncio.Lock()
 
     @app_commands.command(name=_("loot"), description=_("Shows drop chances for loot."))
     @app_commands.guild_only()
     @app_commands.describe(chest=_("The name of the container to see the drop table for."), classes=_("The class for which to see the drop table."), level=_("The character level for which to see the drop table."), tracery=_("Whether the tracery drop table should be shown in full."))
     @app_commands.autocomplete(chest=container_autocomplete)
     async def loot_respond(self, interaction: discord.Interaction, chest: str, classes: Optional[Classes]=Classes.Captain, level: Optional[app_commands.Range[int, 1, 160]]=160, tracery: Optional[bool]=False):
+        if containerRoot is None:
+            await interaction.response.send_message(_("Lore data not available. Ask the bot owner to run the refresh command."))
+            return
         if chest not in containers.keys():
             await interaction.response.send_message(_("Unknown container."))
             return
@@ -316,6 +357,28 @@ class TreasureCog(commands.Cog):
             await interaction.channel.send(embed=embed)
         else:
             await interaction.response.send_message(embed=embed)
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def refreshlore(self, ctx):
+        if not self._refresh_lock.acquire_nowait():
+            await ctx.send(_("A lore data refresh is already in progress."))
+            return
+        try:
+            await ctx.send(_("Fetching latest lore data..."))
+            try:
+                await lore_data.fetch_lore_data(self.bot.http_session)
+            except Exception as e:
+                await ctx.send(_("Failed to fetch lore data: {0}").format(e))
+                return
+            loop = asyncio.get_running_loop()
+            success = await loop.run_in_executor(None, load_lore_data)
+            if success:
+                await ctx.send(footer_text)
+            else:
+                await ctx.send(_("Downloaded data failed to parse; keeping previous data."))
+        finally:
+            self._refresh_lock.release()
 
 async def setup(bot):
     await bot.add_cog(TreasureCog(bot))
