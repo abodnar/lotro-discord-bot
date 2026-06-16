@@ -65,7 +65,7 @@ def load_lore_data():
 
 
 if not load_lore_data():
-    logger.warning("Lore data files not found at import; /loot unavailable until !refreshlore is run.")
+    logger.warning("Lore data files not found at startup; /loot will be unavailable until !refreshlore is run.")
 
 traceryIDs = ['1879428517', '1879428521', '1879428563', '1879428567']
 
