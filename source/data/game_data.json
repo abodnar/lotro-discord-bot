@@ -53,6 +53,7 @@
     "temple":     { "name": "Temple of Utug-bûr",                         "size": 12 },
     "folly":      { "name": "The Folly of Nagakhêdi",                     "size": 12 },
     "caves":      { "name": "The Treasure Caves of Hurum Kâna",           "size": 3  },
+    "garden":     { "name": "Pagru-kirít, the Garden of Corpses",         "size": 6  },
     "palace": {
       "name": "Ekal-nêbi, the Fallen Palace",
       "size": 6,
