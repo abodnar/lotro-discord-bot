@@ -1,0 +1,12 @@
+services:
+  lotro-bot:
+    image: lotro-bot:latest
+    container_name: lotro-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - SERVER_TZ=${SERVER_TZ}
+      - LANGUAGE=en
+      - DB_PATH=/data/raid_db
+    volumes:
+      - ./data:/data
