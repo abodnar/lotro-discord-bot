@@ -1,4 +1,4 @@
-from utils import chunks, fp_ratio, get_match, get_partial_matches
+from utils import button_row, chunks, fp_ratio, get_match, get_partial_matches
 
 
 class TestChunks:
@@ -16,6 +16,20 @@ class TestChunks:
 
     def test_chunk_size_one(self):
         assert list(chunks([1, 2, 3], 1)) == [[1], [2], [3]]
+
+
+class TestButtonRow:
+    def test_first_four_share_row(self):
+        assert [button_row(i) for i in range(4)] == [1, 1, 1, 1]
+
+    def test_fifth_wraps_to_next_row(self):
+        assert button_row(4) == 2
+
+    def test_twelfth_class_stays_within_row_limit(self):
+        assert button_row(11) == 3
+
+    def test_respects_custom_per_row_and_start_row(self):
+        assert button_row(3, per_row=3, start_row=0) == 1
 
 
 class TestFpRatio:

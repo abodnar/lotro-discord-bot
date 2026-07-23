@@ -14,7 +14,7 @@ from typing import Optional
 
 from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, upsert
 from cogs.time_cog import Time
-from utils import get_match
+from utils import button_row, get_match
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -690,10 +690,12 @@ class RaidView(discord.ui.View):
         super().__init__(timeout=None)
         self.raid_cog = raid_cog
         self.conn = raid_cog.conn
+        button_index = 0
         for class_name in raid_cog.role_names:
             emoji = raid_cog.emojis_dict.get(class_name)
             if emoji:
-                self.add_item(EmojiButton(class_name, emoji))
+                self.add_item(EmojiButton(class_name, emoji, button_row(button_index)))
+                button_index += 1
 
     @discord.ui.button(emoji="\U0001F6E0\uFE0F", style=discord.ButtonStyle.blurple, custom_id='raid_view:settings')
     async def settings(self, interaction: discord.Interaction, button: discord.ui.Button):
