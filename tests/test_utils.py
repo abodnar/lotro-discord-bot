@@ -1,4 +1,4 @@
-from utils import button_row, chunks, fp_ratio, get_match, get_partial_matches
+from utils import button_row, chunks, exceeds_max_future_offset, fp_ratio, get_match, get_partial_matches
 
 
 class TestChunks:
@@ -30,6 +30,21 @@ class TestButtonRow:
 
     def test_respects_custom_per_row_and_start_row(self):
         assert button_row(3, per_row=3, start_row=0) == 1
+
+
+class TestExceedsMaxFutureOffset:
+    def test_within_default_year_is_not_exceeded(self):
+        assert exceeds_max_future_offset(0, 31536000) is False
+
+    def test_just_over_default_year_is_exceeded(self):
+        assert exceeds_max_future_offset(0, 31536001) is True
+
+    def test_past_timestamp_is_not_exceeded(self):
+        assert exceeds_max_future_offset(1000, 500) is False
+
+    def test_respects_custom_max_offset(self):
+        assert exceeds_max_future_offset(0, 3601, max_offset=3600) is True
+        assert exceeds_max_future_offset(0, 3600, max_offset=3600) is False
 
 
 class TestFpRatio:

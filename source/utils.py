@@ -14,6 +14,11 @@ def button_row(index, per_row=4, start_row=1):
     return start_row + index // per_row
 
 
+def exceeds_max_future_offset(current_time, timestamp, max_offset=31536000):
+    """Return True if timestamp is more than max_offset seconds after current_time."""
+    return current_time + max_offset < timestamp
+
+
 def fp_ratio(s1, s2, force_ascii=True, full_process=True):
     """
     Return a measure of the sequences' similarity between 0 and 100, using fuzz.ratio and fuzz.partial_ratio.

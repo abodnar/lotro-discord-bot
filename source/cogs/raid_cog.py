@@ -14,7 +14,7 @@ from typing import Optional
 
 from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, upsert
 from cogs.time_cog import Time
-from utils import button_row, get_match
+from utils import button_row, exceeds_max_future_offset, get_match
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -1190,7 +1190,13 @@ class ConfigureModal(discord.ui.Modal):
                 raid_columns.pop(time_index)
                 raid_values.pop(time_index)
             else:
-                raid_values[time_index] = timestamp
+                if exceeds_max_future_offset(int(time.time()), timestamp):
+                    raid_time = datetime.datetime.utcfromtimestamp(timestamp)
+                    resp_msg = _("Events must start within 1 year. Your edit to {0} UTC will not be saved.").format(raid_time)
+                    raid_columns.pop(time_index)
+                    raid_values.pop(time_index)
+                else:
+                    raid_values[time_index] = timestamp
         else:
             raid_columns.pop(time_index)
             raid_values.pop(time_index)
