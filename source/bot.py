@@ -142,9 +142,11 @@ class Bot(commands.Bot):
 
         if not os.path.exists('../data/lore/containers.xml'):
             try:
-                await lore_data.fetch_lore_data(self.http_session)
+                version_info = await lore_data.fetch_lore_data(self.http_session)
             except Exception as e:
                 self.logger.warning(f"Initial lore data fetch failed: {e}")
+            else:
+                self.logger.info(f"Fetched initial lore data ({version_info}).")
 
         self.emojis_dict = await ensure_emojis(self, list(self.role_names), self.creep_names, 'emojis')
         self.logger.info(f'Application emojis ready: {len(self.emojis_dict)} loaded.')
