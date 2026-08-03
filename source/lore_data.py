@@ -1,13 +1,15 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 RAW_BASE_URL = 'https://raw.githubusercontent.com/LotroCompanion/lotro-data/master/lore/'
-TAGS_API_URL = 'https://api.github.com/repos/LotroCompanion/lotro-data/tags'
+COMMITS_API_URL = 'https://api.github.com/repos/LotroCompanion/lotro-data/commits'
+UPDATE_MSG_RE = re.compile(r'Updated for Update ([\d.]+)')
 LORE_FILES = ['containers.xml', 'loots.xml']
 LORE_DIR = '../data/lore'
 VERSION_FILE = os.path.join(LORE_DIR, 'version.json')
@@ -57,17 +59,24 @@ async def _download_file(session, url, dest_path):
 
 
 async def _resolve_version(session):
+    """Resolve a version label from the commit history of the lore/ path.
+
+    Tags on the upstream repo lag behind master, so the version is instead
+    read from the most recent "Updated for Update X.Y" commit message
+    touching lore/ — that's what actually produced the data being fetched.
+    """
     try:
-        async with session.get(TAGS_API_URL) as resp:
+        params = {'path': 'lore', 'per_page': 30}
+        async with session.get(COMMITS_API_URL, params=params) as resp:
             resp.raise_for_status()
-            tags = await resp.json()
-        parts = tags[0]['name'].split('.')
-        version = '.'.join(parts[3:])
-        if not version:
-            raise ValueError(f"Unexpected tag format: {tags[0]['name']}")
-        return {'version': version}
+            commits = await resp.json()
+        for commit in commits:
+            match = UPDATE_MSG_RE.search(commit['commit']['message'])
+            if match:
+                return {'version': match.group(1)}
+        raise ValueError("No 'Updated for Update' commit found in recent history")
     except Exception as e:
-        logger.warning(f"Could not resolve lore data version from tags, using fetch date: {e}")
+        logger.warning(f"Could not resolve lore data version from commit history, using fetch date: {e}")
         return {'fetched_date': datetime.now().strftime('%Y-%m-%d')}
 
 
