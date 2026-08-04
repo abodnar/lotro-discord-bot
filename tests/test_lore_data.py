@@ -3,7 +3,7 @@ import json
 import pytest
 
 import lore_data
-from lore_data import load_version_info, _resolve_version, check_and_update_lore
+from lore_data import load_version_info, _resolve_version, check_and_update_lore, fetch_lore_data
 
 
 class FakeResponse:
@@ -32,6 +32,9 @@ class FakeSession:
 
 
 class FakeDownloadResponse:
+    def __init__(self, data=b'<data/>'):
+        self._data = data
+
     def raise_for_status(self):
         pass
 
@@ -41,7 +44,7 @@ class FakeDownloadResponse:
 
     def iter_chunked(self, size):
         async def gen():
-            yield b'<data/>'
+            yield self._data
         return gen()
 
     async def __aenter__(self):
@@ -54,13 +57,14 @@ class FakeDownloadResponse:
 class FakeUpdateSession:
     """Serves commit history from the commits API and dummy bytes for file downloads."""
 
-    def __init__(self, commits):
+    def __init__(self, commits, download_data=b'<data/>'):
         self._commits = commits
+        self._download_data = download_data
 
     def get(self, url, params=None):
         if url == lore_data.COMMITS_API_URL:
             return FakeResponse(self._commits)
-        return FakeDownloadResponse()
+        return FakeDownloadResponse(self._download_data)
 
 
 def test_load_version_info_with_version(tmp_path, monkeypatch):
@@ -173,3 +177,22 @@ async def test_check_and_update_lore_skips_when_version_unresolved(tmp_path, mon
 
     assert result is None
     assert not (tmp_path / 'containers.xml').exists()
+
+
+@pytest.mark.asyncio
+async def test_fetch_lore_data_rejects_malformed_xml(tmp_path, monkeypatch):
+    monkeypatch.setattr(lore_data, 'LORE_DIR', str(tmp_path))
+    monkeypatch.setattr(lore_data, 'VERSION_FILE', str(tmp_path / 'version.json'))
+    (tmp_path / 'containers.xml').write_bytes(b'<old-good-data/>')
+    (tmp_path / 'version.json').write_text(json.dumps({'version': '48.5'}))
+    session = FakeUpdateSession(
+        [{'commit': {'message': 'Updated for Update 49.1'}}],
+        download_data=b'<not><valid xml',
+    )
+
+    with pytest.raises(ValueError, match='not valid XML'):
+        await fetch_lore_data(session)
+
+    assert (tmp_path / 'containers.xml').read_bytes() == b'<old-good-data/>'
+    assert load_version_info() == {'version': '48.5'}
+    assert not (tmp_path / 'containers.xml.tmp').exists()

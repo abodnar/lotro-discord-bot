@@ -1,7 +1,9 @@
+import asyncio
 import json
 import logging
 import os
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -18,9 +20,10 @@ VERSION_FILE = os.path.join(LORE_DIR, 'version.json')
 async def fetch_lore_data(session):
     """Download lore XML files from lotro-data and resolve a version label.
 
-    Both files are downloaded to `<name>.tmp` first. Only if both downloads
-    succeed are they moved into place and version.json written, so a failed
-    or partial download raises without touching any existing files. Any
+    Both files are downloaded to `<name>.tmp` first and validated as
+    well-formed XML. Only if both downloads succeed and parse do they get
+    moved into place and version.json written, so a failed, partial, or
+    malformed download raises without touching any existing files. Any
     .tmp files created before the failure are cleaned up automatically.
     """
     os.makedirs(LORE_DIR, exist_ok=True)
@@ -32,6 +35,7 @@ async def fetch_lore_data(session):
             tmp = dest + '.tmp'
             await _download_file(session, RAW_BASE_URL + filename, tmp)
             tmp_paths.append((tmp, dest))
+            await _validate_xml(tmp)
 
         version_info = await _resolve_version(session)
 
@@ -71,6 +75,14 @@ async def _download_file(session, url, dest_path):
         with open(dest_path, 'wb') as f:
             async for chunk in resp.content.iter_chunked(65536):
                 f.write(chunk)
+
+
+async def _validate_xml(path):
+    loop = asyncio.get_running_loop()
+    try:
+        await loop.run_in_executor(None, ET.parse, path)
+    except ET.ParseError as e:
+        raise ValueError(f"Downloaded file {os.path.basename(path)} is not valid XML: {e}") from e
 
 
 async def _resolve_version(session):
