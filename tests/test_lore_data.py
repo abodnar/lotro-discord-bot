@@ -3,7 +3,7 @@ import json
 import pytest
 
 import lore_data
-from lore_data import load_version_info, _resolve_version
+from lore_data import load_version_info, _resolve_version, check_and_update_lore
 
 
 class FakeResponse:
@@ -29,6 +29,38 @@ class FakeSession:
 
     def get(self, url, params=None):
         return FakeResponse(self._payload)
+
+
+class FakeDownloadResponse:
+    def raise_for_status(self):
+        pass
+
+    @property
+    def content(self):
+        return self
+
+    def iter_chunked(self, size):
+        async def gen():
+            yield b'<data/>'
+        return gen()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        pass
+
+
+class FakeUpdateSession:
+    """Serves commit history from the commits API and dummy bytes for file downloads."""
+
+    def __init__(self, commits):
+        self._commits = commits
+
+    def get(self, url, params=None):
+        if url == lore_data.COMMITS_API_URL:
+            return FakeResponse(self._commits)
+        return FakeDownloadResponse()
 
 
 def test_load_version_info_with_version(tmp_path, monkeypatch):
@@ -101,3 +133,43 @@ class _FixedDatetime:
     def now(cls):
         import datetime as _dt
         return _dt.datetime(2026, 8, 3)
+
+
+@pytest.mark.asyncio
+async def test_check_and_update_lore_downloads_on_new_version(tmp_path, monkeypatch):
+    monkeypatch.setattr(lore_data, 'LORE_DIR', str(tmp_path))
+    monkeypatch.setattr(lore_data, 'VERSION_FILE', str(tmp_path / 'version.json'))
+    (tmp_path / 'version.json').write_text(json.dumps({'version': '48.5'}))
+    session = FakeUpdateSession([{'commit': {'message': 'Updated for Update 49.1'}}])
+
+    result = await check_and_update_lore(session)
+
+    assert result == {'version': '49.1'}
+    assert load_version_info() == {'version': '49.1'}
+    assert (tmp_path / 'containers.xml').read_bytes() == b'<data/>'
+
+
+@pytest.mark.asyncio
+async def test_check_and_update_lore_skips_when_version_unchanged(tmp_path, monkeypatch):
+    monkeypatch.setattr(lore_data, 'LORE_DIR', str(tmp_path))
+    monkeypatch.setattr(lore_data, 'VERSION_FILE', str(tmp_path / 'version.json'))
+    (tmp_path / 'version.json').write_text(json.dumps({'version': '49.1'}))
+    session = FakeUpdateSession([{'commit': {'message': 'Updated for Update 49.1'}}])
+
+    result = await check_and_update_lore(session)
+
+    assert result is None
+    assert not (tmp_path / 'containers.xml').exists()
+
+
+@pytest.mark.asyncio
+async def test_check_and_update_lore_skips_when_version_unresolved(tmp_path, monkeypatch):
+    monkeypatch.setattr(lore_data, 'LORE_DIR', str(tmp_path))
+    monkeypatch.setattr(lore_data, 'VERSION_FILE', str(tmp_path / 'version.json'))
+    (tmp_path / 'version.json').write_text(json.dumps({'version': '49.1'}))
+    session = FakeUpdateSession([{'commit': {'message': 'Typo fix (French)'}}])
+
+    result = await check_and_update_lore(session)
+
+    assert result is None
+    assert not (tmp_path / 'containers.xml').exists()

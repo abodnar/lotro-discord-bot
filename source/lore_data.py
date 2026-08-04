@@ -50,6 +50,21 @@ async def fetch_lore_data(session):
         raise
 
 
+async def check_and_update_lore(session):
+    """Re-fetch lore data if the resolved version differs from what's stored.
+
+    Only triggers a download when a version label was actually resolved (not
+    the fetch-date fallback), since the fallback can't be reliably compared
+    across runs and would otherwise cause a re-download on every check.
+    Returns the new version_info if a download was applied, or None if the
+    data was already current or the version couldn't be resolved.
+    """
+    latest = await _resolve_version(session)
+    if 'version' not in latest or latest == load_version_info():
+        return None
+    return await fetch_lore_data(session)
+
+
 async def _download_file(session, url, dest_path):
     async with session.get(url) as resp:
         resp.raise_for_status()

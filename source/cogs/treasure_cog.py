@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 
 from discord import app_commands
 from discord.ext import commands
+from discord.ext import tasks
 from typing import Optional
 
 import lore_data
@@ -342,6 +343,33 @@ class TreasureCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._refresh_lock = asyncio.Lock()
+
+    async def cog_load(self):
+        self.check_lore_updates.start()
+
+    async def cog_unload(self):
+        self.check_lore_updates.cancel()
+
+    @tasks.loop(hours=24)
+    async def check_lore_updates(self):
+        async with self._refresh_lock:
+            try:
+                result = await lore_data.check_and_update_lore(self.bot.http_session)
+            except Exception as e:
+                logger.warning(f"Automatic lore update check failed: {e}")
+                return
+        if result is None:
+            return
+        loop = asyncio.get_running_loop()
+        success = await loop.run_in_executor(None, load_lore_data)
+        if success:
+            logger.info(f"Automatically updated lore data: {footer_text}")
+        else:
+            logger.warning("Automatically downloaded lore data failed to parse; keeping previous data.")
+
+    @check_lore_updates.before_loop
+    async def before_check_lore_updates(self):
+        await self.bot.wait_until_ready()
 
     @app_commands.command(name=_("loot"), description=_("Shows drop chances for loot."))
     @app_commands.guild_only()
