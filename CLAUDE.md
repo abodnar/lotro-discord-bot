@@ -9,9 +9,9 @@ cd source
 python3 main.py
 ```
 
-All source files expect to be run from the `source/` directory (they open relative paths like `config.json`, `__init__.py`, `list-of-raids.csv`, `locale/`).
+All source files expect to be run from the `source/` directory (they open relative paths like `config.json`, `__init__.py`, `data/game_data.json`, `locale/`).
 
-**Requirements:** Python >= 3.12
+**Requirements:** Python >= 3.14
 
 ```bash
 python3 -m pip install -U -r requirements.txt
@@ -24,22 +24,21 @@ docker build -t lotro-bot . && docker run lotro-bot
 
 ## Configuration
 
-Copy `source/example-config.json` to `source/config.json` and fill in:
+Copy `source/config.example.json` to `source/config.json` and fill in:
 - `BOT_TOKEN` — Discord bot token
-- `CLASSES` — ordered list of class names (must match custom emoji names in your Discord server)
-- `LINEUP` — bitmask strings (one per slot type), each character is 0/1 indicating whether that class fills that slot; length must match CLASSES length exactly
+- `SERVER_TZ` — TZ database name (e.g. `America/New_York`)
+- `LANGUAGE` — `en`, `fr` or `es`; non-English requires generating a binary `.mo` file
+
+Game data lives in `source/data/game_data.json`:
+- `CLASSES` — ordered list of class names
 - `CREEPS` — optional creep class names for PvMP events
 - `DUOSPEC` — optional list of classes that support dual specializations
-- `SERVER_TZ` — TZ database name (e.g. `America/New_York`)
-- `LANGUAGE` — `en` or `fr`; non-English requires generating a binary `.mo` file
+- `DEFAULT_LINEUP` — one list of eligible class names per roster slot (a legacy `LINEUP` bitmask list is still accepted as a fallback)
+- `RAIDS` — raid definitions keyed by short name: `name`, `size`, and an optional per-raid `lineup`
 
 Config values can also be set as environment variables (fallback if not in `config.json`).
 
-**Generating locale binary** (required for non-English):
-```bash
-cd source/locale/<lang>/LC_MESSAGES
-python3 ../../msgfmt.py messages.po
-```
+**Generating locale binary** (required for non-English): compile `source/locale/<lang>/LC_MESSAGES/messages.po` into `messages.mo` in the same directory with a gettext `msgfmt` tool; the repo doesn't ship one.
 
 ## Architecture
 
@@ -50,7 +49,7 @@ python3 ../../msgfmt.py messages.po
 2. `dev_cog` — owner-only dev commands
 3. `time_cog` — time parsing; must load before calendar_cog
 4. `calendar_cog` — calendar channel management; must load before raid_cog
-5. `raid_cog` — core raid scheduling; loads raid commands dynamically from `list-of-raids.csv`
+5. `raid_cog` — core raid scheduling; registers one slash command per entry in `RAIDS`
 6. `rss_cog` — LotRO RSS feed posting
 7. `treasure_cog` — loot lookup; always loads, graceful no-data state until !refreshlore is run
 8. `custom_cog` — empty stub for local customization without merge conflicts
@@ -64,13 +63,13 @@ python3 ../../msgfmt.py messages.po
 
 ### Raid Commands
 
-Slash commands for individual raids are registered dynamically in `RaidCog.__init__` by reading `source/list-of-raids.csv` (format: `shortname,Full Name,size`). Adding a new raid = adding a row to that CSV.
+Slash commands for individual raids are registered dynamically in `RaidCog.__init__` from `RAIDS` in `source/data/game_data.json`. Adding a new raid = adding an entry there (`"shortname": { "name": "Full Name", "size": 12 }`).
 
-The `LINEUP` config controls which class slots appear in which positions for the raid roster. Too many `1`s in any bitmask string will break the Discord embed UI.
+`DEFAULT_LINEUP` (or a raid's own `lineup`) controls which classes are eligible for each roster slot.
 
 ### Key Files
 
-- `source/list-of-raids.csv` — raid shortnames, full names, and sizes
+- `source/data/game_data.json` — classes, lineups, and raid definitions
 - `source/__init__.py` — bot version (`__version__`)
 - `data/lore/containers.xml`, `data/lore/loots.xml` — loot data for `/loot` command; auto-fetched from GitHub at startup if absent (see `source/lore_data.py`)
 - `source/locale/` — i18n files; `messages.po` is source, `messages.mo` is compiled binary
