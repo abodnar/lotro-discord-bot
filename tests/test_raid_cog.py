@@ -111,3 +111,31 @@ class TestClassSelectCallback:
         assert calls[0] == 'send_message'
         assert 'remove_roles' in calls
         assert select_one(conn, 'Assignment', ['player_id'], ['raid_id', 'slot_id'], [RAID_ID, 0]) is None
+
+
+class TestSignUpCancel:
+    async def test_assigned_player_cancel_pings_organiser(self):
+        conn = make_db()
+        add_raid(conn)  # organizer_id 5
+        upsert(conn, 'Players', ['byname', 'Hunter', 'unavailable'], ['Teri', True, False],
+               ['raid_id', 'player_id'], [RAID_ID, PLAYER_ID])
+        upsert(conn, 'Assignment', ['player_id', 'byname', 'class_name'], [PLAYER_ID, 'Teri', 'Hunter'],
+               ['raid_id', 'slot_id'], [RAID_ID, 0])
+        view = raid_cog.RaidView.__new__(raid_cog.RaidView)
+        view.conn = conn
+        view.raid_cog = SimpleNamespace(slots_class_names={0: ['Hunter']}, update_raid_post=AsyncMock(),
+                                        process_name=MagicMock(return_value='Teri'))
+        interaction = SimpleNamespace(
+            response=SimpleNamespace(defer=AsyncMock()),
+            message=SimpleNamespace(id=RAID_ID),
+            user=SimpleNamespace(id=PLAYER_ID, mention=f'<@{PLAYER_ID}>', remove_roles=AsyncMock()),
+            guild=SimpleNamespace(id=GUILD_ID, roles=[]),
+            channel=SimpleNamespace(send=AsyncMock()),
+            followup=SimpleNamespace(send=AsyncMock()),
+        )
+
+        await view.sign_up_cancel(interaction)
+
+        sent = interaction.channel.send.await_args.args[0]
+        assert sent.startswith('<@5>,')
+        assert f'<@{PLAYER_ID}>' in sent
