@@ -14,6 +14,18 @@ def button_row(index, per_row=4, start_row=1):
     return start_row + index // per_row
 
 
+def format_player_entry(byname, class_specs, include_specs=True, lineup_note=None):
+    """Return one available-player line for the raid embed.
+
+    class_specs is a list of (class_emoji, spec_emoji) pairs; spec_emoji may be "".
+    A lineup_note replaces the emojis for players already shown in the line up.
+    """
+    if lineup_note:
+        return f"{byname} {lineup_note}\n"
+    emojis = "".join(cls + (spec if include_specs else "") for cls, spec in class_specs)
+    return f"{byname} {emojis}\n"
+
+
 def exceeds_max_future_offset(current_time, timestamp, max_offset=31536000):
     """Return True if timestamp is more than max_offset seconds after current_time."""
     return current_time + max_offset < timestamp

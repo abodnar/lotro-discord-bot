@@ -1,4 +1,4 @@
-from utils import button_row, chunks, exceeds_max_future_offset, fp_ratio, get_match, get_partial_matches
+from utils import button_row, chunks, exceeds_max_future_offset, format_player_entry, fp_ratio, get_match, get_partial_matches
 
 
 class TestChunks:
@@ -103,3 +103,16 @@ class TestGetPartialMatches:
     def test_no_match_returns_empty(self):
         matches = get_partial_matches("zzz", ["Captain", "Hunter"], score_cutoff=90)
         assert not matches
+
+
+class TestFormatPlayerEntry:
+    CLASS_SPECS = [("<:Hunter:1>", "<:spec_red:9>"), ("<:Minstrel:2>", "")]
+
+    def test_lists_class_and_spec_emojis(self):
+        assert format_player_entry("Teri", self.CLASS_SPECS) == "Teri <:Hunter:1><:spec_red:9><:Minstrel:2>\n"
+
+    def test_omits_spec_emojis_when_compact(self):
+        assert format_player_entry("Teri", self.CLASS_SPECS, include_specs=False) == "Teri <:Hunter:1><:Minstrel:2>\n"
+
+    def test_lineup_note_replaces_emojis(self):
+        assert format_player_entry("Teri", self.CLASS_SPECS, lineup_note="(in line up)") == "Teri (in line up)\n"

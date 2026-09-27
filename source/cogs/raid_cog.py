@@ -14,7 +14,7 @@ from typing import Optional
 
 from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, upsert
 from cogs.time_cog import Time
-from utils import button_row, exceeds_max_future_offset, get_match
+from utils import button_row, exceeds_max_future_offset, format_player_entry, get_match
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -43,6 +43,9 @@ ROLE_EMOJIS = {
     "cc": "⚡",
     "dps": "⚔️",
 }
+
+# Discord's limit on the combined text of an embed
+EMBED_SIZE_LIMIT = 6000
 
 # Maps /specs bitmask (bit0=red, bit1=blue, bit2=yellow) to spec icon emoji name
 SPEC_BITMASK = {
@@ -429,6 +432,12 @@ class RaidCog(commands.Cog):
         embed = self.build_raid_message(raid_id, available, unavailable)
         if not embed:
             return
+        if len(embed) > EMBED_SIZE_LIMIT:
+            # Custom emoji markup is ~30 chars each; drop spec emojis from the sign-up list to fit.
+            available = self.build_raid_players(raid_id, include_specs=False)
+            embed = self.build_raid_message(raid_id, available, unavailable)
+            if not embed:
+                return
         post = channel.get_partial_message(raid_id)
         try:
             await post.edit(embed=embed)
@@ -523,7 +532,7 @@ class RaidCog(commands.Cog):
                 embed.add_field(name=embed_name, value=embed_texts_unav[i])
         return embed
 
-    def build_raid_players(self, raid_id, available=True, block_size=6):
+    def build_raid_players(self, raid_id, available=True, block_size=6, include_specs=True):
         columns = ['raid_id', 'player_id', 'byname']
         if available:
             columns.extend(self.role_names)
@@ -534,12 +543,15 @@ class RaidCog(commands.Cog):
         if result:
             number_of_players = len(result)
             number_of_fields = ((number_of_players - 1) // block_size) + 1
+            # Players in the line up already show their class and spec there.
+            assigned = {row[0] for row in select(self.conn, 'Assignment', ['player_id'], ['raid_id'], [raid_id])}
+            lineup_note = _("(in line up)")
             # Create the player strings
             for row in result:
                 i = 2
                 if available:
                     specs = select_one(self.conn, 'Specs', self.role_names, ['player_id'], [row[1]])
-                    player_string = row[i] + " "
+                    class_specs = []
                     for name in [*self.role_names, *self.creep_names]:
                         i = i + 1
                         if row[i]:
@@ -550,10 +562,11 @@ class RaidCog(commands.Cog):
                                     icon = SPEC_BITMASK.get(spec)
                                     if icon:
                                         spec_str = self.emojis_dict.get(icon, "")
-                            player_string += self.emojis_dict[name] + spec_str
+                            class_specs.append((self.emojis_dict[name], spec_str))
+                    player_string = format_player_entry(row[2], class_specs, include_specs,
+                                                        lineup_note if row[1] in assigned else None)
                 else:
-                    player_string = "\u274C " + row[i]
-                player_string = player_string + "\n"
+                    player_string = "\u274C " + row[i] + "\n"
                 player_strings.append(player_string)
         else:
             if not available:
@@ -581,7 +594,8 @@ class RaidCog(commands.Cog):
             msg[0] = "\u200B"
         # Check if the length does not exceed embed limit and split if we can.
         if len(max(msg, key=len)) >= 1024 and block_size >= 2:
-            msg = self.build_raid_players(raid_id, block_size=block_size // 2)
+            msg = self.build_raid_players(raid_id, available=available, block_size=block_size // 2,
+                                          include_specs=include_specs)
         return msg
 
     def process_name(self, guild_id, user):
