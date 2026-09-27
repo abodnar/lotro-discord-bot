@@ -655,7 +655,14 @@ class RaidCog(commands.Cog):
 
     async def cleanup_old_raid(self, raid_id, message):
         logger.info(message)
-        tag, guild_id = select_one(self.conn, 'Raids', ['tag', 'guild_id'], ['raid_id'], [raid_id])
+        raid = select_one(self.conn, 'Raids', ['tag', 'guild_id'], ['raid_id'], [raid_id])
+        if raid is None:
+            logger.info("Raid already deleted from database.")
+            if raid_id in self.raids:
+                self.raids.remove(raid_id)
+            self.update_call.pop(raid_id, None)
+            return
+        tag, guild_id = raid
         guild = self.bot.get_guild(guild_id)
         if guild:
             role = discord.utils.get(guild.roles, name=tag)
@@ -951,8 +958,6 @@ class ClassSelect(discord.ui.Select):
             await interaction.response.send_message(msg, ephemeral=True)
             return
 
-        #no members intent so fetch
-        member = await interaction.guild.fetch_member(self.view.player)
         tag = select_one(self.view.conn, 'Raids', ['tag'], ['raid_id'], [self.view.raid_id])
         role = discord.utils.get(interaction.guild.roles, name=tag)
 
@@ -960,10 +965,13 @@ class ClassSelect(discord.ui.Select):
             byname = select_one(self.view.conn, 'Players', ['byname'], ['player_id', 'raid_id'],
                             [self.view.player, raid_id])
             self.clear_assignment()
-            if role:
-                await member.remove_roles(role)
             msg = _("Removed {0} from the selected line up.").format(byname)
+            # Respond before any member/role API calls so the interaction doesn't expire.
             await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
+            if role:
+                # no members intent so fetch
+                member = await interaction.guild.fetch_member(self.view.player)
+                await member.remove_roles(role)
             await self.view.raid_cog.update_raid_post(raid_id, interaction.channel)
             return
 
@@ -991,11 +999,7 @@ class ClassSelect(discord.ui.Select):
         # Remember the resolved slot so spec/role dropdowns use the same one
         self.view.slot = slot_id
 
-        player_id = select_one(self.view.conn, 'Assignment', ['player_id'], ['slot_id', 'raid_id'], [slot_id, raid_id])
-        if player_id:
-            old_member = await interaction.guild.fetch_member(player_id)
-            if role:
-                await old_member.remove_roles(role)
+        old_player_id = select_one(self.view.conn, 'Assignment', ['player_id'], ['slot_id', 'raid_id'], [slot_id, raid_id])
 
         self.clear_assignment()
         assignment_columns = ['player_id', 'byname', 'class_name']
@@ -1004,10 +1008,16 @@ class ClassSelect(discord.ui.Select):
                [raid_id, slot_id])
 
         msg = _("Assigned {0} to {1}.").format(signup[1], self.values[0])
+        # Respond before any member/role API calls so the interaction doesn't expire.
         await interaction.response.send_message(msg, ephemeral=True, delete_after=assign_delay)
 
         if role:
             try:
+                if old_player_id:
+                    # no members intent so fetch
+                    old_member = await interaction.guild.fetch_member(old_player_id)
+                    await old_member.remove_roles(role)
+                member = await interaction.guild.fetch_member(self.view.player)
                 await member.add_roles(role)
             except discord.Forbidden:
                 logger.warning("Error: Missing 'Manage roles' permissions for {interaction.guild}.")
