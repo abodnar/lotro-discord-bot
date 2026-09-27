@@ -25,6 +25,10 @@
   ],
   "RAIDS": {
     "skraid":     { "name": "Skirmish Raid",                              "size": 12 },
+    "storv":      { "name": "Storvâgûn",                                  "size": 6 },
+    "naruhel":    { "name": "Naruhel the Red-maid",                       "size": 6 },
+    "thrang":     { "name": "Thrâng",                                     "size": 6 },
+    "fi":         { "name": "Featured Instance",                          "size": 12 },
     "drake_wing": { "name": "Helegrod: Drake Wing",                       "size": 12 },
     "spider_wing":{ "name": "Helegrod: Spider Wing",                      "size": 12 },
     "giant_wing": { "name": "Helegrod: Giant Wing",                       "size": 12 },
