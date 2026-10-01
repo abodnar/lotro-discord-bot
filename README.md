@@ -27,7 +27,7 @@ A Discord bot for scheduling raids in Lord of the Rings Online. Players sign up 
 - **Auto-cleanup** — raid posts and data removed 2 hours after the scheduled time
 - **Loot tables** — `/loot` shows drop chances for any chest, using LotroCompanion data fetched automatically
 - **LotRO news** — official event schedule (`/events`) and forum announcements posted to a channel (`/rss on`)
-- **Translations** — English, French and Spanish (`LANGUAGE`)
+- **Translations** — the bot can run in English, French or Spanish; the host picks one with the `LANGUAGE` setting (applies to every server)
 
 ## Quick Start
 
