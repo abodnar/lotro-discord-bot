@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 23:30-0500\n"
+"POT-Creation-Date: 2026-09-30 19:10-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: SPANISH <LL@li.org>\n"
@@ -16,132 +16,136 @@ msgstr ""
 "Content-Transfer-Encoding: utf-8\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: bot.py:164
+#: bot.py:185
 msgid "You are not the bot owner."
 msgstr ""
 
-#: calendar_cog.py:21
+#: cogs/calendar_cog.py:22
 msgid "calendar"
 msgstr ""
 
-#: calendar_cog.py:21
+#: cogs/calendar_cog.py:22
 msgid "Manage the calendar settings."
 msgstr ""
 
-#: calendar_cog.py:88
+#: cogs/calendar_cog.py:89
 msgid "Scheduled runs:"
 msgstr ""
 
-#: calendar_cog.py:89
+#: cogs/calendar_cog.py:90
 msgid "Click the link to sign up!"
 msgstr ""
 
-#: calendar_cog.py:101 calendar_cog.py:225
+#: cogs/calendar_cog.py:102 cogs/calendar_cog.py:248
 msgid "Last updated"
 msgstr ""
 
-#: calendar_cog.py:213
+#: cogs/calendar_cog.py:236
 msgid "Upcoming events:"
 msgstr ""
 
-#: calendar_cog.py:243
+#: cogs/calendar_cog.py:266
 msgid "events"
 msgstr ""
 
-#: calendar_cog.py:243
+#: cogs/calendar_cog.py:266
 msgid "Shows upcoming official LotRO events in your local time."
 msgstr ""
 
-#: calendar_cog.py:246
+#: cogs/calendar_cog.py:269
 msgid "Waiting for lotro.com to respond..."
 msgstr ""
 
-#: calendar_cog.py:252
+#: cogs/calendar_cog.py:275 cogs/config_cog.py:143 cogs/rss_cog.py:104
 msgid "off"
 msgstr ""
 
-#: calendar_cog.py:255 calendar_cog.py:265 calendar_cog.py:282
-#: calendar_cog.py:292
+#: cogs/calendar_cog.py:278 cogs/calendar_cog.py:288 cogs/calendar_cog.py:305
+#: cogs/calendar_cog.py:315
 msgid "You must be a raid leader to change the calendar settings."
 msgstr ""
 
-#: calendar_cog.py:258
+#: cogs/calendar_cog.py:281
 msgid "Events will not be posted to a calendar."
 msgstr ""
 
-#: calendar_cog.py:262
+#: cogs/calendar_cog.py:285
 msgid "channel"
 msgstr ""
 
-#: calendar_cog.py:271 calendar_cog.py:298 raid_cog.py:151
+#: cogs/calendar_cog.py:294 cogs/calendar_cog.py:321 cogs/raid_cog.py:151
+#: cogs/rss_cog.py:98
 msgid "Missing permissions to access this channel."
 msgstr ""
 
-#: calendar_cog.py:274
+#: cogs/calendar_cog.py:297
 msgid "Events will be posted to this channel."
 msgstr ""
 
-#: calendar_cog.py:279
+#: cogs/calendar_cog.py:302
 msgid "discord"
 msgstr ""
 
-#: calendar_cog.py:285
+#: cogs/calendar_cog.py:308
 msgid "Events will be posted as discord guild events."
 msgstr ""
 
-#: calendar_cog.py:289
+#: cogs/calendar_cog.py:312
 msgid "both"
 msgstr ""
 
-#: calendar_cog.py:301
+#: cogs/calendar_cog.py:324
 msgid "Events will be posted to this channel and as discord guild events."
 msgstr ""
 
-#: config_cog.py:70
+#: cogs/config_cog.py:19
+msgid "lineup"
+msgstr ""
+
+#: cogs/config_cog.py:19
+msgid "Control whether raid posts show slot lineup suggestions."
+msgstr ""
+
+#: cogs/config_cog.py:79
 msgid "A bot for scheduling raids!"
 msgstr ""
 
-#: config_cog.py:71
+#: cogs/config_cog.py:80
 #, python-brace-format
 msgid "**Developer:** {0}"
 msgstr ""
 
-#: config_cog.py:72
+#: cogs/config_cog.py:81
 #, python-brace-format
 msgid "**[Source code]({0})**"
 msgstr ""
 
-#: config_cog.py:73
-#, python-brace-format
-msgid "**[Support server]({0})**"
-msgstr ""
-
-#: config_cog.py:74
+#: cogs/config_cog.py:82
 #, python-brace-format
 msgid "**[Invite me!]({0})**"
 msgstr ""
 
-#: config_cog.py:76
+#: cogs/config_cog.py:84
 #, python-brace-format
 msgid "**Hosted by:** {0}"
 msgstr ""
 
-#: config_cog.py:77
+#: cogs/config_cog.py:85
 #, python-brace-format
 msgid "**Uptime:** {0}."
 msgstr ""
 
-#: config_cog.py:79
+#: cogs/config_cog.py:87
 #, python-brace-format
 msgid "**Using version:** {0}"
 msgstr ""
 
-#: config_cog.py:80
+#: cogs/config_cog.py:90
 #, python-brace-format
 msgid "**Latest version:** {0}"
 msgstr ""
 
-#: config_cog.py:89
+#: cogs/config_cog.py:98
 #, python-brace-format
 msgid ""
 "Greetings {0}! I am confined to Orthanc and here to spend my days doing your "
@@ -160,31 +164,79 @@ msgid ""
 "a raid leader role with `/leader`, which allows non-admins to edit raids."
 msgstr ""
 
-#: config_cog.py:121
+#: cogs/config_cog.py:136 cogs/rss_cog.py:89
+msgid "on"
+msgstr ""
+
+#: cogs/config_cog.py:136
+msgid "Show class lineup slots on raid posts (default)."
+msgstr ""
+
+#: cogs/config_cog.py:141
+msgid "Lineup display enabled for this server."
+msgstr ""
+
+#: cogs/config_cog.py:143
+msgid "Hide class lineup slots from raid posts."
+msgstr ""
+
+#: cogs/config_cog.py:148
+msgid "Lineup display disabled for this server."
+msgstr ""
+
+#: cogs/config_cog.py:154
+msgid "You must be an admin to change this setting."
+msgstr ""
+
+#: cogs/config_cog.py:183
+msgid "Schedule a specific raid — e.g. `/rem t3 friday 8pm`"
+msgstr ""
+
+#: cogs/config_cog.py:184
+msgid "Click a class icon on the raid post to sign up"
+msgstr ""
+
+#: cogs/config_cog.py:191
+msgid "LotRO Raid Bot — Commands"
+msgstr ""
+
+#: cogs/config_cog.py:205
+msgid "raid_commands"
+msgstr ""
+
+#: cogs/config_cog.py:205 cogs/config_cog.py:211
+msgid "Show all available raid bot commands."
+msgstr ""
+
+#: cogs/config_cog.py:211
+msgid "raid_help"
+msgstr ""
+
+#: cogs/config_cog.py:217
 msgid "about"
 msgstr ""
 
-#: config_cog.py:121
+#: cogs/config_cog.py:217
 msgid "Show information about this bot."
 msgstr ""
 
-#: config_cog.py:127
+#: cogs/config_cog.py:223
 msgid "welcome"
 msgstr ""
 
-#: config_cog.py:127
+#: cogs/config_cog.py:223
 msgid "Resend the welcome message."
 msgstr ""
 
-#: config_cog.py:133
+#: cogs/config_cog.py:229
 msgid "privacy"
 msgstr ""
 
-#: config_cog.py:133
+#: cogs/config_cog.py:229
 msgid "Show information on data collection."
 msgstr ""
 
-#: config_cog.py:136
+#: cogs/config_cog.py:232
 msgid ""
 "**Summary:**\n"
 "When you sign up for a raid the bot stores the time, your discord id, "
@@ -195,606 +247,732 @@ msgid ""
 "your time zone along with your discord id such that it can parse times "
 "provided in your commands in your preferred time zone.\n"
 "**Please find the full privacy policy here:**\n"
-"https://github.com/"
 msgstr ""
 
-#: dev_cog.py:26
+#: cogs/dev_cog.py:25
 msgid "Extension loaded."
 msgstr ""
 
-#: dev_cog.py:29
+#: cogs/dev_cog.py:28
 msgid "Extension reloaded."
 msgstr ""
 
-#: dev_cog.py:31
+#: cogs/dev_cog.py:30
 msgid "Extension not found."
 msgstr ""
 
-#: dev_cog.py:33
+#: cogs/dev_cog.py:32
 msgid "Extension failed to load."
 msgstr ""
 
-#: dev_cog.py:82
-msgid "Resource usage:"
-msgstr ""
-
-#: dev_cog.py:83
-#, python-brace-format
-msgid "**CPU time:** {0}"
-msgstr ""
-
-#: dev_cog.py:84
-#, python-brace-format
-msgid "**Memory:** {0}/{1}\n"
-msgstr ""
-
-#: dev_cog.py:85
-#, python-brace-format
-msgid "**Servers:** {0}"
-msgstr ""
-
-#: dev_cog.py:86
-#, python-brace-format
-msgid "**Members:** {0}"
-msgstr ""
-
-#: dev_cog.py:95
+#: cogs/dev_cog.py:83
 #, python-brace-format
 msgid "**We are in the following {0} guilds:**\n"
 msgstr ""
 
-#: raid_cog.py:130 raid_cog.py:169
+#: cogs/raid_cog.py:130 cogs/raid_cog.py:173
 msgid "The raid tier."
 msgstr ""
 
-#: raid_cog.py:130 raid_cog.py:169 raid_cog.py:185
+#: cogs/raid_cog.py:130 cogs/raid_cog.py:173 cogs/raid_cog.py:189
 msgid "When the raid should be scheduled."
 msgstr ""
 
-#: raid_cog.py:130 raid_cog.py:169 raid_cog.py:185
+#: cogs/raid_cog.py:130 cogs/raid_cog.py:173 cogs/raid_cog.py:189
 msgid "A short description of your objective."
 msgstr ""
 
-#: raid_cog.py:135
+#: cogs/raid_cog.py:135
 #, python-brace-format
 msgid "Schedule {0}."
 msgstr ""
 
-#: raid_cog.py:158
+#: cogs/raid_cog.py:158
 msgid "Posting a new raid!"
 msgstr ""
 
-#: raid_cog.py:168
+#: cogs/raid_cog.py:172
 msgid "custom"
 msgstr ""
 
-#: raid_cog.py:168
+#: cogs/raid_cog.py:172
 msgid "Schedule a custom raid or meetup."
 msgstr ""
 
-#: raid_cog.py:169
+#: cogs/raid_cog.py:173
 msgid "The name of the raid or meetup."
 msgstr ""
 
-#: raid_cog.py:184
+#: cogs/raid_cog.py:188
 msgid "creep"
 msgstr ""
 
-#: raid_cog.py:184
+#: cogs/raid_cog.py:188
 msgid "Schedule a creep raid or meetup."
 msgstr ""
 
-#: raid_cog.py:190
+#: cogs/raid_cog.py:194
 msgid "leader"
 msgstr ""
 
-#: raid_cog.py:190
+#: cogs/raid_cog.py:194
 msgid "Specify the role which is permitted to edit raids."
 msgstr ""
 
-#: raid_cog.py:191 raid_cog.py:209
+#: cogs/raid_cog.py:195 cogs/raid_cog.py:213
 msgid "Discord role."
 msgstr ""
 
-#: raid_cog.py:195
+#: cogs/raid_cog.py:199
 msgid "You must be an admin to change the raid leader role."
 msgstr ""
 
-#: raid_cog.py:204
+#: cogs/raid_cog.py:208
 #, python-brace-format
 msgid "Set the raid leader role to {0}."
 msgstr ""
 
-#: raid_cog.py:206
+#: cogs/raid_cog.py:210
 msgid "Deleted the raid leader role."
 msgstr ""
 
-#: raid_cog.py:208
+#: cogs/raid_cog.py:212
 msgid "kin"
 msgstr ""
 
-#: raid_cog.py:208
+#: cogs/raid_cog.py:212
 msgid "Set your kin role to distinguish kin sign ups from non-kin."
 msgstr ""
 
-#: raid_cog.py:213
+#: cogs/raid_cog.py:217
 msgid "You must be an admin to change the kin role."
 msgstr ""
 
-#: raid_cog.py:222
+#: cogs/raid_cog.py:226
 #, python-brace-format
 msgid "Set the kin role to {0}."
 msgstr ""
 
-#: raid_cog.py:224
+#: cogs/raid_cog.py:228
 msgid "Deleted the kin role."
 msgstr ""
 
-#: raid_cog.py:226
+#: cogs/raid_cog.py:230
 msgid "remove_roles"
 msgstr ""
 
-#: raid_cog.py:226
+#: cogs/raid_cog.py:230
 msgid "Deletes your class roles (used when signing up)."
 msgstr ""
 
-#: raid_cog.py:229
+#: cogs/raid_cog.py:233
 msgid "Removing your class roles..."
 msgstr ""
 
-#: raid_cog.py:233
+#: cogs/raid_cog.py:237
 msgid "Successfully removed your class roles."
 msgstr ""
 
-#: raid_cog.py:235
+#: cogs/raid_cog.py:239
 msgid "I am missing permissions to manage the class roles!"
 msgstr ""
 
-#: raid_cog.py:238
+#: cogs/raid_cog.py:242
 msgid "specs"
 msgstr ""
 
-#: raid_cog.py:238
+#: cogs/raid_cog.py:242
 msgid "Set a specialization for your class."
 msgstr ""
 
-#: raid_cog.py:239
+#: cogs/raid_cog.py:243
 msgid "The class to set your specialization for."
 msgstr ""
 
-#: raid_cog.py:244
+#: cogs/raid_cog.py:248
 #, python-brace-format
 msgid "Select your {0} specialization:"
 msgstr ""
 
-#: raid_cog.py:248
+#: cogs/raid_cog.py:252
 msgid "list_players"
 msgstr ""
 
-#: raid_cog.py:248
+#: cogs/raid_cog.py:252
 msgid "List the signed up players for a raid in order of sign up time."
 msgstr ""
 
-#: raid_cog.py:249
+#: cogs/raid_cog.py:253
 msgid ""
 "Specify the raid to list, e.g. 2 for the second upcoming raid. This defaults "
 "to 1 if omitted."
 msgstr ""
 
-#: raid_cog.py:249
+#: cogs/raid_cog.py:253
 msgid ""
 "Specify cut-off time in hours before raid time. This defaults to 24 hours if "
 "omitted."
 msgstr ""
 
-#: raid_cog.py:253
+#: cogs/raid_cog.py:257
 msgid "You must be a raid leader to list players."
 msgstr ""
 
-#: raid_cog.py:258
+#: cogs/raid_cog.py:262
 #, python-brace-format
 msgid "Cannot list raid {0}: only {1} raids exist."
 msgstr ""
 
-#: raid_cog.py:261
+#: cogs/raid_cog.py:265
 msgid "Please provide a positive integer."
 msgstr ""
 
-#: raid_cog.py:268
+#: cogs/raid_cog.py:272
 #, python-brace-format
 msgid "**Sign up list for {0} on <t:{1}>**"
 msgstr ""
 
-#: raid_cog.py:290
+#: cogs/raid_cog.py:294
 msgid "Players:"
 msgstr ""
 
-#: raid_cog.py:291 raid_cog.py:294
+#: cogs/raid_cog.py:295 cogs/raid_cog.py:298
 msgid "Sign up time:"
 msgstr ""
 
-#: raid_cog.py:293
+#: cogs/raid_cog.py:297
 msgid "Late players:"
 msgstr ""
 
-#: raid_cog.py:298
+#: cogs/raid_cog.py:302
 msgid "list_raids"
 msgstr ""
 
-#: raid_cog.py:298
+#: cogs/raid_cog.py:302
 msgid "Lists the events you have signed up for."
 msgstr ""
 
-#: raid_cog.py:307
+#: cogs/raid_cog.py:311
 msgid "**You are signed up for the following events:**"
 msgstr ""
 
-#: raid_cog.py:341
+#: cogs/raid_cog.py:345
 #, python-brace-format
 msgid ""
 "Events must start within 1 year <@{0}>. Your event on {1} UTC will not be "
 "saved."
 msgstr ""
 
-#: raid_cog.py:346
+#: cogs/raid_cog.py:350
 #, python-brace-format
 msgid ""
 "Events must start in the future <@{0}>. Your event on {1} UTC will not be "
 "saved."
 msgstr ""
 
-#: raid_cog.py:351
+#: cogs/raid_cog.py:355
 #, python-brace-format
 msgid "Please check the date <@{0}>. You are posting a raid for: {1} UTC."
 msgstr ""
 
-#: raid_cog.py:378
+#: cogs/raid_cog.py:382
 msgid ""
 "Failed to create the discord event. Please check the bot has the manage "
 "event permission."
 msgstr ""
 
-#: raid_cog.py:393 raid_cog.py:806 raid_cog.py:1014
+#: cogs/raid_cog.py:394 cogs/raid_cog.py:485 cogs/raid_cog.py:851
+#: cogs/raid_cog.py:1066
 msgid "<Open>"
 msgstr ""
 
-#: raid_cog.py:417 raid_cog.py:697 raid_cog.py:709 raid_cog.py:859
+#: cogs/raid_cog.py:418 cogs/raid_cog.py:737 cogs/raid_cog.py:749
+#: cogs/raid_cog.py:904
 msgid "You do not have permission to change the raid settings."
 msgstr ""
 
-#: raid_cog.py:441
+#: cogs/raid_cog.py:448
 msgid "Missing permissions to edit the raid post."
 msgstr ""
 
-#: raid_cog.py:449
+#: cogs/raid_cog.py:456
 msgid "That's an error. Check the logs."
 msgstr ""
 
-#: raid_cog.py:469
+#: cogs/raid_cog.py:476
 #, python-brace-format
 msgid "Aim: {0}"
 msgstr ""
 
-#: raid_cog.py:476
+#: cogs/raid_cog.py:491
 msgid "Selected line up:"
 msgstr ""
 
-#: raid_cog.py:505
+#: cogs/raid_cog.py:520
 #, python-brace-format
 msgid "The following {0} players are available:"
 msgstr ""
 
-#: raid_cog.py:516
+#: cogs/raid_cog.py:531
 #, python-brace-format
 msgid "The following {0} players are unavailable:"
 msgstr ""
 
-#: raid_cog.py:604
+#: cogs/raid_cog.py:550
+msgid "(in line up)"
+msgstr ""
+
+#: cogs/raid_cog.py:633
 #, python-brace-format
 msgid "Gondor calls for aid! {} will you answer?"
 msgstr ""
 
-#: raid_cog.py:605
+#: cogs/raid_cog.py:634
 #, python-brace-format
 msgid "It's a dangerous business, {}, going out your door."
 msgstr ""
 
-#: raid_cog.py:606
+#: cogs/raid_cog.py:635
 #, python-brace-format
 msgid "I made a promise Mr Frodo. A promise. \"Don't you leave him {}.\""
 msgstr ""
 
-#: raid_cog.py:607
+#: cogs/raid_cog.py:636
 #, python-brace-format
 msgid ""
 "This task was appointed to you {}. And if you do not find a way, no one will."
 msgstr ""
 
-#: raid_cog.py:608
+#: cogs/raid_cog.py:637
 #, python-brace-format
 msgid "Let this be the hour when we draw swords together {}."
 msgstr ""
 
-#: raid_cog.py:609
+#: cogs/raid_cog.py:638
 #, python-brace-format
 msgid "A red sun rises. Blood will be spilt this night {}."
 msgstr ""
 
-#: raid_cog.py:610
+#: cogs/raid_cog.py:639
 #, python-brace-format
 msgid "I can't carry it for you, but I can carry you {}."
 msgstr ""
 
-#: raid_cog.py:611
+#: cogs/raid_cog.py:640
 #, python-brace-format
 msgid "Looks like raiding's back on the menu, {}."
 msgstr ""
 
-#: raid_cog.py:643
+#: cogs/raid_cog.py:674
 msgid " We are forming for the raid now."
 msgstr ""
 
-#: raid_cog.py:702
+#: cogs/raid_cog.py:742
 msgid "This raid no longer exists."
 msgstr ""
 
-#: raid_cog.py:716
+#: cogs/raid_cog.py:756
 msgid "There are no players to assign for this raid!"
 msgstr ""
 
-#: raid_cog.py:719
+#: cogs/raid_cog.py:759
 msgid ""
-"Please first select the player. The roster is updated when a class is "
-"selected. You can select a slot manually or leave it on automatic.\n"
+"**Assign a player:** choose Player → Class (Slot is optional — automatic "
+"finds the best match).\n"
+"**Set slot spec/role:** choose a Slot number first, then Spec or Role.\n"
+"*(This message expires after 60s without interaction.)*"
 msgstr ""
 
-#: raid_cog.py:721
-msgid ""
-"(This selection message is ephemeral and will cease to work after 60s "
-"without interaction.)"
-msgstr ""
-
-#: raid_cog.py:756
+#: cogs/raid_cog.py:796
 msgid "Error: Missing 'Manage roles' permission to assign the class role."
 msgstr ""
 
-#: raid_cog.py:758
+#: cogs/raid_cog.py:798
 #, python-brace-format
 msgid "Signed up as {0}."
 msgstr ""
 
-#: raid_cog.py:760
+#: cogs/raid_cog.py:800
 #, python-brace-format
 msgid "Removed {0} from your sign up."
 msgstr ""
 
-#: raid_cog.py:782
+#: cogs/raid_cog.py:822
 msgid ""
 "You have not assigned yourself any class roles yet, please sign up with a "
 "class first."
 msgstr ""
 
-#: raid_cog.py:794
+#: cogs/raid_cog.py:835
 #, python-brace-format
 msgid ""
-"Dearest raid leader, {0} has cancelled their availability. Please note they "
-"were assigned to {1} in the raid."
+"<@{2}>, {0} has cancelled their availability. Please note they were assigned "
+"to {1} in the raid."
 msgstr ""
 
-#: raid_cog.py:816 raid_cog.py:854
+#: cogs/raid_cog.py:861 cogs/raid_cog.py:899
 msgid "Your sign up has been removed."
 msgstr ""
 
-#: raid_cog.py:837
+#: cogs/raid_cog.py:882
 msgid ""
 "Your sign up has been received and the raid post will be updated momentarily."
 msgstr ""
 
-#: raid_cog.py:902
+#: cogs/raid_cog.py:949
 msgid "Automatic"
 msgstr ""
 
-#: raid_cog.py:906
+#: cogs/raid_cog.py:952
 msgid "Slot (automatic)"
 msgstr ""
 
-#: raid_cog.py:921
+#: cogs/raid_cog.py:967
 msgid "Player"
 msgstr ""
 
-#: raid_cog.py:934
+#: cogs/raid_cog.py:980
 msgid "Remove"
 msgstr ""
 
-#: raid_cog.py:935
+#: cogs/raid_cog.py:981
 msgid "Class"
 msgstr ""
 
-#: raid_cog.py:940
+#: cogs/raid_cog.py:986
 msgid "Please select a player first."
 msgstr ""
 
-#: raid_cog.py:955
+#: cogs/raid_cog.py:997
 #, python-brace-format
 msgid "Removed {0} from the selected line up."
 msgstr ""
 
-#: raid_cog.py:963
+#: cogs/raid_cog.py:1010
 #, python-brace-format
 msgid "{0} did not sign up with {1}."
 msgstr ""
 
-#: raid_cog.py:976
+#: cogs/raid_cog.py:1023
 msgid ""
 "There are no slots available. Please select a slot manually to overwrite."
 msgstr ""
 
-#: raid_cog.py:993
+#: cogs/raid_cog.py:1039
 #, python-brace-format
 msgid "Assigned {0} to {1}."
 msgstr ""
 
-#: raid_cog.py:1021 raid_cog.py:1056
+#: cogs/raid_cog.py:1073 cogs/raid_cog.py:1111
 msgid "None"
 msgstr ""
 
-#: raid_cog.py:1022
+#: cogs/raid_cog.py:1074
 msgid "Tank"
 msgstr ""
 
-#: raid_cog.py:1023
+#: cogs/raid_cog.py:1075
 msgid "Healer"
 msgstr ""
 
-#: raid_cog.py:1024
+#: cogs/raid_cog.py:1076
 msgid "CC"
 msgstr ""
 
-#: raid_cog.py:1025
+#: cogs/raid_cog.py:1077
 msgid "DPS"
 msgstr ""
 
-#: raid_cog.py:1027
+#: cogs/raid_cog.py:1079
 msgid "Role"
 msgstr ""
 
-#: raid_cog.py:1031 raid_cog.py:1066
-msgid "Please select a slot first."
+#: cogs/raid_cog.py:1087 cogs/raid_cog.py:1125
+msgid "No open slots available."
 msgstr ""
 
-#: raid_cog.py:1039
+#: cogs/raid_cog.py:1094
 #, python-brace-format
 msgid "Set slot {0} role to {1}."
 msgstr ""
 
-#: raid_cog.py:1046
+#: cogs/raid_cog.py:1101
 msgid "Red"
 msgstr ""
 
-#: raid_cog.py:1047
+#: cogs/raid_cog.py:1102
 msgid "Blue"
 msgstr ""
 
-#: raid_cog.py:1048
+#: cogs/raid_cog.py:1103
 msgid "Yellow"
 msgstr ""
 
-#: raid_cog.py:1049
+#: cogs/raid_cog.py:1104
 msgid "Red / Blue"
 msgstr ""
 
-#: raid_cog.py:1050
+#: cogs/raid_cog.py:1105
 msgid "Blue / Yellow"
 msgstr ""
 
-#: raid_cog.py:1051
+#: cogs/raid_cog.py:1106
 msgid "Red / Yellow"
 msgstr ""
 
-#: raid_cog.py:1052
+#: cogs/raid_cog.py:1107
 msgid "All three"
 msgstr ""
 
-#: raid_cog.py:1062
+#: cogs/raid_cog.py:1117
 msgid "Spec"
 msgstr ""
 
-#: raid_cog.py:1074
+#: cogs/raid_cog.py:1133
 #, python-brace-format
 msgid "Set slot {0} spec to {1}."
 msgstr ""
 
-#: raid_cog.py:1114
+#: cogs/raid_cog.py:1173
 #, python-brace-format
 msgid "Updated your {0} specialization to {1}."
 msgstr ""
 
-#: raid_cog.py:1136
+#: cogs/raid_cog.py:1198
 msgid "Leave blank to keep the existing time."
 msgstr ""
 
-#: raid_cog.py:1137
+#: cogs/raid_cog.py:1199
 msgid "Type 'delete' here to delete the raid."
 msgstr ""
 
-#: raid_cog.py:1158
+#: cogs/raid_cog.py:1209
+msgid "This raid has been deleted."
+msgstr ""
+
+#: cogs/raid_cog.py:1225
 msgid ""
 "The raid settings have been successfully updated! Changes will be reflected "
 "momentarily."
 msgstr ""
 
-#: raid_cog.py:1166 time_cog.py:63
+#: cogs/raid_cog.py:1233 cogs/time_cog.py:66
 msgid "Failed to parse time argument: "
 msgstr ""
 
-#: time_cog.py:42
+#: cogs/raid_cog.py:1239
+#, python-brace-format
+msgid ""
+"Events must start within 1 year. Your edit to {0} UTC will not be saved."
+msgstr ""
+
+#: cogs/rss_cog.py:20
+msgid "rss"
+msgstr ""
+
+#: cogs/rss_cog.py:20
+msgid "Manage RSS settings."
+msgstr ""
+
+#: cogs/rss_cog.py:89
+msgid "Turn on RSS in this channel."
+msgstr ""
+
+#: cogs/rss_cog.py:92
+msgid "You must be an admin to set up RSS."
+msgstr ""
+
+#: cogs/rss_cog.py:101
+msgid "Forum announcements will be posted to this channel."
+msgstr ""
+
+#: cogs/rss_cog.py:104
+msgid "Turn off RSS in this channel."
+msgstr ""
+
+#: cogs/rss_cog.py:107
+msgid "You must be an admin to turn off RSS."
+msgstr ""
+
+#: cogs/rss_cog.py:110
+msgid "Forum announcements will no longer be posted to this channel."
+msgstr ""
+
+#: cogs/time_cog.py:43
 msgid "time_zones"
 msgstr ""
 
-#: time_cog.py:42
+#: cogs/time_cog.py:43
 msgid "Manage time zone settings."
 msgstr ""
 
-#: time_cog.py:55 time_cog.py:136
+#: cogs/time_cog.py:58 cogs/time_cog.py:139
 msgid "server"
 msgstr ""
 
-#: time_cog.py:103
+#: cogs/time_cog.py:106
 msgid "server_time"
 msgstr ""
 
-#: time_cog.py:103
+#: cogs/time_cog.py:106
 msgid "Shows the current server time."
 msgstr ""
 
-#: time_cog.py:111
+#: cogs/time_cog.py:114
 #, python-brace-format
 msgid "Current server time: {0}"
 msgstr ""
 
-#: time_cog.py:116
+#: cogs/time_cog.py:119
 msgid "personal"
 msgstr ""
 
-#: time_cog.py:116
+#: cogs/time_cog.py:119
 msgid "Set your time zone to be used when interpreting your raid commands."
 msgstr ""
 
-#: time_cog.py:117
+#: cogs/time_cog.py:120
 msgid "Select a city representing your time zone."
 msgstr ""
 
-#: time_cog.py:124 time_cog.py:147
+#: cogs/time_cog.py:127 cogs/time_cog.py:150
 #, python-brace-format
 msgid "{0} is not a valid time zone!"
 msgstr ""
 
-#: time_cog.py:128
+#: cogs/time_cog.py:131
 #, python-brace-format
 msgid "Set your time zone to {0}."
 msgstr ""
 
-#: time_cog.py:131
+#: cogs/time_cog.py:134
 msgid "Deleted your time zone data."
 msgstr ""
 
-#: time_cog.py:136
+#: cogs/time_cog.py:139
 msgid "Set the time zone for this discord server."
 msgstr ""
 
-#: time_cog.py:137
+#: cogs/time_cog.py:140
 msgid "Select a city representing the time zone."
 msgstr ""
 
-#: time_cog.py:141
+#: cogs/time_cog.py:144
 msgid "You must be an admin to change the server time zone."
 msgstr ""
 
-#: time_cog.py:151
+#: cogs/time_cog.py:154
 #, python-brace-format
 msgid "Set server time zone to {0}."
 msgstr ""
 
-#: time_cog.py:154
+#: cogs/time_cog.py:157
 msgid "Deleted server time zone data."
+msgstr ""
+
+#: cogs/treasure_cog.py:26
+msgid "Lore data not loaded yet."
+msgstr ""
+
+#: cogs/treasure_cog.py:84
+#, python-brace-format
+msgid "Powered by LotroCompanion. Data as of U{0}"
+msgstr ""
+
+#: cogs/treasure_cog.py:86
+#, python-brace-format
+msgid "Powered by LotroCompanion. Data fetched {0}"
+msgstr ""
+
+#: cogs/treasure_cog.py:88
+msgid "Powered by LotroCompanion."
+msgstr ""
+
+#: cogs/treasure_cog.py:298
+#, python-brace-format
+msgid "Drop table for {0}"
+msgstr ""
+
+#: cogs/treasure_cog.py:299
+#, python-brace-format
+msgid "Level {0} {1}"
+msgstr ""
+
+#: cogs/treasure_cog.py:313
+msgid "??% chance to get one of the following:"
+msgstr ""
+
+#: cogs/treasure_cog.py:315
+#, python-format
+msgid "%.3g%% chance to get one of the following:"
+msgstr ""
+
+#: cogs/treasure_cog.py:374
+msgid "loot"
+msgstr ""
+
+#: cogs/treasure_cog.py:374
+msgid "Shows drop chances for loot."
+msgstr ""
+
+#: cogs/treasure_cog.py:376
+msgid "The name of the container to see the drop table for."
+msgstr ""
+
+#: cogs/treasure_cog.py:376
+msgid "The class for which to see the drop table."
+msgstr ""
+
+#: cogs/treasure_cog.py:376
+msgid "The character level for which to see the drop table."
+msgstr ""
+
+#: cogs/treasure_cog.py:376
+msgid "Whether the tracery drop table should be shown in full."
+msgstr ""
+
+#: cogs/treasure_cog.py:380
+msgid "Lore data not available. Ask the bot owner to run the refresh command."
+msgstr ""
+
+#: cogs/treasure_cog.py:383
+msgid "Unknown container."
+msgstr ""
+
+#: cogs/treasure_cog.py:388
+msgid "Cannot parse obsolete container."
+msgstr ""
+
+#: cogs/treasure_cog.py:401
+msgid "A tracery (pass tracery=True to expand this list)"
+msgstr ""
+
+#: cogs/treasure_cog.py:403
+#, python-brace-format
+msgid "{0} traceries (pass tracery=True to expand this list)"
+msgstr ""
+
+#: cogs/treasure_cog.py:411
+msgid "Missing permissions to send multiple messages in this channel."
+msgstr ""
+
+#: cogs/treasure_cog.py:413
+msgid "Large container, responding with multiple embeds..."
+msgstr ""
+
+#: cogs/treasure_cog.py:435
+msgid "A lore data refresh is already in progress."
+msgstr ""
+
+#: cogs/treasure_cog.py:438
+msgid "Fetching latest lore data..."
+msgstr ""
+
+#: cogs/treasure_cog.py:442
+#, python-brace-format
+msgid "Failed to fetch lore data: {0}"
+msgstr ""
+
+#: cogs/treasure_cog.py:449
+msgid "Downloaded data failed to parse; keeping previous data."
 msgstr ""
