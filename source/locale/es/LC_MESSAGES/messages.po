@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 19:37-0500\n"
+"POT-Creation-Date: 2026-09-30 19:47-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: SPANISH <LL@li.org>\n"
@@ -91,7 +91,7 @@ msgstr "channel"
 msgid "Post events to calendar in this channel."
 msgstr "Publica los eventos en un calendario en este canal."
 
-#: cogs/calendar_cog.py:294 cogs/calendar_cog.py:321 cogs/raid_cog.py:151
+#: cogs/calendar_cog.py:294 cogs/calendar_cog.py:321 cogs/raid_cog.py:180
 #: cogs/rss_cog.py:98
 msgid "Missing permissions to access this channel."
 msgstr "Faltan permisos para acceder a este canal."
@@ -326,233 +326,252 @@ msgstr "No se pudo cargar la extensión."
 msgid "**We are in the following {0} guilds:**\n"
 msgstr "**Estamos en los siguientes {0} servidores:**\n"
 
-#: cogs/raid_cog.py:66
+#: cogs/raid_cog.py:67
 msgid "Clear"
 msgstr "Borrar"
 
-#: cogs/raid_cog.py:67 cogs/raid_cog.py:1101
+#: cogs/raid_cog.py:68 cogs/raid_cog.py:1134
 msgid "Red"
 msgstr "Rojo"
 
-#: cogs/raid_cog.py:68 cogs/raid_cog.py:1102
+#: cogs/raid_cog.py:69 cogs/raid_cog.py:1135
 msgid "Blue"
 msgstr "Azul"
 
-#: cogs/raid_cog.py:69 cogs/raid_cog.py:1103
+#: cogs/raid_cog.py:70 cogs/raid_cog.py:1136
 msgid "Yellow"
 msgstr "Amarillo"
 
-#: cogs/raid_cog.py:70 cogs/raid_cog.py:1104
+#: cogs/raid_cog.py:71 cogs/raid_cog.py:1137
 msgid "Red / Blue"
 msgstr "Rojo / Azul"
 
-#: cogs/raid_cog.py:71 cogs/raid_cog.py:1105
+#: cogs/raid_cog.py:72 cogs/raid_cog.py:1138
 msgid "Blue / Yellow"
 msgstr "Azul / Amarillo"
 
-#: cogs/raid_cog.py:72 cogs/raid_cog.py:1106
+#: cogs/raid_cog.py:73 cogs/raid_cog.py:1139
 msgid "Red / Yellow"
 msgstr "Rojo / Amarillo"
 
-#: cogs/raid_cog.py:73 cogs/raid_cog.py:1107
+#: cogs/raid_cog.py:74 cogs/raid_cog.py:1140
 msgid "All three"
 msgstr "Las tres"
 
-#: cogs/raid_cog.py:130 cogs/raid_cog.py:173
+#: cogs/raid_cog.py:159 cogs/raid_cog.py:202
 msgid "The raid tier."
 msgstr "El nivel de la raid."
 
-#: cogs/raid_cog.py:130 cogs/raid_cog.py:173 cogs/raid_cog.py:189
+#: cogs/raid_cog.py:159 cogs/raid_cog.py:202 cogs/raid_cog.py:218
 msgid "When the raid should be scheduled."
 msgstr "Cuándo debe programarse la raid."
 
-#: cogs/raid_cog.py:130 cogs/raid_cog.py:173 cogs/raid_cog.py:189
+#: cogs/raid_cog.py:159 cogs/raid_cog.py:202 cogs/raid_cog.py:218
 msgid "A short description of your objective."
 msgstr "Una breve descripción de tu objetivo."
 
-#: cogs/raid_cog.py:135
+#: cogs/raid_cog.py:164
 #, python-brace-format
 msgid "Schedule {0}."
 msgstr "Programa {0}."
 
-#: cogs/raid_cog.py:158
+#: cogs/raid_cog.py:187
 msgid "Posting a new raid!"
 msgstr "¡Publicando una nueva raid!"
 
-#: cogs/raid_cog.py:172
+#: cogs/raid_cog.py:201
 msgid "custom"
 msgstr "custom"
 
-#: cogs/raid_cog.py:172
+#: cogs/raid_cog.py:201
 msgid "Schedule a custom raid or meetup."
 msgstr "Programa una raid personalizada o una quedada."
 
-#: cogs/raid_cog.py:173
+#: cogs/raid_cog.py:202
 msgid "The name of the raid or meetup."
 msgstr "El nombre de la raid o la quedada."
 
-#: cogs/raid_cog.py:188
+#: cogs/raid_cog.py:217
 msgid "creep"
 msgstr "creep"
 
-#: cogs/raid_cog.py:188
+#: cogs/raid_cog.py:217
 msgid "Schedule a creep raid or meetup."
 msgstr "Programa una raid o quedada como criatura (JcJM)."
 
-#: cogs/raid_cog.py:194
+#: cogs/raid_cog.py:223
 msgid "leader"
 msgstr "leader"
 
-#: cogs/raid_cog.py:194
+#: cogs/raid_cog.py:223
 msgid "Specify the role which is permitted to edit raids."
 msgstr "Indica el rol que puede editar las raids."
 
-#: cogs/raid_cog.py:195 cogs/raid_cog.py:213
+#: cogs/raid_cog.py:224 cogs/raid_cog.py:242
 msgid "Discord role."
 msgstr "Rol de Discord."
 
-#: cogs/raid_cog.py:199
+#: cogs/raid_cog.py:228
 msgid "You must be an admin to change the raid leader role."
 msgstr "Debes ser administrador para cambiar el rol de líder de raid."
 
-#: cogs/raid_cog.py:208
+#: cogs/raid_cog.py:237
 #, python-brace-format
 msgid "Set the raid leader role to {0}."
 msgstr "Rol de líder de raid establecido en {0}."
 
-#: cogs/raid_cog.py:210
+#: cogs/raid_cog.py:239
 msgid "Deleted the raid leader role."
 msgstr "Rol de líder de raid eliminado."
 
-#: cogs/raid_cog.py:212
+#: cogs/raid_cog.py:241
 msgid "kin"
 msgstr "kin"
 
-#: cogs/raid_cog.py:212
+#: cogs/raid_cog.py:241
 msgid "Set your kin role to distinguish kin sign ups from non-kin."
 msgstr ""
 "Establece el rol de tu hermandad para distinguir a sus miembros del resto de"
 " inscritos."
 
-#: cogs/raid_cog.py:217
+#: cogs/raid_cog.py:242
+msgid "Emoji representing the kinship."
+msgstr "Emoji que representa a la hermandad."
+
+#: cogs/raid_cog.py:246
 msgid "You must be an admin to change the kin role."
 msgstr "Debes ser administrador para cambiar el rol de hermandad."
 
-#: cogs/raid_cog.py:226
+#: cogs/raid_cog.py:251
+#, python-brace-format
+msgid "\"{0}\" is not a valid emoji."
+msgstr "«{0}» no es un emoji válido."
+
+#: cogs/raid_cog.py:261
+#, python-brace-format
+msgid "Set the kin role to {0} and icon to {1}."
+msgstr "Rol de hermandad establecido en {0} e icono en {1}."
+
+#: cogs/raid_cog.py:263
 #, python-brace-format
 msgid "Set the kin role to {0}."
 msgstr "Rol de hermandad establecido en {0}."
 
-#: cogs/raid_cog.py:228
-msgid "Deleted the kin role."
-msgstr "Rol de hermandad eliminado."
+#: cogs/raid_cog.py:265
+#, python-brace-format
+msgid "Set the kin icon to {0}."
+msgstr "Icono de hermandad establecido en {0}."
 
-#: cogs/raid_cog.py:230
+#: cogs/raid_cog.py:267
+msgid "Deleted the kin role and icon."
+msgstr "Rol e icono de hermandad eliminados."
+
+#: cogs/raid_cog.py:269
 msgid "remove_roles"
 msgstr "remove_roles"
 
-#: cogs/raid_cog.py:230
+#: cogs/raid_cog.py:269
 msgid "Deletes your class roles (used when signing up)."
 msgstr "Elimina tus roles de clase (asignados al apuntarte)."
 
-#: cogs/raid_cog.py:233
+#: cogs/raid_cog.py:272
 msgid "Removing your class roles..."
 msgstr "Eliminando tus roles de clase..."
 
-#: cogs/raid_cog.py:237
+#: cogs/raid_cog.py:276
 msgid "Successfully removed your class roles."
 msgstr "Tus roles de clase se han eliminado."
 
-#: cogs/raid_cog.py:239
+#: cogs/raid_cog.py:278
 msgid "I am missing permissions to manage the class roles!"
 msgstr "¡Me faltan permisos para gestionar los roles de clase!"
 
-#: cogs/raid_cog.py:242
+#: cogs/raid_cog.py:281
 msgid "specs"
 msgstr "specs"
 
-#: cogs/raid_cog.py:242
+#: cogs/raid_cog.py:281
 msgid "Set a specialization for your class."
 msgstr "Establece una especialización para tu clase."
 
-#: cogs/raid_cog.py:243
+#: cogs/raid_cog.py:282
 msgid "The class to set your specialization for."
 msgstr "La clase cuya especialización quieres establecer."
 
-#: cogs/raid_cog.py:248
+#: cogs/raid_cog.py:287
 #, python-brace-format
 msgid "Select your {0} specialization:"
 msgstr "Elige tu especialización de {0}:"
 
-#: cogs/raid_cog.py:252
+#: cogs/raid_cog.py:291
 msgid "list_players"
 msgstr "list_players"
 
-#: cogs/raid_cog.py:252
+#: cogs/raid_cog.py:291
 msgid "List the signed up players for a raid in order of sign up time."
 msgstr "Lista los inscritos de una raid por orden de inscripción."
 
-#: cogs/raid_cog.py:253
+#: cogs/raid_cog.py:292
 msgid ""
 "Specify the raid to list, e.g. 2 for the second upcoming raid. This defaults"
 " to 1 if omitted."
 msgstr ""
 "La raid a listar, p. ej. 2 para la segunda próxima raid. Por defecto, 1."
 
-#: cogs/raid_cog.py:253
+#: cogs/raid_cog.py:292
 msgid ""
 "Specify cut-off time in hours before raid time. This defaults to 24 hours if"
 " omitted."
 msgstr "Hora límite, en horas antes de la raid. Por defecto, 24 horas."
 
-#: cogs/raid_cog.py:257
+#: cogs/raid_cog.py:296
 msgid "You must be a raid leader to list players."
 msgstr "Debes ser líder de raid para listar a los jugadores."
 
-#: cogs/raid_cog.py:262
+#: cogs/raid_cog.py:301
 #, python-brace-format
 msgid "Cannot list raid {0}: only {1} raids exist."
 msgstr "No se puede listar la raid {0}: solo hay {1} raids."
 
-#: cogs/raid_cog.py:265
+#: cogs/raid_cog.py:304
 msgid "Please provide a positive integer."
 msgstr "Indica un número entero positivo."
 
-#: cogs/raid_cog.py:272
+#: cogs/raid_cog.py:311
 #, python-brace-format
 msgid "**Sign up list for {0} on <t:{1}>**"
 msgstr "**Inscritos en {0} el <t:{1}>**"
 
-#: cogs/raid_cog.py:294
+#: cogs/raid_cog.py:333
 msgid "Players:"
 msgstr "Jugadores:"
 
-#: cogs/raid_cog.py:295 cogs/raid_cog.py:298
+#: cogs/raid_cog.py:334 cogs/raid_cog.py:337
 msgid "Sign up time:"
 msgstr "Hora de inscripción:"
 
-#: cogs/raid_cog.py:297
+#: cogs/raid_cog.py:336
 msgid "Late players:"
 msgstr "Inscritos con retraso:"
 
-#: cogs/raid_cog.py:302
+#: cogs/raid_cog.py:341
 msgid "list_raids"
 msgstr "list_raids"
 
-#: cogs/raid_cog.py:302
+#: cogs/raid_cog.py:341
 msgid "Lists the events you have signed up for."
 msgstr "Lista los eventos a los que te has apuntado."
 
-#: cogs/raid_cog.py:311
+#: cogs/raid_cog.py:350
 msgid "**You are signed up for the following events:**"
 msgstr "**Estás apuntado a los siguientes eventos:**"
 
-#: cogs/raid_cog.py:315
+#: cogs/raid_cog.py:354
 #, python-brace-format
 msgid "{0} at <t:{1}>"
 msgstr "{0} el <t:{1}>"
 
-#: cogs/raid_cog.py:345
+#: cogs/raid_cog.py:384
 #, python-brace-format
 msgid ""
 "Events must start within 1 year <@{0}>. Your event on {1} UTC will not be "
@@ -561,7 +580,7 @@ msgstr ""
 "Los eventos deben empezar dentro de un año como máximo, <@{0}>. Tu evento "
 "del {1} UTC no se guardará."
 
-#: cogs/raid_cog.py:350
+#: cogs/raid_cog.py:389
 #, python-brace-format
 msgid ""
 "Events must start in the future <@{0}>. Your event on {1} UTC will not be "
@@ -570,12 +589,12 @@ msgstr ""
 "Los eventos deben empezar en el futuro, <@{0}>. Tu evento del {1} UTC no se "
 "guardará."
 
-#: cogs/raid_cog.py:355
+#: cogs/raid_cog.py:394
 #, python-brace-format
 msgid "Please check the date <@{0}>. You are posting a raid for: {1} UTC."
 msgstr "Comprueba la fecha, <@{0}>. Estás publicando una raid para: {1} UTC."
 
-#: cogs/raid_cog.py:382
+#: cogs/raid_cog.py:421
 msgid ""
 "Failed to create the discord event. Please check the bot has the manage "
 "event permission."
@@ -583,73 +602,73 @@ msgstr ""
 "No se pudo crear el evento de Discord. Comprueba que el bot tiene el permiso"
 " de gestionar eventos."
 
-#: cogs/raid_cog.py:394 cogs/raid_cog.py:485 cogs/raid_cog.py:851
-#: cogs/raid_cog.py:1066
+#: cogs/raid_cog.py:433 cogs/raid_cog.py:524 cogs/raid_cog.py:884
+#: cogs/raid_cog.py:1099
 msgid "<Open>"
 msgstr "<Libre>"
 
-#: cogs/raid_cog.py:418 cogs/raid_cog.py:737 cogs/raid_cog.py:749
-#: cogs/raid_cog.py:904
+#: cogs/raid_cog.py:457 cogs/raid_cog.py:770 cogs/raid_cog.py:782
+#: cogs/raid_cog.py:937
 msgid "You do not have permission to change the raid settings."
 msgstr "No tienes permiso para cambiar la configuración de la raid."
 
-#: cogs/raid_cog.py:448
+#: cogs/raid_cog.py:487
 msgid "Missing permissions to edit the raid post."
 msgstr "Faltan permisos para editar el anuncio de la raid."
 
-#: cogs/raid_cog.py:456
+#: cogs/raid_cog.py:495
 msgid "That's an error. Check the logs."
 msgstr "Se ha producido un error. Revisa los registros."
 
-#: cogs/raid_cog.py:472
+#: cogs/raid_cog.py:511
 #, python-brace-format
 msgid "Organiser: <@{0}>"
 msgstr "Organizador: <@{0}>"
 
-#: cogs/raid_cog.py:474
+#: cogs/raid_cog.py:513
 #, python-brace-format
 msgid "Tag: {0}"
 msgstr "Etiqueta: {0}"
 
-#: cogs/raid_cog.py:476
+#: cogs/raid_cog.py:515
 #, python-brace-format
 msgid "Aim: {0}"
 msgstr "Objetivo: {0}"
 
-#: cogs/raid_cog.py:491
+#: cogs/raid_cog.py:530
 msgid "Selected line up:"
 msgstr "Alineación seleccionada:"
 
-#: cogs/raid_cog.py:520
+#: cogs/raid_cog.py:559
 #, python-brace-format
 msgid "The following {0} players are available:"
 msgstr "Los siguientes {0} jugadores están disponibles:"
 
-#: cogs/raid_cog.py:531
+#: cogs/raid_cog.py:570
 #, python-brace-format
 msgid "The following {0} players are unavailable:"
 msgstr "Los siguientes {0} jugadores no están disponibles:"
 
-#: cogs/raid_cog.py:550
+#: cogs/raid_cog.py:589
 msgid "(in line up)"
 msgstr "(en la alineación)"
 
-#: cogs/raid_cog.py:633
+#: cogs/raid_cog.py:666
 #, python-brace-format
 msgid "Gondor calls for aid! {} will you answer?"
 msgstr "¡Gondor pide ayuda! {}, ¿acudirás?"
 
-#: cogs/raid_cog.py:634
+#: cogs/raid_cog.py:667
 #, python-brace-format
 msgid "It's a dangerous business, {}, going out your door."
 msgstr "Es peligroso, {}, cruzar la puerta."
 
-#: cogs/raid_cog.py:635
+#: cogs/raid_cog.py:668
 #, python-brace-format
 msgid "I made a promise Mr Frodo. A promise. \"Don't you leave him {}.\""
 msgstr "Hice una promesa, señor Frodo. Una promesa. «No le abandones, {}»."
 
-#: cogs/raid_cog.py:636
+#: cogs/raid_cog.py:669
 #, python-brace-format
 msgid ""
 "This task was appointed to you {}. And if you do not find a way, no one "
@@ -658,39 +677,39 @@ msgstr ""
 "Esta tarea te fue encomendada, {}. Y si tú no encuentras el camino, nadie lo"
 " hará."
 
-#: cogs/raid_cog.py:637
+#: cogs/raid_cog.py:670
 #, python-brace-format
 msgid "Let this be the hour when we draw swords together {}."
 msgstr "Que sea esta la hora en que desenvainemos juntos, {}."
 
-#: cogs/raid_cog.py:638
+#: cogs/raid_cog.py:671
 #, python-brace-format
 msgid "A red sun rises. Blood will be spilt this night {}."
 msgstr "Sale un sol rojo. Esta noche se derramará sangre, {}."
 
-#: cogs/raid_cog.py:639
+#: cogs/raid_cog.py:672
 #, python-brace-format
 msgid "I can't carry it for you, but I can carry you {}."
 msgstr "No puedo llevarlo por ti, pero puedo llevarte a ti, {}."
 
-#: cogs/raid_cog.py:640
+#: cogs/raid_cog.py:673
 #, python-brace-format
 msgid "Looks like raiding's back on the menu, {}."
 msgstr "Parece que las raids vuelven a estar en el menú, {}."
 
-#: cogs/raid_cog.py:674
+#: cogs/raid_cog.py:707
 msgid " We are forming for the raid now."
 msgstr " Estamos formando el grupo para la raid."
 
-#: cogs/raid_cog.py:742
+#: cogs/raid_cog.py:775
 msgid "This raid no longer exists."
 msgstr "Esta raid ya no existe."
 
-#: cogs/raid_cog.py:756
+#: cogs/raid_cog.py:789
 msgid "There are no players to assign for this raid!"
 msgstr "¡No hay jugadores que asignar en esta raid!"
 
-#: cogs/raid_cog.py:759
+#: cogs/raid_cog.py:792
 msgid ""
 "**Assign a player:** choose Player → Class (Slot is optional — automatic finds the best match).\n"
 "**Set slot spec/role:** choose a Slot number first, then Spec or Role.\n"
@@ -700,29 +719,29 @@ msgstr ""
 "**Establecer especialización/rol de un hueco:** elige primero el número de hueco y después Especialización o Rol.\n"
 "*(Este mensaje caduca tras 60 s sin interacción.)*"
 
-#: cogs/raid_cog.py:796
+#: cogs/raid_cog.py:829
 msgid "Error: Missing 'Manage roles' permission to assign the class role."
 msgstr ""
 "Error: falta el permiso «Gestionar roles» para asignar el rol de clase."
 
-#: cogs/raid_cog.py:798
+#: cogs/raid_cog.py:831
 #, python-brace-format
 msgid "Signed up as {0}."
 msgstr "Apuntado como {0}."
 
-#: cogs/raid_cog.py:800
+#: cogs/raid_cog.py:833
 #, python-brace-format
 msgid "Removed {0} from your sign up."
 msgstr "Se ha quitado {0} de tu inscripción."
 
-#: cogs/raid_cog.py:822
+#: cogs/raid_cog.py:855
 msgid ""
 "You have not assigned yourself any class roles yet, please sign up with a "
 "class first."
 msgstr ""
 "Todavía no tienes ningún rol de clase; apúntate primero con una clase."
 
-#: cogs/raid_cog.py:835
+#: cogs/raid_cog.py:868
 #, python-brace-format
 msgid ""
 "<@{2}>, {0} has cancelled their availability. Please note they were assigned"
@@ -731,11 +750,11 @@ msgstr ""
 "<@{2}>, {0} ha cancelado su disponibilidad. Ten en cuenta que estaba "
 "asignado a {1} en la raid."
 
-#: cogs/raid_cog.py:861 cogs/raid_cog.py:899
+#: cogs/raid_cog.py:894 cogs/raid_cog.py:932
 msgid "Your sign up has been removed."
 msgstr "Se ha eliminado tu inscripción."
 
-#: cogs/raid_cog.py:882
+#: cogs/raid_cog.py:915
 msgid ""
 "Your sign up has been received and the raid post will be updated "
 "momentarily."
@@ -743,135 +762,135 @@ msgstr ""
 "Hemos recibido tu inscripción y el anuncio de la raid se actualizará en "
 "breve."
 
-#: cogs/raid_cog.py:949
+#: cogs/raid_cog.py:982
 msgid "Automatic"
 msgstr "Automático"
 
-#: cogs/raid_cog.py:952
+#: cogs/raid_cog.py:985
 msgid "Slot (automatic)"
 msgstr "Hueco (automático)"
 
-#: cogs/raid_cog.py:967
+#: cogs/raid_cog.py:1000
 msgid "Player"
 msgstr "Jugador"
 
-#: cogs/raid_cog.py:980
+#: cogs/raid_cog.py:1013
 msgid "Remove"
 msgstr "Quitar"
 
-#: cogs/raid_cog.py:981
+#: cogs/raid_cog.py:1014
 msgid "Class"
 msgstr "Clase"
 
-#: cogs/raid_cog.py:986
+#: cogs/raid_cog.py:1019
 msgid "Please select a player first."
 msgstr "Selecciona primero un jugador."
 
-#: cogs/raid_cog.py:997
+#: cogs/raid_cog.py:1030
 #, python-brace-format
 msgid "Removed {0} from the selected line up."
 msgstr "Se ha quitado a {0} de la alineación seleccionada."
 
-#: cogs/raid_cog.py:1010
+#: cogs/raid_cog.py:1043
 #, python-brace-format
 msgid "{0} did not sign up with {1}."
 msgstr "{0} no se apuntó con {1}."
 
-#: cogs/raid_cog.py:1023
+#: cogs/raid_cog.py:1056
 msgid ""
 "There are no slots available. Please select a slot manually to overwrite."
 msgstr ""
 "No hay huecos disponibles. Elige un hueco manualmente para sustituirlo."
 
-#: cogs/raid_cog.py:1039
+#: cogs/raid_cog.py:1072
 #, python-brace-format
 msgid "Assigned {0} to {1}."
 msgstr "{0} asignado a {1}."
 
-#: cogs/raid_cog.py:1073 cogs/raid_cog.py:1111
+#: cogs/raid_cog.py:1106 cogs/raid_cog.py:1144
 msgid "None"
 msgstr "Ninguno"
 
-#: cogs/raid_cog.py:1074
+#: cogs/raid_cog.py:1107
 msgid "Tank"
 msgstr "Tanque"
 
-#: cogs/raid_cog.py:1075
+#: cogs/raid_cog.py:1108
 msgid "Healer"
 msgstr "Sanador"
 
-#: cogs/raid_cog.py:1076
+#: cogs/raid_cog.py:1109
 msgid "CC"
 msgstr "CC"
 
-#: cogs/raid_cog.py:1077
+#: cogs/raid_cog.py:1110
 msgid "DPS"
 msgstr "DPS"
 
-#: cogs/raid_cog.py:1079
+#: cogs/raid_cog.py:1112
 msgid "Role"
 msgstr "Rol"
 
-#: cogs/raid_cog.py:1087 cogs/raid_cog.py:1125
+#: cogs/raid_cog.py:1120 cogs/raid_cog.py:1158
 msgid "No open slots available."
 msgstr "No hay huecos libres."
 
-#: cogs/raid_cog.py:1094
+#: cogs/raid_cog.py:1127
 #, python-brace-format
 msgid "Set slot {0} role to {1}."
 msgstr "Rol del hueco {0} establecido en {1}."
 
-#: cogs/raid_cog.py:1117
+#: cogs/raid_cog.py:1150
 msgid "Spec"
 msgstr "Especialización"
 
-#: cogs/raid_cog.py:1133
+#: cogs/raid_cog.py:1166
 #, python-brace-format
 msgid "Set slot {0} spec to {1}."
 msgstr "Especialización del hueco {0} establecida en {1}."
 
-#: cogs/raid_cog.py:1173
+#: cogs/raid_cog.py:1206
 #, python-brace-format
 msgid "Updated your {0} specialization to {1}."
 msgstr "Tu especialización de {0} ahora es {1}."
 
-#: cogs/raid_cog.py:1184
+#: cogs/raid_cog.py:1217
 msgid "Raid Settings"
 msgstr "Configuración de la raid"
 
-#: cogs/raid_cog.py:1195
+#: cogs/raid_cog.py:1228
 msgid "Name"
 msgstr "Nombre"
 
-#: cogs/raid_cog.py:1196
+#: cogs/raid_cog.py:1229
 msgid "Tier"
 msgstr "Nivel"
 
-#: cogs/raid_cog.py:1197
+#: cogs/raid_cog.py:1230
 msgid "Aim"
 msgstr "Objetivo"
 
-#: cogs/raid_cog.py:1198
+#: cogs/raid_cog.py:1231
 msgid "Time"
 msgstr "Hora"
 
-#: cogs/raid_cog.py:1198
+#: cogs/raid_cog.py:1231
 msgid "Leave blank to keep the existing time."
 msgstr "Déjalo en blanco para mantener la hora actual."
 
-#: cogs/raid_cog.py:1199
+#: cogs/raid_cog.py:1232
 msgid "Delete"
 msgstr "Eliminar"
 
-#: cogs/raid_cog.py:1199
+#: cogs/raid_cog.py:1232
 msgid "Type 'delete' here to delete the raid."
 msgstr "Escribe 'delete' aquí para borrar la raid."
 
-#: cogs/raid_cog.py:1209
+#: cogs/raid_cog.py:1242
 msgid "This raid has been deleted."
 msgstr "Esta raid se ha eliminado."
 
-#: cogs/raid_cog.py:1225
+#: cogs/raid_cog.py:1258
 msgid ""
 "The raid settings have been successfully updated! Changes will be reflected "
 "momentarily."
@@ -879,11 +898,11 @@ msgstr ""
 "¡La configuración de la raid se ha actualizado! Los cambios se verán en "
 "breve."
 
-#: cogs/raid_cog.py:1233 cogs/time_cog.py:72
+#: cogs/raid_cog.py:1266 cogs/time_cog.py:72
 msgid "Failed to parse time argument: "
 msgstr "No se pudo interpretar la hora: "
 
-#: cogs/raid_cog.py:1239
+#: cogs/raid_cog.py:1272
 #, python-brace-format
 msgid ""
 "Events must start within 1 year. Your edit to {0} UTC will not be saved."

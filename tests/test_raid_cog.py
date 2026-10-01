@@ -262,3 +262,52 @@ class TestConfigureModalSubmit:
         assert select_one(modal.conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
         interaction.response.send_message.assert_awaited_once()
         modal.calendar_cog.modify_guild_event.assert_not_awaited()
+
+
+class TestKinIcon:
+    def test_valid_emoji(self):
+        assert raid_cog.is_valid_emoji('👪')
+        assert raid_cog.is_valid_emoji('🧝🏽‍♀️')  # skin tone + ZWJ sequence
+        assert raid_cog.is_valid_emoji('<:vilya:1234567890>')
+        assert raid_cog.is_valid_emoji('<a:spin:1234567890>')
+
+    def test_invalid_emoji(self):
+        assert not raid_cog.is_valid_emoji('kin')
+        assert not raid_cog.is_valid_emoji('👪👪')
+        assert not raid_cog.is_valid_emoji('<:vilya:abc>')
+        assert not raid_cog.is_valid_emoji('')
+
+    def test_byname(self):
+        assert raid_cog.kin_byname('Teri', True, '🌳') == '🌳 Teri'
+        assert raid_cog.kin_byname('Teri', False, '🌳') == 'Teri'
+        assert raid_cog.kin_byname('🌳 Teri', False, '🌳') == 'iMAhACkEr'
+
+    def test_settings_changes(self):
+        assert raid_cog.kin_settings_changes(7, '🌳') == {'role_id': 7, 'icon': '🌳'}
+        assert raid_cog.kin_settings_changes(7, None) == {'role_id': 7}  # keep the icon
+        assert raid_cog.kin_settings_changes(None, '🌳') == {'icon': '🌳'}  # keep the role
+        assert raid_cog.kin_settings_changes(None, None) == {'role_id': None, 'icon': None}
+
+    def make_cog(self, conn):
+        cog = raid_cog.RaidCog.__new__(raid_cog.RaidCog)
+        cog.conn = conn
+        return cog
+
+    def make_conn(self, icon=None):
+        from database import create_table, set_server_setting
+        conn = make_db()
+        create_table(conn, 'settings')
+        upsert(conn, 'Settings', ['priority'], [99], ['guild_id'], [GUILD_ID])
+        if icon:
+            set_server_setting(conn, GUILD_ID, 'kin_icon', icon)
+        return conn
+
+    def test_process_name_uses_default_icon(self):
+        user = SimpleNamespace(display_name='Teri', roles=[SimpleNamespace(id=99)])
+
+        assert self.make_cog(self.make_conn()).process_name(GUILD_ID, user) == '\U0001F46A Teri'
+
+    def test_process_name_uses_custom_icon(self):
+        user = SimpleNamespace(display_name='Teri', roles=[SimpleNamespace(id=99)])
+
+        assert self.make_cog(self.make_conn('🌳')).process_name(GUILD_ID, user) == '🌳 Teri'

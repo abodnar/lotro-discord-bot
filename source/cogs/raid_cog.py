@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import discord
+import emoji as emoji_lib
 from discord import app_commands
 from discord.ext import commands
 from discord.ext import tasks
@@ -12,7 +13,7 @@ import re
 import time
 from typing import Optional
 
-from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, upsert
+from database import add_column_if_missing, create_table, count, delete, get_server_setting, read_config_key, select, select_le, select_one, select_order, set_server_setting, upsert
 from cogs.time_cog import Time
 from utils import button_row, exceeds_max_future_offset, format_player_entry, get_match
 
@@ -72,6 +73,34 @@ _SPEC_CHOICES = [
     ('spec_ry',     _('Red / Yellow'),   'spec_ry'),
     ('spec_all',    _('All three'),      'spec_all'),
 ]
+
+KIN_ICON_DEFAULT = "\U0001F46A"
+CUSTOM_EMOJI_RE = re.compile(r'<a?:\w{2,32}:\d+>')
+
+
+def is_valid_emoji(text):
+    """True for a single Unicode emoji or a Discord custom emoji such as <:name:id>."""
+    return emoji_lib.is_emoji(text) or CUSTOM_EMOJI_RE.fullmatch(text) is not None
+
+
+def kin_byname(display_name, is_kin, icon):
+    """Prefix kin members' names with the kin icon, and flag non-kin who put it in their own name."""
+    if is_kin:
+        return f"{icon} {display_name}"
+    if icon in display_name:
+        return "iMAhACkEr"
+    return display_name
+
+
+def kin_settings_changes(role_id, icon):
+    """The kin settings a /kin call writes: giving only one option leaves the other as is; giving neither clears both."""
+    changes = {}
+    if role_id or icon is None:
+        changes['role_id'] = role_id
+    if icon or role_id is None:
+        changes['icon'] = icon
+    return changes
+
 
 class RaidCog(commands.Cog):
 
@@ -210,22 +239,32 @@ class RaidCog(commands.Cog):
                 await interaction.response.send_message(_("Deleted the raid leader role."))
 
     @app_commands.command(name=_("kin"), description=_("Set your kin role to distinguish kin sign ups from non-kin."))
-    @app_commands.describe(role=_("Discord role."))
+    @app_commands.describe(role=_("Discord role."), icon=_("Emoji representing the kinship."))
     @app_commands.guild_only()
-    async def priority_respond(self, interaction: discord.Interaction, role: Optional[discord.Role]):
+    async def priority_respond(self, interaction: discord.Interaction, role: Optional[discord.Role], icon: Optional[str]):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(_("You must be an admin to change the kin role."), ephemeral=True)
+            return
+        if icon is not None:
+            icon = icon.strip()
+            if not is_valid_emoji(icon):
+                await interaction.response.send_message(_("\"{0}\" is not a valid emoji.").format(icon), ephemeral=True)
+                return
+        changes = kin_settings_changes(role.id if role else None, icon)
+        if 'role_id' in changes:
+            upsert(self.conn, 'Settings', ['priority'], [changes['role_id']], ['guild_id'], [interaction.guild_id])
+        if 'icon' in changes:
+            set_server_setting(self.conn, interaction.guild_id, 'kin_icon', changes['icon'])
+        self.conn.commit()
+        no_mentions = discord.AllowedMentions.none()
+        if role and icon:
+            await interaction.response.send_message(_("Set the kin role to {0} and icon to {1}.").format(role.mention, icon), allowed_mentions=no_mentions)
+        elif role:
+            await interaction.response.send_message(_("Set the kin role to {0}.").format(role.mention), allowed_mentions=no_mentions)
+        elif icon:
+            await interaction.response.send_message(_("Set the kin icon to {0}.").format(icon), allowed_mentions=no_mentions)
         else:
-            if role:
-                role_id = role.id
-            else:
-                role_id = None
-            res = upsert(self.conn, 'Settings', ['priority'], [role_id], ['guild_id'], [interaction.guild_id])
-            self.conn.commit()
-            if role:
-                await interaction.response.send_message(_("Set the kin role to {0}.").format(role.mention), allowed_mentions=discord.AllowedMentions.none())
-            else:
-                await interaction.response.send_message(_("Deleted the kin role."))
+            await interaction.response.send_message(_("Deleted the kin role and icon."))
 
     @app_commands.command(name=_("remove_roles"), description=_("Deletes your class roles (used when signing up)."))
     @app_commands.guild_only()
@@ -602,14 +641,8 @@ class RaidCog(commands.Cog):
 
     def process_name(self, guild_id, user):
         role_id = select_one(self.conn, 'Settings', ['priority'], ['guild_id'], [guild_id])
-        if role_id in [role.id for role in user.roles]:
-            byname = "\U0001F46A " + user.display_name
-        else:
-            if "\U0001F46A" in user.display_name:
-                byname = "iMAhACkEr"
-            else:
-                byname = user.display_name
-        return byname
+        icon = get_server_setting(self.conn, guild_id, 'kin_icon') or KIN_ICON_DEFAULT
+        return kin_byname(user.display_name, role_id in [role.id for role in user.roles], icon)
 
     @tasks.loop(seconds=300)
     async def background_task(self):

@@ -73,7 +73,7 @@ Spec and Role are per-slot and persist when players are swapped.
 | Command | Example | Notes |
 |---------|---------|-------|
 | `/leader` `<role>` | `/leader Officer` | Set the raid leader role. Leaders can edit any raid. |
-| `/kin` `<role>` | `/kin Kinship` | Set the kin role. Kin members are marked on the sign-up sheet. |
+| `/kin` `<role>` `<icon>` | `/kin Kinship 🌳` | Set the kin role and the emoji marking kin members on the sign-up sheet (👪 by default; a server custom emoji works too). Give just one option to change only that; give neither to clear both. |
 | `/time_zones server` `<timezone>` | `/time_zones server America/New_York` | Set the default server timezone. |
 | `/rss on/off` | `/rss on` | Post LotRO news announcements to this channel. |
 
