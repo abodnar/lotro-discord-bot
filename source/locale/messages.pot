@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 19:10-0500\n"
+"POT-Creation-Date: 2026-09-30 19:37-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,6 +45,16 @@ msgstr ""
 msgid "Upcoming events:"
 msgstr ""
 
+#: cogs/calendar_cog.py:244
+#, python-brace-format
+msgid "From <t:{0}>"
+msgstr ""
+
+#: cogs/calendar_cog.py:246
+#, python-brace-format
+msgid "At <t:{0}>"
+msgstr ""
+
 #: cogs/calendar_cog.py:266
 msgid "events"
 msgstr ""
@@ -61,6 +71,10 @@ msgstr ""
 msgid "off"
 msgstr ""
 
+#: cogs/calendar_cog.py:275
+msgid "Turn off calendars."
+msgstr ""
+
 #: cogs/calendar_cog.py:278 cogs/calendar_cog.py:288 cogs/calendar_cog.py:305
 #: cogs/calendar_cog.py:315
 msgid "You must be a raid leader to change the calendar settings."
@@ -72,6 +86,10 @@ msgstr ""
 
 #: cogs/calendar_cog.py:285
 msgid "channel"
+msgstr ""
+
+#: cogs/calendar_cog.py:285
+msgid "Post events to calendar in this channel."
 msgstr ""
 
 #: cogs/calendar_cog.py:294 cogs/calendar_cog.py:321 cogs/raid_cog.py:151
@@ -87,12 +105,20 @@ msgstr ""
 msgid "discord"
 msgstr ""
 
+#: cogs/calendar_cog.py:302
+msgid "Post events to discord calendar."
+msgstr ""
+
 #: cogs/calendar_cog.py:308
 msgid "Events will be posted as discord guild events."
 msgstr ""
 
 #: cogs/calendar_cog.py:312
 msgid "both"
+msgstr ""
+
+#: cogs/calendar_cog.py:312
+msgid "Post events to both discord and channel calendar."
 msgstr ""
 
 #: cogs/calendar_cog.py:324
@@ -189,6 +215,30 @@ msgstr ""
 msgid "You must be an admin to change this setting."
 msgstr ""
 
+#: cogs/config_cog.py:159
+msgid "📅 Scheduling"
+msgstr ""
+
+#: cogs/config_cog.py:163
+msgid "✅ Sign-up"
+msgstr ""
+
+#: cogs/config_cog.py:167
+msgid "📆 Calendar"
+msgstr ""
+
+#: cogs/config_cog.py:170
+msgid "ℹ️ Info"
+msgstr ""
+
+#: cogs/config_cog.py:173
+msgid "⚙️ Server settings"
+msgstr ""
+
+#: cogs/config_cog.py:176
+msgid "👤 Personal settings"
+msgstr ""
+
 #: cogs/config_cog.py:183
 msgid "Schedule a specific raid — e.g. `/rem t3 friday 8pm`"
 msgstr ""
@@ -269,6 +319,38 @@ msgstr ""
 #: cogs/dev_cog.py:83
 #, python-brace-format
 msgid "**We are in the following {0} guilds:**\n"
+msgstr ""
+
+#: cogs/raid_cog.py:66
+msgid "Clear"
+msgstr ""
+
+#: cogs/raid_cog.py:67 cogs/raid_cog.py:1101
+msgid "Red"
+msgstr ""
+
+#: cogs/raid_cog.py:68 cogs/raid_cog.py:1102
+msgid "Blue"
+msgstr ""
+
+#: cogs/raid_cog.py:69 cogs/raid_cog.py:1103
+msgid "Yellow"
+msgstr ""
+
+#: cogs/raid_cog.py:70 cogs/raid_cog.py:1104
+msgid "Red / Blue"
+msgstr ""
+
+#: cogs/raid_cog.py:71 cogs/raid_cog.py:1105
+msgid "Blue / Yellow"
+msgstr ""
+
+#: cogs/raid_cog.py:72 cogs/raid_cog.py:1106
+msgid "Red / Yellow"
+msgstr ""
+
+#: cogs/raid_cog.py:73 cogs/raid_cog.py:1107
+msgid "All three"
 msgstr ""
 
 #: cogs/raid_cog.py:130 cogs/raid_cog.py:173
@@ -457,6 +539,11 @@ msgstr ""
 msgid "**You are signed up for the following events:**"
 msgstr ""
 
+#: cogs/raid_cog.py:315
+#, python-brace-format
+msgid "{0} at <t:{1}>"
+msgstr ""
+
 #: cogs/raid_cog.py:345
 #, python-brace-format
 msgid ""
@@ -498,6 +585,16 @@ msgstr ""
 
 #: cogs/raid_cog.py:456
 msgid "That's an error. Check the logs."
+msgstr ""
+
+#: cogs/raid_cog.py:472
+#, python-brace-format
+msgid "Organiser: <@{0}>"
+msgstr ""
+
+#: cogs/raid_cog.py:474
+#, python-brace-format
+msgid "Tag: {0}"
 msgstr ""
 
 #: cogs/raid_cog.py:476
@@ -697,34 +794,6 @@ msgstr ""
 msgid "Set slot {0} role to {1}."
 msgstr ""
 
-#: cogs/raid_cog.py:1101
-msgid "Red"
-msgstr ""
-
-#: cogs/raid_cog.py:1102
-msgid "Blue"
-msgstr ""
-
-#: cogs/raid_cog.py:1103
-msgid "Yellow"
-msgstr ""
-
-#: cogs/raid_cog.py:1104
-msgid "Red / Blue"
-msgstr ""
-
-#: cogs/raid_cog.py:1105
-msgid "Blue / Yellow"
-msgstr ""
-
-#: cogs/raid_cog.py:1106
-msgid "Red / Yellow"
-msgstr ""
-
-#: cogs/raid_cog.py:1107
-msgid "All three"
-msgstr ""
-
 #: cogs/raid_cog.py:1117
 msgid "Spec"
 msgstr ""
@@ -739,8 +808,32 @@ msgstr ""
 msgid "Updated your {0} specialization to {1}."
 msgstr ""
 
+#: cogs/raid_cog.py:1184
+msgid "Raid Settings"
+msgstr ""
+
+#: cogs/raid_cog.py:1195
+msgid "Name"
+msgstr ""
+
+#: cogs/raid_cog.py:1196
+msgid "Tier"
+msgstr ""
+
+#: cogs/raid_cog.py:1197
+msgid "Aim"
+msgstr ""
+
+#: cogs/raid_cog.py:1198
+msgid "Time"
+msgstr ""
+
 #: cogs/raid_cog.py:1198
 msgid "Leave blank to keep the existing time."
+msgstr ""
+
+#: cogs/raid_cog.py:1199
+msgid "Delete"
 msgstr ""
 
 #: cogs/raid_cog.py:1199
@@ -757,7 +850,7 @@ msgid ""
 "momentarily."
 msgstr ""
 
-#: cogs/raid_cog.py:1233 cogs/time_cog.py:66
+#: cogs/raid_cog.py:1233 cogs/time_cog.py:72
 msgid "Failed to parse time argument: "
 msgstr ""
 
@@ -807,67 +900,95 @@ msgstr ""
 msgid "Manage time zone settings."
 msgstr ""
 
-#: cogs/time_cog.py:58 cogs/time_cog.py:139
+#: cogs/time_cog.py:48
+msgid "Monday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Tuesday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Wednesday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Thursday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Friday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Saturday"
+msgstr ""
+
+#: cogs/time_cog.py:48
+msgid "Sunday"
+msgstr ""
+
+#: cogs/time_cog.py:64 cogs/time_cog.py:145
 msgid "server"
 msgstr ""
 
-#: cogs/time_cog.py:106
+#: cogs/time_cog.py:112
 msgid "server_time"
 msgstr ""
 
-#: cogs/time_cog.py:106
+#: cogs/time_cog.py:112
 msgid "Shows the current server time."
 msgstr ""
 
-#: cogs/time_cog.py:114
+#: cogs/time_cog.py:120
 #, python-brace-format
 msgid "Current server time: {0}"
 msgstr ""
 
-#: cogs/time_cog.py:119
+#: cogs/time_cog.py:125
 msgid "personal"
 msgstr ""
 
-#: cogs/time_cog.py:119
+#: cogs/time_cog.py:125
 msgid "Set your time zone to be used when interpreting your raid commands."
 msgstr ""
 
-#: cogs/time_cog.py:120
+#: cogs/time_cog.py:126
 msgid "Select a city representing your time zone."
 msgstr ""
 
-#: cogs/time_cog.py:127 cogs/time_cog.py:150
+#: cogs/time_cog.py:133 cogs/time_cog.py:156
 #, python-brace-format
 msgid "{0} is not a valid time zone!"
 msgstr ""
 
-#: cogs/time_cog.py:131
+#: cogs/time_cog.py:137
 #, python-brace-format
 msgid "Set your time zone to {0}."
 msgstr ""
 
-#: cogs/time_cog.py:134
+#: cogs/time_cog.py:140
 msgid "Deleted your time zone data."
 msgstr ""
 
-#: cogs/time_cog.py:139
+#: cogs/time_cog.py:145
 msgid "Set the time zone for this discord server."
 msgstr ""
 
-#: cogs/time_cog.py:140
+#: cogs/time_cog.py:146
 msgid "Select a city representing the time zone."
 msgstr ""
 
-#: cogs/time_cog.py:144
+#: cogs/time_cog.py:150
 msgid "You must be an admin to change the server time zone."
 msgstr ""
 
-#: cogs/time_cog.py:154
+#: cogs/time_cog.py:160
 #, python-brace-format
 msgid "Set server time zone to {0}."
 msgstr ""
 
-#: cogs/time_cog.py:157
+#: cogs/time_cog.py:163
 msgid "Deleted server time zone data."
 msgstr ""
 
