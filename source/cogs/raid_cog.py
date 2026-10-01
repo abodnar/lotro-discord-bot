@@ -1204,6 +1204,11 @@ class ConfigureModal(discord.ui.Modal):
         self.add_item(delete_field)
 
     async def on_submit(self, interaction: discord.Interaction):
+        # The raid can expire or be deleted by someone else while the modal is open.
+        if select_one(self.conn, 'Raids', ['raid_id'], ['raid_id'], [self.raid_id]) is None:
+            await interaction.response.send_message(_("This raid has been deleted."), ephemeral=True, delete_after=assign_delay)
+            self.stop()
+            return
         text_fields = interaction.data['components']
         raid_columns = [field['components'][0]['custom_id'] for field in text_fields]
         raid_values = [field['components'][0]['value'] for field in text_fields]

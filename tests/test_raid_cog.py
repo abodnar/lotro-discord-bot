@@ -224,3 +224,41 @@ class TestCheckRaids:
 
         channel.send.assert_awaited_once()
         assert '<@5>' in channel.send.await_args.args[0]  # no assignments, so the organiser is pinged
+
+
+class TestConfigureModalSubmit:
+    def make_modal(self, conn):
+        modal = raid_cog.ConfigureModal.__new__(raid_cog.ConfigureModal)
+        modal.conn = conn
+        modal.raid_id = RAID_ID
+        modal.raid_cog = SimpleNamespace(update_raid_post=AsyncMock(), bot=MagicMock())
+        modal.calendar_cog = SimpleNamespace(update_calendar=AsyncMock(), modify_guild_event=AsyncMock(),
+                                             delete_guild_event=AsyncMock())
+        return modal
+
+    def make_interaction(self, **values):
+        fields = {'name': 'Renamed', 'tier': '', 'boss': '', 'time': '', 'delete': ''} | values
+        components = [{'components': [{'custom_id': key, 'value': value}]} for key, value in fields.items()]
+        return SimpleNamespace(data={'components': components},
+                               response=SimpleNamespace(send_message=AsyncMock(), defer=AsyncMock()),
+                               guild=SimpleNamespace(id=GUILD_ID), guild_id=GUILD_ID,
+                               user=SimpleNamespace(id=PLAYER_ID), channel=MagicMock())
+
+    async def test_edit_updates_raid(self):
+        conn = make_db()
+        add_raid(conn)
+        modal = self.make_modal(conn)
+
+        await modal.on_submit(self.make_interaction())
+
+        assert select_one(conn, 'Raids', ['name'], ['raid_id'], [RAID_ID]) == 'Renamed'
+
+    async def test_submit_after_raid_deleted_does_not_recreate_it(self):
+        modal = self.make_modal(make_db())
+        interaction = self.make_interaction()
+
+        await modal.on_submit(interaction)
+
+        assert select_one(modal.conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
+        interaction.response.send_message.assert_awaited_once()
+        modal.calendar_cog.modify_guild_event.assert_not_awaited()
