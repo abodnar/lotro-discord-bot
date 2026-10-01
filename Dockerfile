@@ -9,6 +9,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -U -r requirements.txt
 
 COPY /source/ .
+# Compile the translations; LANGUAGE (env or config.json) picks one at startup.
+RUN for po in locale/*/LC_MESSAGES/messages.po; do msgfmt -o "${po%.po}.mo" "$po"; done
 COPY lotro-com-chain.pem /usr/src/
 
 ARG VERSION=dev

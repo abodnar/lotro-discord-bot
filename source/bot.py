@@ -5,7 +5,6 @@ from discord.ext import commands
 from itertools import compress
 import gettext
 import json
-import locale
 import logging
 import os
 import re
@@ -82,8 +81,6 @@ class Bot(commands.Bot):
         self.host_id = int(host_id) if host_id else None
 
         language = read_config_key(config, 'LANGUAGE', False) or 'en'
-        if language == 'fr':
-            locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
         localization = gettext.translation('messages', localedir='locale', languages=[language], fallback=True)
         if language == 'en' or hasattr(localization, '_catalog'):  # Technically 'en' has no file.
             logger.info("Using language file for '{0}'.".format(language))
