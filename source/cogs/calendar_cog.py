@@ -123,6 +123,9 @@ class CalendarCog(commands.Cog):
         except discord.Forbidden:
             logger.warning("Missing manage events permission for guild {0}".format(guild.id))
             event_id = None
+        except discord.HTTPException as e:
+            logger.warning("Failed to create guild event for raid {0}: {1}".format(raid_id, e))
+            event_id = None
         else:
             event_id = event.id
         return event_id
@@ -132,9 +135,10 @@ class CalendarCog(commands.Cog):
         res = select_one(conn, 'Settings', ['guild_events'], ['guild_id'], [guild.id])
         if not res:
             return
-        event_id, name, tier, description, timestamp = select_one(conn, 'Raids', ['event_id', 'name', 'tier', 'boss', 'time'], ['raid_id'], [raid_id])
-        if not event_id:
+        raid = select_one(conn, 'Raids', ['event_id', 'name', 'tier', 'boss', 'time'], ['raid_id'], [raid_id])
+        if not raid or not raid[0]:
             return
+        event_id, name, tier, description, timestamp = raid
 
         # discord.py does not have partial event
         try:
@@ -152,6 +156,9 @@ class CalendarCog(commands.Cog):
             await event.edit(name=event_name, description=description, start_time=start_time, end_time=end_time)
         except discord.Forbidden:
             logger.warning("Missing manage events permission for guild {0}".format(guild.id))
+        except discord.HTTPException as e:
+            # e.g. the event was deleted meanwhile, or has already started or ended
+            logger.warning("Failed to edit guild event {0} for raid {1}: {2}".format(event_id, raid_id, e))
 
     async def delete_guild_event(self, guild, raid_id):
         conn = self.bot.conn
@@ -169,6 +176,8 @@ class CalendarCog(commands.Cog):
             await event.delete()
         except discord.Forbidden:
             logger.warning("Missing manage events permission for guild {0}".format(guild.id))
+        except discord.HTTPException as e:
+            logger.warning("Failed to delete guild event {0} for raid {1}: {2}".format(event_id, raid_id, e))
 
     async def get_events(self):
         current_time = datetime.now().timestamp()

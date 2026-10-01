@@ -53,12 +53,33 @@ class Cog:
         return lambda func: func
 
 
+# Real exception classes so `except discord.NotFound:` etc. work against the mocked module.
+class HTTPException(Exception):
+    pass
+
+
+class Forbidden(HTTPException):
+    pass
+
+
+class NotFound(HTTPException):
+    pass
+
+
+class DiscordServerError(HTTPException):
+    pass
+
+
 def _install_discord_stubs():
     discord = sys.modules['discord']
     discord.ui.View = View
     discord.ui.Modal = Modal
     discord.ui.Select = Select
     discord.ui.Button = Button
+    discord.HTTPException = HTTPException
+    discord.Forbidden = Forbidden
+    discord.NotFound = NotFound
+    discord.DiscordServerError = DiscordServerError
     # `from discord.ext import commands` resolves the attribute, not sys.modules['discord.ext.commands']
     for commands in (sys.modules['discord.ext'].commands, sys.modules['discord.ext.commands']):
         commands.Cog = Cog
