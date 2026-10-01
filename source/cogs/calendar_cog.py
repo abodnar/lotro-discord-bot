@@ -137,7 +137,11 @@ class CalendarCog(commands.Cog):
             return
 
         # discord.py does not have partial event
-        event = await guild.fetch_scheduled_event(event_id, with_counts=False)
+        try:
+            event = await guild.fetch_scheduled_event(event_id, with_counts=False)
+        except discord.NotFound:
+            logger.info("Guild event {0} for raid {1} no longer exists.".format(event_id, raid_id))
+            return
         start_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
         end_time = datetime.fromtimestamp(timestamp+7200, tz=timezone.utc)
         if tier:
@@ -156,7 +160,11 @@ class CalendarCog(commands.Cog):
             return
 
         # discord.py does not have partial event
-        event = await guild.fetch_scheduled_event(event_id, with_counts=False)
+        try:
+            event = await guild.fetch_scheduled_event(event_id, with_counts=False)
+        except discord.NotFound:
+            logger.info("Guild event {0} for raid {1} was already deleted.".format(event_id, raid_id))
+            return
         try:
             await event.delete()
         except discord.Forbidden:
