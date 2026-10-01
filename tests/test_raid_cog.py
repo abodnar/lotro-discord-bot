@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.raid_cog_harness import Forbidden, load_raid_cog, make_db
+from tests.raid_cog_harness import Forbidden, NotFound, load_raid_cog, make_db
 
 raid_cog = load_raid_cog()
 
@@ -180,6 +180,18 @@ class TestCheckRaids:
         conn = make_db()
         add_raid(conn)
         post = SimpleNamespace(delete=AsyncMock())
+        cog = self.make_cog(conn, self.make_channel(post))
+
+        await cog.check_raids(self.NOW)
+
+        post.delete.assert_awaited_once()
+        assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
+
+    async def test_expired_post_already_gone_is_ignored(self):
+        # The post can be deleted by someone else between fetch_message and delete.
+        conn = make_db()
+        add_raid(conn)
+        post = SimpleNamespace(delete=AsyncMock(side_effect=NotFound()))
         cog = self.make_cog(conn, self.make_channel(post))
 
         await cog.check_raids(self.NOW)

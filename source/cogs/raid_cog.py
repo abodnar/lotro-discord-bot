@@ -654,7 +654,10 @@ class RaidCog(commands.Cog):
         else:
             if current_time > timestamp + raid_expiry_time:
                 await self.cleanup_old_raid(raid_id, "Deleted expired raid post.")
-                await post.delete()
+                try:
+                    await post.delete()
+                except discord.HTTPException as e:
+                    logger.warning("Failed to delete expired raid post {0}: {1}".format(raid_id, e))
             elif current_time < timestamp:
                 raid_start_msg = random.choice(raid_start_msgs)
                 players = select(self.conn, 'Assignment', ['player_id'], ['raid_id'], [raid_id])
