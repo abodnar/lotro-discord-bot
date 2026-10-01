@@ -153,3 +153,47 @@ class TestSignUpCancel:
         sent = interaction.channel.send.await_args.args[0]
         assert sent.startswith('<@5>,')
         assert f'<@{PLAYER_ID}>' in sent
+
+
+class TestCheckRaids:
+    NOW = 10_000  # add_raid schedules at time 0, so the raid has expired by now
+
+    def make_cog(self, conn, channel):
+        cog = TestCleanupOldRaid().make_cog(conn)
+        cog.bot.get_channel.return_value = channel
+        cog.bot.get_guild.return_value = None
+        return cog
+
+    def make_channel(self, post):
+        return SimpleNamespace(id=10, fetch_message=AsyncMock(return_value=post), send=AsyncMock())
+
+    async def test_missing_channel_cleans_up_raid(self):
+        conn = make_db()
+        add_raid(conn)
+        cog = self.make_cog(conn, None)
+
+        await cog.check_raids(self.NOW)
+
+        assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
+
+    async def test_expired_raid_is_deleted(self):
+        conn = make_db()
+        add_raid(conn)
+        post = SimpleNamespace(delete=AsyncMock())
+        cog = self.make_cog(conn, self.make_channel(post))
+
+        await cog.check_raids(self.NOW)
+
+        post.delete.assert_awaited_once()
+        assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
+
+    async def test_upcoming_raid_notifies_channel(self):
+        conn = make_db()
+        add_raid(conn)
+        channel = self.make_channel(SimpleNamespace(delete=AsyncMock()))
+        cog = self.make_cog(conn, channel)
+
+        await cog.check_raids(-100)  # raid starts in 100 seconds
+
+        channel.send.assert_awaited_once()
+        assert '<@5>' in channel.send.await_args.args[0]  # no assignments, so the organiser is pinged
