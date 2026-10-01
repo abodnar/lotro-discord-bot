@@ -19,15 +19,15 @@ python3 -m pip install -U -r requirements.txt
 
 **Docker:**
 ```bash
-docker build -t lotro-bot . && docker run lotro-bot
+docker build -t lotro-bot . && docker run -e BOT_TOKEN=... -e SERVER_TZ=America/New_York lotro-bot
 ```
 
 ## Configuration
 
-Copy `source/config.example.json` to `source/config.json` and fill in:
+Copy `source/config.example.json` to `source/config.json` (running from source) or pass environment variables (Docker; the image excludes `config.json`):
 - `BOT_TOKEN` — Discord bot token
 - `SERVER_TZ` — TZ database name (e.g. `America/New_York`)
-- `LANGUAGE` — `en`, `fr` or `es`; non-English requires generating a binary `.mo` file
+- `LANGUAGE` — `en`, `fr` or `es`; applies bot-wide (not per guild). Non-English needs a compiled `.mo` file
 
 Game data lives in `source/data/game_data.json`:
 - `CLASSES` — ordered list of class names
@@ -38,7 +38,7 @@ Game data lives in `source/data/game_data.json`:
 
 Config values can also be set as environment variables (fallback if not in `config.json`).
 
-**Generating locale binary** (required for non-English): compile `source/locale/<lang>/LC_MESSAGES/messages.po` into `messages.mo` in the same directory with a gettext `msgfmt` tool; the repo doesn't ship one.
+**Generating locale binary** (required for non-English): the Docker build compiles every `messages.po` into `messages.mo`. When running from source, compile `source/locale/<lang>/LC_MESSAGES/messages.po` into `messages.mo` in the same directory with `msgfmt`; `.mo` files are gitignored.
 
 ## Architecture
 
@@ -76,4 +76,4 @@ Slash commands for individual raids are registered dynamically in `RaidCog.__ini
 
 ### Internationalization
 
-All user-facing strings use `_("string")` (GNU gettext). The `_` function is installed globally via `localization.install()` in `bot.py`. The `source/gen_locale_strings.sh` script extracts strings for translation.
+All user-facing strings use `_("string")` (GNU gettext). The `_` function is installed globally via `localization.install()` in `bot.py`. The `source/gen_locale_strings.sh` script (run from `source/`) extracts strings into `messages.pot` and merges them into the fr/es catalogs. Slash command names stay English on purpose: `/raid_help` looks commands up by their English names.

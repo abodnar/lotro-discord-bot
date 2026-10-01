@@ -10,23 +10,24 @@
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create a new application
 2. Under **Bot**, click **Reset Token** and copy it — this is your `BOT_TOKEN`
 3. Under **Privileged Gateway Intents**, enable **Message Content Intent**
-4. Under **OAuth2 → URL Generator**, select scopes `bot` and `applications.commands`, permissions: **Manage Roles**, **Send Messages**, **Embed Links**, **Manage Events**
-   - Or use this permission integer: `8858388480`
+4. Under **OAuth2 → URL Generator**, select scopes `bot` and `applications.commands`, permissions: **View Channels**, **Send Messages**, **Embed Links**, **Read Message History**, **Manage Roles**, **Manage Events**
+   - Or use this permission integer: `8858455040`
+   - Read Message History matters: the bot re-reads each raid post, and treats a post it can't read as deleted
 5. Open the generated URL to invite the bot to your server
 
 ## 2. Configure
 
-Create `source/config.json` with your secrets:
+With Docker, settings are passed as environment variables:
 
-```json
-{
-  "BOT_TOKEN": "your-bot-token-here",
-  "SERVER_TZ": "America/New_York",
-  "LANGUAGE": "en"
-}
-```
+| Variable | Example |
+|----------|---------|
+| `BOT_TOKEN` | your bot token |
+| `SERVER_TZ` | `America/New_York` |
+| `LANGUAGE` | `en`, `fr` or `es` (optional) |
 
-Game data (classes, lineups) lives in `source/game_data.json` and is committed to the repo — see [Configuration](configuration.md) to customise it.
+`source/config.json` works too when running from source, but the Docker image doesn't include it.
+
+Game data (classes, lineups, raids) lives in `source/data/game_data.json` and is committed to the repo — see [Configuration](configuration.md) to customise it.
 
 ## 3. Run with Docker
 
@@ -35,6 +36,8 @@ docker build -t lotro-bot .
 mkdir -p data
 docker run -d --name lotro-bot \
   --restart unless-stopped \
+  -e BOT_TOKEN=your-bot-token \
+  -e SERVER_TZ=America/New_York \
   -e DB_PATH=/data/raid_db \
   -v $(pwd)/data:/data \
   lotro-bot
@@ -60,6 +63,8 @@ docker build -t lotro-bot .
 docker stop lotro-bot && docker rm lotro-bot
 docker run -d --name lotro-bot \
   --restart unless-stopped \
+  -e BOT_TOKEN=your-bot-token \
+  -e SERVER_TZ=America/New_York \
   -e DB_PATH=/data/raid_db \
   -v $(pwd)/data:/data \
   lotro-bot
@@ -67,16 +72,10 @@ docker run -d --name lotro-bot \
 
 ## Translations
 
-The bot ships in English. To generate a binary for French or Spanish:
+The bot speaks English, French or Spanish, set with `LANGUAGE` (`-e LANGUAGE=fr`). The language applies to every server the bot is in. The Docker build compiles the translations, so nothing else is needed. Slash command names stay in English.
+
+After changing user-facing strings, regenerate the catalogs from `source/` (needs the gettext tools) and translate any new entries in `locale/<lang>/LC_MESSAGES/messages.po`:
 
 ```bash
-docker exec lotro-bot msgfmt locale/fr/LC_MESSAGES/messages.po -o locale/fr/LC_MESSAGES/messages.mo
-```
-
-Set `"LANGUAGE": "fr"` in `config.json` and rebuild.
-
-To regenerate the translation template after code changes:
-
-```bash
-docker exec lotro-bot sh gen_locale_strings.sh
+cd source && sh gen_locale_strings.sh
 ```

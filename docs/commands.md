@@ -32,7 +32,7 @@ Clicking a class you're already signed up with removes that class. If it's your 
 
 | Button | Action |
 |--------|--------|
-| ⚙️ | Edit raid name, tier, aim, or time; or delete the raid |
+| 🛠️ | Edit raid name, tier, aim, or time; or delete the raid |
 | ⛏️ | Open the roster picker — assign players to slots, set per-slot spec and role |
 
 ### Roster picker dropdowns (in order)
@@ -53,8 +53,12 @@ Spec and Role are per-slot and persist when players are swapped.
 |---------|-------|
 | `/calendar channel` | Creates a self-updating overview of upcoming raids in this channel. Run once; it updates automatically as raids are posted. |
 | `/calendar discord` | Adds each raid as a Discord guild scheduled event. |
-| `/list_raids` | Lists all upcoming raids for this server. |
-| `/list_players` | Lists signed-up players in sign-up order (raid leaders only). |
+| `/calendar both` | Both of the above. |
+| `/calendar off` | Stops posting raids to any calendar. |
+| `/list_raids` | Lists the raids you're signed up for (only visible to you). |
+| `/list_players` `[raid_number]` `[cut_off]` | Lists signed-up players in sign-up order (raid leaders only). `raid_number` picks the upcoming raid (default 1); players who signed up less than `cut_off` hours before the raid (default 24) are listed as late. |
+
+The `/calendar` commands require the raid leader role (or admin).
 
 ---
 
@@ -75,6 +79,7 @@ Spec and Role are per-slot and persist when players are swapped.
 | `/leader` `<role>` | `/leader Officer` | Set the raid leader role. Leaders can edit any raid. |
 | `/kin` `<role>` `<icon>` | `/kin Kinship 🌳` | Set the kin role and the emoji marking kin members on the sign-up sheet (👪 by default; a server custom emoji works too). Give just one option to change only that; give neither to clear both. |
 | `/time_zones server` `<timezone>` | `/time_zones server America/New_York` | Set the default server timezone. |
+| `/lineup on/off` | `/lineup off` | Show or hide the suggested class slots on raid posts (on by default). |
 | `/rss on/off` | `/rss on` | Post LotRO news announcements to this channel. |
 
 ---
@@ -87,6 +92,6 @@ Spec and Role are per-slot and persist when players are swapped.
 | `/about` | Bot info, version, uptime, invite link. |
 | `/events` | Upcoming official LotRO in-game events. |
 | `/server_time` | Current server time in the configured timezone. |
-| `/loot` `<chest>` `[class]` `[level]` `[tracery]` | Loot table for any chest. Requires the LotRO data submodule. |
+| `/loot` `<chest>` `[class]` `[level]` `[tracery]` | Loot table for any chest. Data comes from LotroCompanion and is downloaded automatically at startup; the bot owner can refresh it with `!refreshlore`. |
 | `/privacy` | Data collection and retention policy. |
 | `/welcome` | Resends the welcome and setup message. |

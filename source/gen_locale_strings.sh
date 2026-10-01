@@ -1,6 +1,6 @@
 #!/bin/bash
 # Regenerate the translation template and merge into each language.
-# Run from inside Docker: docker exec lotro-bot sh gen_locale_strings.sh
+# Run from source/ with the gettext tools installed: sh gen_locale_strings.sh
 set -e
 
 xgettext --language=Python --keyword=_ --from-code=UTF-8 \

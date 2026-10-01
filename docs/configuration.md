@@ -5,7 +5,7 @@ Configuration is split across two files:
 | File | Contents | Committed? |
 |------|----------|-----------|
 | `source/config.json` | Secrets and instance settings | No (gitignored) |
-| `source/game_data.json` | Classes, lineups, creeps | Yes |
+| `source/data/game_data.json` | Classes, lineups, creeps, raids | Yes |
 
 ---
 
@@ -23,10 +23,10 @@ Configuration is split across two files:
 |-----|----------|-------------|
 | `BOT_TOKEN` | Yes | Discord bot token |
 | `SERVER_TZ` | Yes | Default timezone for raid times ([TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)) |
-| `LANGUAGE` | No | `en` (default) or `fr` |
+| `LANGUAGE` | No | `en` (default), `fr` or `es` |
 | `HOST` | No | Guild ID whose custom emoji to use as fallback |
 
-All values can also be set as environment variables (useful for Docker/CI).
+All values can also be set as environment variables. The Docker image doesn't include `config.json` (it's excluded by `.dockerignore`), so with Docker pass them with `-e` or an env file.
 
 ---
 
