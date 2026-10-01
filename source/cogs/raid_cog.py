@@ -619,7 +619,11 @@ class RaidCog(commands.Cog):
         cutoff = current_time + raid_notify_time + 1
         raids = select_le(self.conn, 'Raids', ['raid_id', 'channel_id', 'time', 'roster'], ['time'], [cutoff])
         for raid in raids:
-            await self.check_raid(raid, current_time)
+            # An unhandled error would stop the task loop for every guild until restart.
+            try:
+                await self.check_raid(raid, current_time)
+            except Exception:
+                logger.exception("Background check failed for raid {0}.".format(raid[0]))
 
         self.conn.commit()
         logger.debug("Completed raid background task.")

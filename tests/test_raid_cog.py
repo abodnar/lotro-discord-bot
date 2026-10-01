@@ -199,6 +199,21 @@ class TestCheckRaids:
         post.delete.assert_awaited_once()
         assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
 
+    async def test_failing_raid_does_not_stop_the_others(self):
+        conn = make_db()
+        add_raid(conn)
+        upsert(conn, 'Raids', ['channel_id', 'guild_id', 'organizer_id', 'name', 'time', 'roster', 'tag', 'size'],
+               [10, GUILD_ID, 5, 'Second Raid', 1, True, 'test2', 12], ['raid_id'], [RAID_ID + 1])
+        post = SimpleNamespace(delete=AsyncMock())
+        broken = SimpleNamespace(id=10, fetch_message=AsyncMock(side_effect=RuntimeError("boom")))
+        cog = self.make_cog(conn, None)
+        cog.bot.get_channel.side_effect = [broken, self.make_channel(post)]
+
+        await cog.check_raids(self.NOW)
+
+        post.delete.assert_awaited_once()
+        assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID + 1]) is None
+
     async def test_upcoming_raid_notifies_channel(self):
         conn = make_db()
         add_raid(conn)
