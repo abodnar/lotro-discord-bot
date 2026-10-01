@@ -1,7 +1,7 @@
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.raid_cog_harness import load_raid_cog, make_db
+from tests.raid_cog_harness import Forbidden, load_raid_cog, make_db
 
 raid_cog = load_raid_cog()
 
@@ -36,6 +36,20 @@ class TestCleanupOldRaid:
 
         await cog.cleanup_old_raid(RAID_ID, "test")
 
+        assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
+        assert RAID_ID not in cog.raids
+
+    async def test_role_delete_failure_still_deletes_raid(self):
+        # e.g. the raid role sits above the bot's role, or Manage Roles was revoked
+        conn = make_db()
+        add_raid(conn)
+        cog = self.make_cog(conn)
+        role = SimpleNamespace(delete=AsyncMock(side_effect=Forbidden()))
+
+        with patch.object(raid_cog.discord.utils, 'get', return_value=role):
+            await cog.cleanup_old_raid(RAID_ID, "test")
+
+        role.delete.assert_awaited_once()
         assert select_one(conn, 'Raids', ['raid_id'], ['raid_id'], [RAID_ID]) is None
         assert RAID_ID not in cog.raids
 

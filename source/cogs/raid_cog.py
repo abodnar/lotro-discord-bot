@@ -681,7 +681,10 @@ class RaidCog(commands.Cog):
         if guild:
             role = discord.utils.get(guild.roles, name=tag)
             if role:
-                await role.delete()
+                try:
+                    await role.delete()
+                except discord.HTTPException as e:
+                    logger.warning("Failed to delete raid role {0} in guild {1}: {2}".format(tag, guild_id, e))
         delete(self.conn, 'Raids', ['raid_id'], [raid_id])
         delete(self.conn, 'Players', ['raid_id'], [raid_id])
         delete(self.conn, 'Assignment', ['raid_id'], [raid_id])
