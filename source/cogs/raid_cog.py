@@ -63,14 +63,14 @@ SPEC_TO_BITMASK = {v: k for k, v in SPEC_BITMASK.items()}
 
 # (value, text label, emoji_key) — emoji_key is None for Clear
 _SPEC_CHOICES = [
-    ('clear',       'Clear',          None),
-    ('spec_red',    'Red',            'spec_red'),
-    ('spec_blue',   'Blue',           'spec_blue'),
-    ('spec_yellow', 'Yellow',         'spec_yellow'),
-    ('spec_rb',     'Red / Blue',     'spec_rb'),
-    ('spec_by',     'Blue / Yellow',  'spec_by'),
-    ('spec_ry',     'Red / Yellow',   'spec_ry'),
-    ('spec_all',    'All three',      'spec_all'),
+    ('clear',       _('Clear'),          None),
+    ('spec_red',    _('Red'),            'spec_red'),
+    ('spec_blue',   _('Blue'),           'spec_blue'),
+    ('spec_yellow', _('Yellow'),         'spec_yellow'),
+    ('spec_rb',     _('Red / Blue'),     'spec_rb'),
+    ('spec_by',     _('Blue / Yellow'),  'spec_by'),
+    ('spec_ry',     _('Red / Yellow'),   'spec_ry'),
+    ('spec_all',    _('All three'),      'spec_all'),
 ]
 
 class RaidCog(commands.Cog):
@@ -312,7 +312,7 @@ class RaidCog(commands.Cog):
         embed = discord.Embed(title=embed_title, colour=discord.Colour(0x3498db))
         for raid in raids[:25]:
             raid_id, channel_id, guild_id, name, time = raid
-            field_name = f"{name} at <t:{time}>"
+            field_name = _("{0} at <t:{1}>").format(name, time)
             field_text = f"https://discord.com/channels/{guild_id}/{channel_id}/{raid_id}"
             embed.add_field(name=field_name, value=field_text, inline=False)
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -469,9 +469,9 @@ class RaidCog(commands.Cog):
             embed_title = f"{name} {tier}\n<t:{timestamp}:F>"
         else:
             embed_title = f"{name}\n<t:{timestamp}:F>"
-        embed_description = f"Organiser: <@{organizer_id}>\n"
+        embed_description = _("Organiser: <@{0}>").format(organizer_id) + "\n"
         if tag:
-            embed_description += f"Tag: {tag}\n\n"
+            embed_description += _("Tag: {0}").format(tag) + "\n\n"
         if boss:
             embed_description += _("Aim: {0}").format(boss)
 
@@ -1181,7 +1181,7 @@ class SpecButton(discord.ui.Button):
 class ConfigureModal(discord.ui.Modal):
 
     def __init__(self, raid_cog, raid_id):
-        super().__init__(title='Raid Settings')
+        super().__init__(title=_("Raid Settings"))
         self.raid_cog = raid_cog
         self.calendar_cog = raid_cog.bot.get_cog('CalendarCog')
         self.raid_id = raid_id
@@ -1192,11 +1192,11 @@ class ConfigureModal(discord.ui.Modal):
         except TypeError:
             logger.info("The raid has been deleted during editing.")
             return
-        name_field = discord.ui.TextInput(custom_id='name', label='Name', default=name, max_length=256)
-        tier_field = discord.ui.TextInput(custom_id='tier', label='Tier', required=False, default=tier, max_length=8)
-        aim_field = discord.ui.TextInput(custom_id='boss', label='Aim', required=False, default=aim, max_length=1024)
-        time_field = discord.ui.TextInput(custom_id='time', label='Time', required=False, placeholder=_("Leave blank to keep the existing time."), max_length=64)
-        delete_field = discord.ui.TextInput(custom_id='delete', label='Delete', required=False, placeholder=_("Type 'delete' here to delete the raid."), max_length=8)
+        name_field = discord.ui.TextInput(custom_id='name', label=_("Name"), default=name, max_length=256)
+        tier_field = discord.ui.TextInput(custom_id='tier', label=_("Tier"), required=False, default=tier, max_length=8)
+        aim_field = discord.ui.TextInput(custom_id='boss', label=_("Aim"), required=False, default=aim, max_length=1024)
+        time_field = discord.ui.TextInput(custom_id='time', label=_("Time"), required=False, placeholder=_("Leave blank to keep the existing time."), max_length=64)
+        delete_field = discord.ui.TextInput(custom_id='delete', label=_("Delete"), required=False, placeholder=_("Type 'delete' here to delete the raid."), max_length=8)
         self.add_item(name_field)
         self.add_item(tier_field)
         self.add_item(aim_field)

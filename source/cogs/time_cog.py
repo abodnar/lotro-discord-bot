@@ -43,6 +43,12 @@ class TimeGroup(app_commands.Group):
         super().__init__(name=_("time_zones"), description=_("Manage time zone settings."))
 
 
+def format_weekday_time(dt):
+    """'Friday 20:00' with the weekday translated; strftime's %A follows the process locale, not LANGUAGE."""
+    weekdays = [_("Monday"), _("Tuesday"), _("Wednesday"), _("Thursday"), _("Friday"), _("Saturday"), _("Sunday")]
+    return "{0} {1}".format(weekdays[dt.weekday()], dt.strftime("%H:%M"))
+
+
 class Time(commands.Converter):
     async def convert(self, ctx, argument):
         # dateparser can take seconds to compile its locale regexes; keep it off the event loop
@@ -110,7 +116,7 @@ class TimeCog(commands.Cog):
         server_tz = pytz.timezone(tz_str)
         server_time = datetime.datetime.now(tz=server_tz)
 
-        formatted_time = server_time.strftime("%A %H:%M")
+        formatted_time = format_weekday_time(server_time)
         content = _("Current server time: {0}").format(formatted_time)
         await interaction.response.send_message(content)
 

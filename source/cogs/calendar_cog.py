@@ -241,9 +241,9 @@ class CalendarCog(commands.Cog):
                 time_str = f"<t:{e[1]}> -- <t:{e[2]}>"
             else:
                 if e[1]:
-                    time_str = f"From <t:{e[1]}>"
+                    time_str = _("From <t:{0}>").format(e[1])
                 if e[2]:
-                    time_str = f"At <t:{e[2]}>"
+                    time_str = _("At <t:{0}>").format(e[2])
             embed.add_field(name=e[0], value=time_str, inline=False)
         embed.set_footer(text=_("Last updated"))
         embed.timestamp = datetime.fromtimestamp(self.cached_events_at)
@@ -272,7 +272,7 @@ class CalendarCog(commands.Cog):
 
     group = CalendarGroup()
 
-    @group.command(name=_("off"), description=("Turn off calendars."))
+    @group.command(name=_("off"), description=_("Turn off calendars."))
     async def calendar_off(self, interaction: discord.Interaction):
         if not self.is_raid_leader(interaction.user, interaction.guild):
             await interaction.response.send_message(_("You must be a raid leader to change the calendar settings."), ephemeral=True)
@@ -282,7 +282,7 @@ class CalendarCog(commands.Cog):
         await interaction.response.send_message(content, ephemeral=True)
         self.conn.commit()
 
-    @group.command(name=_("channel"), description=("Post events to calendar in this channel."))
+    @group.command(name=_("channel"), description=_("Post events to calendar in this channel."))
     async def calendar_channel(self, interaction: discord.Interaction):
         if not self.is_raid_leader(interaction.user, interaction.guild):
             await interaction.response.send_message(_("You must be a raid leader to change the calendar settings."), ephemeral=True)
@@ -299,7 +299,7 @@ class CalendarCog(commands.Cog):
         # post calendar will commit
         await self.post_calendar(guild.id, channel)
 
-    @group.command(name=_("discord"), description=("Post events to discord calendar."))
+    @group.command(name=_("discord"), description=_("Post events to discord calendar."))
     async def calendar_discord(self, interaction: discord.Interaction):
         if not self.is_raid_leader(interaction.user, interaction.guild):
             await interaction.response.send_message(_("You must be a raid leader to change the calendar settings."), ephemeral=True)
@@ -309,7 +309,7 @@ class CalendarCog(commands.Cog):
         await interaction.response.send_message(content, ephemeral=True)
         self.conn.commit()
 
-    @group.command(name=_("both"), description=("Post events to both discord and channel calendar."))
+    @group.command(name=_("both"), description=_("Post events to both discord and channel calendar."))
     async def calendar_both(self, interaction: discord.Interaction):
         if not self.is_raid_leader(interaction.user, interaction.guild):
             await interaction.response.send_message(_("You must be a raid leader to change the calendar settings."), ephemeral=True)

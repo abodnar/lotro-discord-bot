@@ -156,24 +156,24 @@ class ConfigCog(commands.Cog):
     # Sections: maps section title → list of command names to include.
     # Names starting with * are shown as plain text (no slash command registered).
     _HELP_SECTIONS = [
-        ("📅 Scheduling", [
+        (_("📅 Scheduling"), [
             "*[raid name]",   # dynamic raid commands like /rem, /ad, /palace
             "custom", "creep",
         ]),
-        ("✅ Sign-up", [
+        (_("✅ Sign-up"), [
             "*class buttons",  # not a slash command
             "remove_roles", "specs",
         ]),
-        ("📆 Calendar", [
+        (_("📆 Calendar"), [
             "calendar", "list_raids", "list_players",
         ]),
-        ("ℹ️ Info", [
+        (_("ℹ️ Info"), [
             "about", "events", "server_time", "loot",
         ]),
-        ("⚙️ Server settings", [
+        (_("⚙️ Server settings"), [
             "leader", "kin", "time_zones", "rss",
         ]),
-        ("👤 Personal settings", [
+        (_("👤 Personal settings"), [
             "privacy",
         ]),
     ]
