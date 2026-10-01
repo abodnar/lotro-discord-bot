@@ -2,7 +2,10 @@
 
 A Discord bot for scheduling raids in Lord of the Rings Online. Players sign up via class buttons on the raid embed; raid leaders manage the roster, assign slots, and set per-slot spec and role requirements.
 
-![Screenshot](./assets/screenshots/raid.png)
+<p>
+  <img src="./assets/screenshots/raid.png" width="420" alt="Raid post with lineup, specs, roles and sign-ups">
+  <img src="./assets/screenshots/creep.png" width="420" alt="Ettenmoors creep event with monster-class sign-ups">
+</p>
 
 ## Features
 
