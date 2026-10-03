@@ -15,9 +15,11 @@ class _SuppressReconnectTraceback(logging.Filter):
 
 def main():
     bot = Bot()
-    handler = logging.StreamHandler()
+    logging.getLogger('discord').setLevel(logging.INFO)
     logging.getLogger('discord.client').addFilter(_SuppressReconnectTraceback())
-    bot.run(bot.token, log_handler=handler)
+    # bot.py's basicConfig root handler already prints discord.py records;
+    # a second handler from run() would print each one twice.
+    bot.run(bot.token, log_handler=None)
     bot.logger.info("Shutting down.")
 
 
