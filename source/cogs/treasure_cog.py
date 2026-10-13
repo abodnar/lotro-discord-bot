@@ -222,12 +222,15 @@ def getItemsFromTreasureGroup(treasureGroupProfileID, container_frequency):
         drops = sorted(drops, key=lambda d: -d['weight'])
         result = ["{0}% -- {1}{2}".format(drop['percentage'], drop['quantity'], drop['name']) for drop in drops]
         return result
+    results = []
     #For old chests treasureGroup can point to treasureList instead of itemList directly
     entries = lore.entries('treasureList', treasureGroupProfileID)
     if entries is not None:
+        total = sum(int(entry['weight']) for entry in entries)
         for entry in entries:
-            result = getItemsFromTreasureGroup(entry['treasureGroupProfileId'], container_frequency)
-            return(result)
+            odds = int(entry['weight'])/total * container_frequency
+            results = results + getItemsFromTreasureGroup(entry['treasureGroupProfileId'], odds)
+        return(results)
 
 def getItemDrops(trophyListIDs):
     loot = []

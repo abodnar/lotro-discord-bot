@@ -10,6 +10,7 @@ CONTAINERS_XML = """<containers>
   <container id="c1" name="Wooden Chest" trophyListId="t1" treasureListId="tr1"/>
   <container id="c2" name="Wooden Chest" trophyListId="t1" treasureListId="tr1"/>
   <container id="c3" name="Class Chest" filteredTrophyTableId="f1"/>
+  <container id="c4" name="Old Chest" trophyListId="t3"/>
 </containers>"""
 
 LOOTS_XML = """<loots>
@@ -24,6 +25,16 @@ LOOTS_XML = """<loots>
     <itemsTableEntry name="Gem" weight="1"/>
     <itemsTableEntry name="Coin" quantity="5" weight="3"/>
   </itemsTable>
+  <trophyList id="t3">
+    <trophyListEntry treasureGroupProfileId="tr2" dropFrequency="1.0"/>
+  </trophyList>
+  <itemsTable id="i2">
+    <itemsTableEntry name="Ruby" weight="1"/>
+  </itemsTable>
+  <treasureList id="tr2">
+    <treasureListEntry treasureGroupProfileId="i1" weight="1"/>
+    <treasureListEntry treasureGroupProfileId="i2" weight="3"/>
+  </treasureList>
   <treasureList id="tr1">
     <treasureListEntry treasureGroupProfileId="i1"/>
   </treasureList>
@@ -48,8 +59,8 @@ def lore_dir(tmp_path, monkeypatch):
 def test_load_builds_database_and_container_names(lore_dir):
     assert treasure_cog.load_lore_data() is True
     assert (lore_dir / "lore.db").exists()
-    assert treasure_cog.containers == {"c1": "Wooden Chest", "c2": "Wooden Chest", "c3": "Class Chest"}
-    assert treasure_cog.containers_unique == {"c1": "Wooden Chest", "c3": "Class Chest"}
+    assert treasure_cog.containers == {"c1": "Wooden Chest", "c2": "Wooden Chest", "c3": "Class Chest", "c4": "Old Chest"}
+    assert treasure_cog.containers_unique == {"c1": "Wooden Chest", "c3": "Class Chest", "c4": "Old Chest"}
 
 
 def test_load_without_files_returns_false(tmp_path, monkeypatch):
@@ -86,3 +97,11 @@ def test_compute_loot_filters_by_class_and_level(lore_dir):
     assert treasure_cog.compute_loot("c3", "Captain", 60, False) == [[100.0, ["100% -- Captain Helm"]]]
     assert treasure_cog.compute_loot("c3", "Captain", 40, False) == []
     assert treasure_cog.compute_loot("c3", "Hunter", 60, False) == []
+
+
+def test_compute_loot_combines_every_group_of_a_treasure_list(lore_dir):
+    # Old chests point a trophy entry at a treasureList; each weighted group's odds are scaled by its share.
+    treasure_cog.load_lore_data()
+    assert treasure_cog.compute_loot("c4", "Captain", 160, False) == [
+        [100.0, ["18.75% -- 5 Coin", "6.25% -- Gem", "75.00% -- Ruby"]],
+    ]
