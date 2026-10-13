@@ -12,7 +12,7 @@ Use `/raid_commands` or `/raid_help` in Discord for a quick in-app overview.
 | `/custom` `<name>` `<time>` `[tier]` `[aim]` | `/custom Turtle friday 8pm` | Schedule a custom event. |
 | `/creep` `<time>` `[aim]` | `/creep saturday 2100` | Schedule an Ettenmoors event. |
 
-Time accepts natural language (`tomorrow 8pm`, `friday 20:00`, `2026-06-10 2100`).
+Time accepts natural language (`tomorrow 8pm`, `friday 20:00`, `vendredi 20h`, `2026-06-10 2100`).
 
 ---
 
@@ -92,6 +92,6 @@ The `/calendar` commands require the raid leader role (or admin).
 | `/about` | Bot info, version, uptime, invite link. |
 | `/events` | Upcoming official LotRO in-game events. |
 | `/server_time` | Current server time in the configured timezone. |
-| `/loot` `<chest>` `[class]` `[level]` `[tracery]` | Loot table for any chest. Data comes from LotroCompanion and is downloaded automatically at startup; the bot owner can refresh it with `!refreshlore`. |
+| `/loot` `<chest>` `[class]` `[level]` `[tracery]` | Loot table for any container: chests, boxes and bundles, and also harvest nodes such as ore deposits. Pick a suggestion from the list; typed text that doesn't match one is rejected. Data comes from LotroCompanion and is downloaded automatically at startup; the bot owner can refresh it with `!refreshlore`. |
 | `/privacy` | Data collection and retention policy. |
 | `/welcome` | Resends the welcome and setup message. |
