@@ -117,11 +117,23 @@ def load_raid_cog():
     return module
 
 
+_open_dbs = []
+
+
 def make_db():
-    """In-memory database with the raid tables, using the harness CLASSES."""
+    """In-memory database with the raid tables, using the harness CLASSES.
+
+    Closed after each test by close_dbs() (an autouse fixture in conftest.py).
+    """
     load_raid_cog()  # imports database with the harness config
     import database
     conn = sqlite3.connect(':memory:')
+    _open_dbs.append(conn)
     for table in ('raid', 'player', 'assign', 'specs'):
         database.create_table(conn, table)
     return conn
+
+
+def close_dbs():
+    while _open_dbs:
+        _open_dbs.pop().close()

@@ -14,3 +14,13 @@ for _mod in ['discord', 'discord.ext', 'discord.ext.commands', 'discord.ext.task
 _mock_raid = MagicMock()
 _mock_raid.Classes = Enum('Classes', ['Captain', 'Hunter', 'Guardian', 'Champion', 'Burglar'])
 sys.modules['cogs.raid_cog'] = _mock_raid
+
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _close_test_dbs():
+    yield
+    from tests.raid_cog_harness import close_dbs
+    close_dbs()
