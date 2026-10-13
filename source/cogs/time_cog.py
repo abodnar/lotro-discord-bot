@@ -8,6 +8,15 @@ import re
 
 # Match bare HHMM military time (e.g. 2100, 0900) but not date parts like 2026 in 2026-06-05
 _HHMM_RE = re.compile(r'(?<!\d)([01]\d|2[0-3])([0-5]\d)(?!\d)(?![-/])')
+# Match a bare hour like "20h" (French/Spanish), which dateparser reads as a 20-hour duration, or as
+# the 20th after a weekday. An optional preceding "in"/"dans"/"en" marks a real duration ("dans 2h").
+_HOUR_H_RE = re.compile(r'(\b(?:in|dans|en)\s+)?(?<![\d:])([01]?\d|2[0-3])\s?h(?!\w)', re.IGNORECASE)
+
+
+def normalize_time_input(argument):
+    """Rewrite clock times dateparser misreads: "2030" -> "20:30", "20h" -> "20:00"."""
+    argument = _HHMM_RE.sub(r'\1:\2', argument)
+    return _HOUR_H_RE.sub(lambda m: m.group(0) if m.group(1) else m.group(2) + ':00', argument)
 
 from discord import app_commands
 from discord.ext import commands
@@ -59,7 +68,7 @@ class Time(commands.Converter):
     def converter(bot, guild_id, author_id, argument):
         time_cog = bot.get_cog('TimeCog')
         parse_settings = {'PREFER_DATES_FROM': 'future'}
-        argument = _HHMM_RE.sub(r'\1:\2', argument)
+        argument = normalize_time_input(argument)
         argument_lower = argument.lower()
         server = _("server")
         if server in argument_lower:
