@@ -71,7 +71,7 @@ Slash commands for individual raids are registered dynamically in `RaidCog.__ini
 
 - `source/data/game_data.json` — classes, lineups, and raid definitions
 - `source/__init__.py` — bot version (`__version__`)
-- `data/lore/containers.xml`, `data/lore/loots.xml` — loot data for `/loot` command; auto-fetched from GitHub at startup if absent (see `source/lore_data.py`)
+- `data/lore/containers.xml`, `data/lore/loots.xml` — loot data for `/loot` command; auto-fetched from GitHub at startup if absent (see `source/lore_data.py`). Streamed into `data/lore/lore.db` (SQLite, rebuilt whenever the XML is newer; see `source/lore_db.py`) so the parsed tree isn't held in memory
 - `source/locale/` — i18n files; `messages.po` is source, `messages.mo` is compiled binary
 
 ### Internationalization

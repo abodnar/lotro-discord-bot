@@ -1,21 +1,12 @@
-import xml.etree.ElementTree as ET
-
 from cogs.treasure_cog import _build_unique_containers, _dedup_loot, formatNumber, override_player_class
 
 
 def _make_container(id_, name, **attrs):
-    el = ET.Element('container')
-    el.attrib['id'] = id_
-    el.attrib['name'] = name
-    el.attrib.update(attrs)
-    return el
+    return {'id': id_, 'name': name, **attrs}
 
 
 def _make_root(*containers):
-    root = ET.Element('containers')
-    for c in containers:
-        root.append(c)
-    return root
+    return list(containers)
 
 
 class TestFormatNumber:

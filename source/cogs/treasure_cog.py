@@ -1,6 +1,8 @@
 import asyncio
 import discord
 import logging
+import os
+import sqlite3
 import xml.etree.ElementTree as ET
 
 from discord import app_commands
@@ -9,24 +11,20 @@ from discord.ext import tasks
 from typing import Optional
 
 import lore_data
+import lore_db
 from cogs.raid_cog import Classes
 from utils import get_partial_matches
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-containerRoot = None
+lore = None
 containers = {}
 containers_unique = {}
-itemsTables = []
-filteredTrophyTables = []
-weightedTreasureTables = []
-trophyLists = []
-treasureLists = []
 footer_text = _("Lore data not loaded yet.")
 
 
-def _build_unique_containers(root, all_containers):
+def _build_unique_containers(container_attrs, all_containers):
     """Return a subset of all_containers with duplicate loot tables removed.
 
     Two containers are considered duplicates if they share the same name and
@@ -35,18 +33,18 @@ def _build_unique_containers(root, all_containers):
     """
     seen = set()
     result = {}
-    for child in root:
-        cid = child.attrib['id']
+    for attrs in container_attrs:
+        cid = attrs['id']
         if cid not in all_containers:
             continue
         sig = (
-            child.attrib.get('name', ''),
-            child.attrib.get('filteredTrophyTableId', ''),
-            child.attrib.get('filteredTrophyTableId2', ''),
-            child.attrib.get('filteredTrophyTableId3', ''),
-            child.attrib.get('trophyListId', ''),
-            child.attrib.get('barterTrophyListId', ''),
-            child.attrib.get('treasureListId', ''),
+            attrs.get('name', ''),
+            attrs.get('filteredTrophyTableId', ''),
+            attrs.get('filteredTrophyTableId2', ''),
+            attrs.get('filteredTrophyTableId3', ''),
+            attrs.get('trophyListId', ''),
+            attrs.get('barterTrophyListId', ''),
+            attrs.get('treasureListId', ''),
         )
         if sig not in seen:
             seen.add(sig)
@@ -54,29 +52,30 @@ def _build_unique_containers(root, all_containers):
     return result
 
 
+def _db_is_stale(db_path, xml_paths):
+    if not os.path.exists(db_path):
+        return True
+    db_mtime = os.path.getmtime(db_path)
+    return any(os.path.exists(p) and os.path.getmtime(p) > db_mtime for p in xml_paths)
+
+
 def load_lore_data():
-    """Load and parse the lore XML files into module-level data structures.
+    """Load the lore data, rebuilding the SQLite store if the XML is newer.
 
-    Parses into local variables first; the module globals below are only
-    reassigned if both files parse successfully. Returns True on success,
-    False if the files are missing or invalid (existing data, if any, is
-    left untouched).
+    The module globals below are only reassigned if the store builds and
+    opens successfully. Returns True on success, False if the files are
+    missing or invalid (existing data, if any, is left untouched).
     """
-    global containerRoot, containers, containers_unique, itemsTables, filteredTrophyTables
-    global weightedTreasureTables, trophyLists, treasureLists, footer_text
+    global lore, containers, containers_unique, footer_text
 
+    xml_paths = [os.path.join(lore_data.LORE_DIR, name) for name in lore_data.LORE_FILES]
+    db_path = os.path.join(lore_data.LORE_DIR, 'lore.db')
     try:
-        tree = ET.parse('../data/lore/containers.xml')
-        new_containerRoot = tree.getroot()
-        new_containers = {child.attrib['id']: child.attrib['name'] for child in new_containerRoot}
-        tree = ET.parse('../data/lore/loots.xml')
-        root = tree.getroot()
-        new_itemsTables = root.findall("itemsTable")
-        new_filteredTrophyTables = root.findall("filteredTrophyTable")
-        new_weightedTreasureTables = root.findall("weightedTreasureTable")
-        new_trophyLists = root.findall("trophyList")
-        new_treasureLists = root.findall("treasureList")
-    except (FileNotFoundError, ET.ParseError):
+        if _db_is_stale(db_path, xml_paths):
+            lore_db.build(*xml_paths, db_path)
+        new_lore = lore_db.LoreDB(db_path)
+        container_attrs = new_lore.containers()
+    except (OSError, ET.ParseError, sqlite3.Error):
         return False
 
     info = lore_data.load_version_info()
@@ -87,11 +86,13 @@ def load_lore_data():
     else:
         new_footer_text = _("Powered by LotroCompanion.")
 
-    containerRoot, containers = new_containerRoot, new_containers
-    containers_unique = _build_unique_containers(new_containerRoot, new_containers)
-    itemsTables, filteredTrophyTables = new_itemsTables, new_filteredTrophyTables
-    weightedTreasureTables, trophyLists, treasureLists = new_weightedTreasureTables, new_trophyLists, new_treasureLists
+    new_containers = {attrs['id']: attrs['name'] for attrs in container_attrs}
+    old_lore, lore = lore, new_lore
+    containers = new_containers
+    containers_unique = _build_unique_containers(container_attrs, new_containers)
     footer_text = new_footer_text
+    if old_lore is not None:
+        old_lore.close()
     return True
 
 
@@ -109,90 +110,87 @@ def getContainerContents(containerID):
     filteredTrophyTableIDs = []
     trophyListIDs = []
     treasureListIDs = []
-    for child in containerRoot:
-        if child.attrib['id'] == containerID:
-            try:
-                filteredTrophyTableIDs.append(child.attrib['filteredTrophyTableId'])
-                filteredTrophyTableIDs.append(child.attrib['filteredTrophyTableId2'])
-                filteredTrophyTableIDs.append(child.attrib['filteredTrophyTableId3'])
-            except KeyError:
-                pass
-            try:
-                trophyListIDs.append([(1, child.attrib['trophyListId'])])
-            except KeyError:
-                pass
-            try:
-                trophyListIDs.append([(1, child.attrib['barterTrophyListId'])])
-            except KeyError:
-                pass
-            try:
-                treasureListIDs.append(child.attrib['treasureListId'])
-            except KeyError:
-                pass
-            try:
-                child.attrib['weightedTreasureTableId']
-                #TODO
-                raise NotImplementedError
-            except KeyError:
-                pass
-            try:
-                child.attrib['skirmishLootTableId']
-                #TODO
-                raise NotImplementedError
-            except KeyError:
-                pass
-            return (filteredTrophyTableIDs, trophyListIDs, treasureListIDs)
+    attrs = lore.container(containerID)
+    if attrs is not None:
+        try:
+            filteredTrophyTableIDs.append(attrs['filteredTrophyTableId'])
+            filteredTrophyTableIDs.append(attrs['filteredTrophyTableId2'])
+            filteredTrophyTableIDs.append(attrs['filteredTrophyTableId3'])
+        except KeyError:
+            pass
+        try:
+            trophyListIDs.append([(1, attrs['trophyListId'])])
+        except KeyError:
+            pass
+        try:
+            trophyListIDs.append([(1, attrs['barterTrophyListId'])])
+        except KeyError:
+            pass
+        try:
+            treasureListIDs.append(attrs['treasureListId'])
+        except KeyError:
+            pass
+        try:
+            attrs['weightedTreasureTableId']
+            #TODO
+            raise NotImplementedError
+        except KeyError:
+            pass
+        try:
+            attrs['skirmishLootTableId']
+            #TODO
+            raise NotImplementedError
+        except KeyError:
+            pass
+        return (filteredTrophyTableIDs, trophyListIDs, treasureListIDs)
 
-def getTrophyListFromWeightedTreasureTable(weightedTreasureTableID, weightedTreasureTables):
+def getTrophyListFromWeightedTreasureTable(weightedTreasureTableID):
     trophyListIDs = []
-    for element in weightedTreasureTables:
-        if element.attrib['id'] == weightedTreasureTableID:
-            total = 0
-            for entry in element:
-                attributes = entry.attrib
-                weight = int(attributes['weight'])
-                total += weight
-                trophyListID = attributes['trophyListId']
-                trophyListIDs.append([weight, trophyListID])
-            for trophyListID in trophyListIDs:
-                trophyListID[0] = trophyListID[0]/total
-            return trophyListIDs
+    entries = lore.entries('weightedTreasureTable', weightedTreasureTableID)
+    if entries is not None:
+        total = 0
+        for attributes in entries:
+            weight = int(attributes['weight'])
+            total += weight
+            trophyListID = attributes['trophyListId']
+            trophyListIDs.append([weight, trophyListID])
+        for trophyListID in trophyListIDs:
+            trophyListID[0] = trophyListID[0]/total
+        return trophyListIDs
 
 def getTrophyListIDs(filteredTrophyTableIDs, trophyListIDs, _class, level):
     for filteredTrophyTableID in filteredTrophyTableIDs:
-        for element in filteredTrophyTables:
-            if element.attrib['id'] == filteredTrophyTableID:
-                for entry in element:
-                    try:
-                        minLevel = int(entry.attrib['minLevel'])
-                    except KeyError:
-                        pass
-                    else:
-                        if minLevel > level:
-                            continue
-                    try:
-                        maxLevel = int(entry.attrib['maxLevel'])
-                    except KeyError:
-                        pass
-                    else:
-                        if maxLevel < level:
-                            continue
-                    try:
-                        requiredClass = entry.attrib['requiredClass']
-                    except KeyError:
-                        pass
-                    else:
-                        if _class not in requiredClass:
-                            continue
-                    try:
-                        trophyListID = entry.attrib['trophyListId']
-                        trophyListIDs.append([(1, trophyListID)])
-                    except KeyError:
-                        weightedTreasureTableID = entry.attrib['weightedTreasureTableId']
-                        result = getTrophyListFromWeightedTreasureTable(weightedTreasureTableID, weightedTreasureTables)
-                        trophyListIDs.append(result)
-                        pass
-                break
+        entries = lore.entries('filteredTrophyTable', filteredTrophyTableID)
+        if entries is not None:
+            for entry in entries:
+                try:
+                    minLevel = int(entry['minLevel'])
+                except KeyError:
+                    pass
+                else:
+                    if minLevel > level:
+                        continue
+                try:
+                    maxLevel = int(entry['maxLevel'])
+                except KeyError:
+                    pass
+                else:
+                    if maxLevel < level:
+                        continue
+                try:
+                    requiredClass = entry['requiredClass']
+                except KeyError:
+                    pass
+                else:
+                    if _class not in requiredClass:
+                        continue
+                try:
+                    trophyListID = entry['trophyListId']
+                    trophyListIDs.append([(1, trophyListID)])
+                except KeyError:
+                    weightedTreasureTableID = entry['weightedTreasureTableId']
+                    result = getTrophyListFromWeightedTreasureTable(weightedTreasureTableID)
+                    trophyListIDs.append(result)
     return trophyListIDs
 
 def formatNumber(number):
@@ -206,31 +204,30 @@ def formatNumber(number):
 
 def getItemsFromTreasureGroup(treasureGroupProfileID, container_frequency):
     drops = []
-    for element in itemsTables:
-        if element.attrib['id'] == treasureGroupProfileID:
-            total = 0
-            for entry in element:
-                attributes = entry.attrib
-                weight = int(attributes['weight'])
-                total += weight
-                name = attributes['name']
-                try:
-                    quantity = attributes['quantity'] + " "
-                except KeyError:
-                    quantity = ""
-                drops.append({'quantity': quantity, 'name': name, 'weight': weight})
-            for drop in drops:
-                percentage = drop['weight']/total * 100 * container_frequency
-                drop['percentage'] = formatNumber(percentage)
-            drops = sorted(drops, key=lambda d: -d['weight'])
-            result = ["{0}% -- {1}{2}".format(drop['percentage'], drop['quantity'], drop['name']) for drop in drops]
-            return result
+    entries = lore.entries('itemsTable', treasureGroupProfileID)
+    if entries is not None:
+        total = 0
+        for attributes in entries:
+            weight = int(attributes['weight'])
+            total += weight
+            name = attributes['name']
+            try:
+                quantity = attributes['quantity'] + " "
+            except KeyError:
+                quantity = ""
+            drops.append({'quantity': quantity, 'name': name, 'weight': weight})
+        for drop in drops:
+            percentage = drop['weight']/total * 100 * container_frequency
+            drop['percentage'] = formatNumber(percentage)
+        drops = sorted(drops, key=lambda d: -d['weight'])
+        result = ["{0}% -- {1}{2}".format(drop['percentage'], drop['quantity'], drop['name']) for drop in drops]
+        return result
     #For old chests treasureGroup can point to treasureList instead of itemList directly
-    for element in treasureLists:
-        if element.attrib['id'] == treasureGroupProfileID:
-            for entry in element:
-                result = getItemsFromTreasureGroup( entry.attrib['treasureGroupProfileId'], container_frequency)
-                return(result)
+    entries = lore.entries('treasureList', treasureGroupProfileID)
+    if entries is not None:
+        for entry in entries:
+            result = getItemsFromTreasureGroup(entry['treasureGroupProfileId'], container_frequency)
+            return(result)
 
 def getItemDrops(trophyListIDs):
     loot = []
@@ -242,45 +239,43 @@ def getItemDrops(trophyListIDs):
         else:
             weightedGroup = False
         for trophyListID in trophyListIDSet:
-            for element in trophyLists:
-                if element.attrib['id'] == trophyListID[1]:
-                    if weightedGroup:
-                        assert(len(element) == 1)
-                    for entry in element:
+            entries = lore.entries('trophyList', trophyListID[1])
+            if entries is not None:
+                if weightedGroup:
+                    assert(len(entries) == 1)
+                for entry in entries:
+                    try:
+                        treasureGroup = entry['treasureGroupProfileId']
+                    except KeyError:
+                        item = entry['name']
                         try:
-                            treasureGroup = entry.attrib['treasureGroupProfileId']
+                            quantity = entry['quantity'] + " "
                         except KeyError:
-                            item = entry.attrib['name']
-                            try:
-                                quantity = entry.attrib['quantity'] + " "
-                            except KeyError:
-                                quantity = ""
-                            if weightedGroup:
-                                percentage = formatNumber(trophyListID[0] * 100)
-                                item = ["{0}% -- {1}{2}".format(percentage, quantity, item)]
-                            else:
-                                item = ["100% -- " + quantity + item]
-                        else:
-                            item = getItemsFromTreasureGroup(treasureGroup, trophyListID[0])
-                        frequency = float(entry.attrib['dropFrequency']) * 100
+                            quantity = ""
                         if weightedGroup:
-                            assert(int(frequency) == 100)
-                            loot[index][1].extend(item)
+                            percentage = formatNumber(trophyListID[0] * 100)
+                            item = ["{0}% -- {1}{2}".format(percentage, quantity, item)]
                         else:
-                            loot.append([frequency, item])
-                    break
+                            item = ["100% -- " + quantity + item]
+                    else:
+                        item = getItemsFromTreasureGroup(treasureGroup, trophyListID[0])
+                    frequency = float(entry['dropFrequency']) * 100
+                    if weightedGroup:
+                        assert(int(frequency) == 100)
+                        loot[index][1].extend(item)
+                    else:
+                        loot.append([frequency, item])
     return loot
 
 def appendTreasureDrops(treasureListIDs, loot):
     for treasureListID in treasureListIDs:
-        for element in treasureLists:
-            if element.attrib['id'] == treasureListID:
-                for entry in element:
-                    treasureGroup = entry.attrib['treasureGroupProfileId']
-                    item = getItemsFromTreasureGroup(treasureGroup, 1)
-                    #frequency = float(entry.attrib['dropFrequency']) * 100
-                    loot.append([-1, item])
-                break
+        entries = lore.entries('treasureList', treasureListID)
+        if entries is not None:
+            for entry in entries:
+                treasureGroup = entry['treasureGroupProfileId']
+                item = getItemsFromTreasureGroup(treasureGroup, 1)
+                #frequency = float(entry['dropFrequency']) * 100
+                loot.append([-1, item])
     return loot
 
 def _dedup_loot(loot):
@@ -292,6 +287,30 @@ def _dedup_loot(loot):
             seen.add(key)
             result.append([freq, items])
     return result
+
+
+def compute_loot(chest, _class, level, tracery):
+    """Drop table for a container as [frequency, [item lines]] pairs; frequency -1 means unknown.
+
+    Raises NotImplementedError for containers using loot tables we can't parse.
+    """
+    filteredTrophyTableIDs, trophyListIDs, treasureListIDs = getContainerContents(chest)
+    traceryID = []
+    if not tracery:
+        traceryID = [_id for _id in filteredTrophyTableIDs if _id in traceryIDs]
+        for _traceryID in traceryID:
+            filteredTrophyTableIDs.remove(_traceryID)
+
+    queryClass = override_player_class(_class)
+    trophyListIDs = getTrophyListIDs(filteredTrophyTableIDs, trophyListIDs, queryClass, level)
+    loot = getItemDrops(trophyListIDs)
+    if not tracery and traceryID and level>=50:
+        if len(traceryID)==1:
+            loot.append((100, [_("A tracery (pass tracery=True to expand this list)")]))
+        else:
+            loot.append((100, [_("{0} traceries (pass tracery=True to expand this list)").format(len(traceryID))]))
+    loot = appendTreasureDrops(treasureListIDs, loot)
+    return _dedup_loot(loot)
 
 
 def generateLootEmbed(loot, container, level, classes):
@@ -320,7 +339,7 @@ def generateLootEmbed(loot, container, level, classes):
     return embed
 
 async def container_autocomplete(interaction: discord.Interaction, current: str):
-    if not current or containerRoot is None:
+    if not current or lore is None:
         return []
     suggestions = get_partial_matches(current, containers_unique, keys=True)
     return [
@@ -376,33 +395,18 @@ class TreasureCog(commands.Cog):
     @app_commands.describe(chest=_("The name of the container to see the drop table for."), classes=_("The class for which to see the drop table."), level=_("The character level for which to see the drop table."), tracery=_("Whether the tracery drop table should be shown in full."))
     @app_commands.autocomplete(chest=container_autocomplete)
     async def loot_respond(self, interaction: discord.Interaction, chest: str, classes: Optional[Classes]=Classes.Captain, level: Optional[app_commands.Range[int, 1, 160]]=160, tracery: Optional[bool]=False):
-        if containerRoot is None:
+        if lore is None:
             await interaction.response.send_message(_("Lore data not available. Ask the bot owner to run the refresh command."))
             return
         if chest not in containers.keys():
             await interaction.response.send_message(_("Unknown container."))
             return
+        _class = classes.name
         try:
-            filteredTrophyTableIDs, trophyListIDs, treasureListIDs = getContainerContents(chest)
+            loot = compute_loot(chest, _class, level, tracery)
         except NotImplementedError:
             await interaction.response.send_message(_("Cannot parse obsolete container."))
             return
-        if not tracery:
-            traceryID = [_id for _id in filteredTrophyTableIDs if _id in traceryIDs]
-            for _traceryID in traceryID:
-                filteredTrophyTableIDs.remove(_traceryID)
-
-        _class = classes.name
-        queryClass = override_player_class(_class)
-        trophyListIDs = getTrophyListIDs(filteredTrophyTableIDs, trophyListIDs, queryClass, level)
-        loot = getItemDrops(trophyListIDs)
-        if not tracery and traceryID and level>=50:
-            if len(traceryID)==1:
-                loot.append((100, [_("A tracery (pass tracery=True to expand this list)")]))
-            else:
-                loot.append((100, [_("{0} traceries (pass tracery=True to expand this list)").format(len(traceryID))]))
-        loot = appendTreasureDrops(treasureListIDs, loot)
-        loot = _dedup_loot(loot)
         embed = generateLootEmbed(loot, containers[chest], level, _class)
         if len(embed) > 6000:
             # Check for send messages permission

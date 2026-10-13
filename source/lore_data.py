@@ -77,10 +77,16 @@ async def _download_file(session, url, dest_path):
                 f.write(chunk)
 
 
+def _check_well_formed(path):
+    # Stream rather than ET.parse: building the full loots.xml tree costs ~100 MB.
+    for _event, elem in ET.iterparse(path):
+        elem.clear()
+
+
 async def _validate_xml(path):
     loop = asyncio.get_running_loop()
     try:
-        await loop.run_in_executor(None, ET.parse, path)
+        await loop.run_in_executor(None, _check_well_formed, path)
     except ET.ParseError as e:
         raise ValueError(f"Downloaded file {os.path.basename(path)} is not valid XML: {e}") from e
 
