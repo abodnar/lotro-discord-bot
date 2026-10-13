@@ -274,11 +274,16 @@ def appendTreasureDrops(treasureListIDs, loot):
     for treasureListID in treasureListIDs:
         entries = lore.entries('treasureList', treasureListID)
         if entries is not None:
+            # One group is picked by weight, as in getItemsFromTreasureGroup. A group can be
+            # listed more than once, so sum its weights to show it once at its combined chance.
+            weights = {}
             for entry in entries:
-                treasureGroup = entry['treasureGroupProfileId']
+                group = entry['treasureGroupProfileId']
+                weights[group] = weights.get(group, 0) + int(entry['weight'])
+            total = sum(weights.values())
+            for treasureGroup, weight in weights.items():
                 item = getItemsFromTreasureGroup(treasureGroup, 1)
-                #frequency = float(entry['dropFrequency']) * 100
-                loot.append([-1, item])
+                loot.append([weight/total * 100, item])
     return loot
 
 def _dedup_loot(loot):
@@ -293,7 +298,7 @@ def _dedup_loot(loot):
 
 
 def compute_loot(chest, _class, level, tracery):
-    """Drop table for a container as [frequency, [item lines]] pairs; frequency -1 means unknown.
+    """Drop table for a container as [frequency %, [item lines]] pairs.
 
     Raises NotImplementedError for containers using loot tables we can't parse.
     """
@@ -331,10 +336,7 @@ def generateLootEmbed(loot, container, level, classes):
             items = pair[1][i:i+blocksize]
             msg = "\n".join(items)
             if i == 0:
-                if pair[0] == -1:
-                    field_name = _("??% chance to get one of the following:")
-                else:
-                    field_name = _("%.3g%% chance to get one of the following:") % pair[0]
+                field_name = _("%.3g%% chance to get one of the following:") % pair[0]
             else:
                 field_name = "\u200b"
             embed.add_field(name=field_name, value=msg, inline=False)
