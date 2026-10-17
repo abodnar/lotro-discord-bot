@@ -720,11 +720,11 @@ msgstr "Il n'y a aucun joueur à assigner pour ce raid !"
 msgid ""
 "**Assign a player:** choose Player → Class (Slot is optional — automatic finds the best match).\n"
 "**Set slot spec/role:** choose a Slot number first, then Spec or Role.\n"
-"*(This message expires after 60s without interaction.)*"
+"*(This message expires after 15 minutes.)*"
 msgstr ""
 "**Assigner un joueur :** choisissez Joueur → Classe (l'emplacement est facultatif — le mode automatique trouve le meilleur).\n"
 "**Définir la spécialisation/le rôle d'un emplacement :** choisissez d'abord un numéro d'emplacement, puis Spécialisation ou Rôle.\n"
-"*(Ce message expire après 60 s sans interaction.)*"
+"*(Ce message expire après 15 minutes.)*"
 
 #: cogs/raid_cog.py:829
 msgid "Error: Missing 'Manage roles' permission to assign the class role."

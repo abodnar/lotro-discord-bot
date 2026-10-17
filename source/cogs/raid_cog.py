@@ -792,7 +792,7 @@ class RaidView(discord.ui.View):
             return
         msg = _("**Assign a player:** choose Player → Class (Slot is optional — automatic finds the best match).\n"
                 "**Set slot spec/role:** choose a Slot number first, then Spec or Role.\n"
-                "*(This message expires after 60s without interaction.)*")
+                "*(This message expires after 15 minutes.)*")
         view = SelectView(self.raid_cog, raid_id)
         await interaction.response.send_message(msg, view=view, ephemeral=True)
         roster = select_one(self.conn, 'Raids', ['roster'], ['raid_id'], [raid_id])
@@ -959,7 +959,7 @@ class EmojiButton(discord.ui.Button):
 
 class SelectView(discord.ui.View):
     def __init__(self, raid_cog, raid_id):
-        super().__init__(timeout=60)
+        super().__init__(timeout=900)
         self.raid_cog = raid_cog
         self.raid_id = raid_id
         self.conn = raid_cog.conn
