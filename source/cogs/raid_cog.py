@@ -199,6 +199,7 @@ class RaidCog(commands.Cog):
                 await self.post_raid(name, tier, aim, timestamp, roster, guild.id, channel, interaction.user.id, creep)
 
     @app_commands.command(name=_("custom"), description=_("Schedule a custom raid or meetup."))
+    # Max 96 so the tag (name + day + hour) fits Discord's 100-character role name limit.
     @app_commands.describe(name=_("The name of the raid or meetup."), tier=_("The raid tier."), time=_("When the raid should be scheduled."), aim=_("A short description of your objective."))
     @app_commands.choices(tier=[
         app_commands.Choice(name='1', value='T1'),
@@ -209,7 +210,7 @@ class RaidCog(commands.Cog):
         app_commands.Choice(name='5', value='T5'),
     ])
     @app_commands.guild_only()
-    async def custom_respond(self, interaction: discord.Interaction, name: str, time: str, tier: Optional[app_commands.Choice[str]], aim: Optional[str]):
+    async def custom_respond(self, interaction: discord.Interaction, name: app_commands.Range[str, 1, 96], time: str, tier: Optional[app_commands.Choice[str]], aim: Optional[str]):
         if tier:
             tier = tier.value
         await self.handle_raid_command(interaction, name, tier, time, aim)
