@@ -1082,7 +1082,10 @@ class ClassSelect(discord.ui.Select):
                 member = await interaction.guild.fetch_member(self.view.player)
                 await member.add_roles(role)
             except discord.Forbidden:
-                logger.warning("Error: Missing 'Manage roles' permissions for {interaction.guild}.")
+                logger.warning(f"Error: Missing 'Manage roles' permissions for {interaction.guild}.")
+            except discord.HTTPException as e:
+                # e.g. NotFound when the player has left the guild; still update the raid post
+                logger.error(f"Failed to assign tag role for raid {raid_id}: {e}")
         else:
             logger.warning(f'No role exists for raid {raid_id}.')
 
